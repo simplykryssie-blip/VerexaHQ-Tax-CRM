@@ -580,6 +580,115 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          last_message_at: string | null
+          subject: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string | null
+          subject?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string | null
+          subject?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          attachment_document_id: string | null
+          body: string
+          client_visible: boolean
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_type: string
+          sender_user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          attachment_document_id?: string | null
+          body: string
+          client_visible?: boolean
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_type: string
+          sender_user_id: string
+          workspace_id: string
+        }
+        Update: {
+          attachment_document_id?: string | null
+          body?: string
+          client_visible?: boolean
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_type?: string
+          sender_user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_attachment_document_id_fkey"
+            columns: ["attachment_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       compliance_cases: {
         Row: {
           assigned_to_user_id: string | null
