@@ -62,8 +62,45 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && (pathname === "/login" || pathname === "/signup")) {
+    // Staff land on /dashboard, portal-only clients on /portal/dashboard; a
+    // user with neither also goes to /dashboard, which renders
+    // NoWorkspaceState rather than a dead-end route. See
+    // lib/auth/portal.ts#resolveHomePath for the full (server-only) logic —
+    // duplicated minimally here since middleware can't reuse React `cache()`.
+    const { data: membership } = await supabase
+      .from("workspace_members")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    let destination = "/dashboard";
+    if (!membership) {
+      const { data: primaryClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("portal_user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (primaryClient) {
+        destination = "/portal/dashboard";
+      } else {
+        const { data: contactClient } = await supabase
+          .from("client_contacts")
+          .select("id")
+          .eq("auth_user_id", user.id)
+          .eq("can_access_portal", true)
+          .eq("is_active", true)
+          .limit(1)
+          .maybeSingle();
+        if (contactClient) destination = "/portal/dashboard";
+      }
+    }
+
     const redirectUrl = request.nextUrl.clone();
-    redirectUrl.pathname = "/dashboard";
+    redirectUrl.pathname = destination;
     redirectUrl.search = "";
     return NextResponse.redirect(redirectUrl);
   }

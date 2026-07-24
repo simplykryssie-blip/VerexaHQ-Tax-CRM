@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
+import { resolveHomePath } from "@/lib/auth/portal";
 
-export default function RootPage() {
-  redirect("/dashboard");
+export default async function RootPage() {
+  redirect(await resolveHomePath());
 }
