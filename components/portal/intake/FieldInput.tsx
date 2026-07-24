@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { inputClassName } from "@/components/ui/FormField";
 import { cn } from "@/lib/utils";
 import type { FormField as FormFieldRow } from "@/lib/types";
@@ -244,9 +245,9 @@ export function FieldInput({ field, value, onChange, disabled }: FieldInputProps
       return wrap(
         <p className="rounded-lg border border-dashed border-border bg-slate-50 px-3 py-2 text-sm text-muted">
           Upload this from the{" "}
-          <a href="/portal/document-requests" className="font-medium text-accent-700 hover:underline">
+          <Link href="/portal/document-requests" className="font-medium text-accent-700 hover:underline">
             Documents
-          </a>{" "}
+          </Link>{" "}
           section.
         </p>,
       );
