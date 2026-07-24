@@ -1,0 +1,255 @@
+# VerexaHQ Tax CRM
+
+A standalone tax practice management platform for tax firms — client
+management, tax intake collection, staff review workflows, and document
+request tracking, built on Next.js and Supabase.
+
+> ⚠️ **Repository separation**
+>
+> **This repository belongs only to VerexaHQ Tax CRM and must not be
+> connected to the VerexaHQ CRM Supabase project.**
+>
+> This application is completely separate from the existing VerexaHQ CRM
+> (bookkeeping/business-services) application and its Supabase project. Do
+> not reuse that project's database, credentials, environment variables,
+> Vercel project, or application code in this repository, and do not point
+> this repository's environment variables at it.
+>
+> | | This app (VerexaHQ Tax CRM) | Do NOT use here |
+> |---|---|---|
+> | Supabase project | **VerexaHQ Tax Office** | VerexaHQ CRM |
+> | Supabase project ref | **`aewqbffscdrziiwfomyf`** | `euxfopzgdmlmgcmmjvic` |
+> | Supabase URL | `https://aewqbffscdrziiwfomyf.supabase.co` | — |
+> | GitHub repo | `simplykryssie-blip/VerexaHQ-Tax-CRM` | `simplykryssie-blip/VerexaHQ` |
+
+## Architecture overview
+
+- **Framework**: Next.js (App Router) + TypeScript + React, Server
+  Components by default, Server Actions for mutations.
+- **Styling**: Tailwind CSS v4 with a light, teal/green-accented brand theme
+  (see `app/globals.css`).
+- **Data**: Supabase Postgres, accessed through `@supabase/ssr` with three
+  client variants:
+  - `lib/supabase/client.ts` — browser client (publishable key only).
+  - `lib/supabase/server.ts` — server client for Server Components, Server
+    Actions, and Route Handlers (session-scoped, subject to RLS).
+  - `lib/supabase/admin.ts` — service-role client, server-only, used only
+    where genuinely necessary. Never imported from client code.
+  - `lib/supabase/types.ts` — generated database types (see below).
+- **Auth**: Supabase SSR auth with session-refresh middleware
+  (`middleware.ts` + `lib/supabase/middleware.ts`).
+- **Authorization**: every workspace-scoped page/action resolves the
+  current workspace from the authenticated user's own `workspace_members`
+  rows (`lib/auth/workspace.ts`) — never from a client-supplied ID — and
+  checks the user's role before allowing staff actions. Row-Level Security
+  in Postgres is the first layer of defense; these server-side checks are
+  an additional layer, not a replacement.
+- **Validation**: Zod schemas in `lib/validation/*`, enforced in Server
+  Actions (`lib/actions/*`) regardless of client-side form validation.
+- **Business logic**: intake review/compliance/document-generation logic
+  lives in existing Postgres functions (`submit_intake`,
+  `validate_intake_submission`, `evaluate_intake_compliance`,
+  `generate_intake_document_request`, `begin_intake_review`,
+  `review_intake_section`, `request_intake_clarification`,
+  `resolve_intake_clarification`, `complete_intake_review`,
+  `approve_and_lock_intake`, `reopen_intake`, and related helpers) and is
+  invoked via `supabase.rpc(...)` rather than reimplemented in the app.
+
+### Directory layout
+
+```
+app/
+  (auth)/            login, signup, forgot-password, reset-password
+  (app)/              authenticated app shell: dashboard, clients, intakes,
+                       document-requests, settings
+  auth/callback/      Supabase auth code exchange (email confirm / recovery)
+components/
+  ui/                 generic design-system primitives
+  app/                sidebar, header, shell, sign-out, workspace switcher
+  auth/               auth form components
+  clients/            client list/detail tab components
+  intakes/            intake queue/review components
+  document-requests/  document request components
+  dashboard/          dashboard cards
+lib/
+  supabase/           client/server/middleware/admin clients + generated types
+  auth/               session + workspace authorization helpers
+  data/                read-side data-access functions, scoped by workspace
+  actions/            Server Actions (mutations), Zod-validated
+  validation/          Zod schemas
+  status.ts            enum -> label/tone mappings for status badges
+  types.ts              typed aliases over the generated Database type
+```
+
+## Local setup
+
+### Prerequisites
+
+- Node.js 20+
+- A Supabase project (see below) — this app expects the **VerexaHQ Tax
+  Office** project's existing schema to already be in place.
+
+### Installation
+
+```bash
+npm install
+```
+
+### Environment variables
+
+Copy `.env.example` to `.env.local` and fill in the values from the
+**VerexaHQ Tax Office** Supabase project (ref `aewqbffscdrziiwfomyf`) —
+never from the VerexaHQ CRM project:
+
+```bash
+cp .env.example .env.local
+```
+
+| Variable | Where to find it | Notes |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API | Already set to `https://aewqbffscdrziiwfomyf.supabase.co` in `.env.example` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Supabase → Project Settings → API → Publishable/anon key | Safe for the browser |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase → Project Settings → API → Service role key | **Server-only.** Never expose to the browser. Only used in `lib/supabase/admin.ts`, and only where RLS genuinely cannot express the operation. |
+| `NEXT_PUBLIC_APP_URL` | — | Base URL used to build auth redirect links (e.g. `http://localhost:3000` locally) |
+
+`.env.local` is gitignored — never commit it.
+
+### Development
+
+```bash
+npm run dev
+```
+
+### Type-check
+
+```bash
+npm run type-check
+```
+
+### Lint
+
+```bash
+npm run lint
+```
+
+### Production build
+
+```bash
+npm run build
+```
+
+## Regenerating Supabase types
+
+The committed `lib/supabase/types.ts` was generated from the **VerexaHQ Tax
+Office** project. Regenerate it after any schema change:
+
+```bash
+npx supabase gen types typescript --project-id aewqbffscdrziiwfomyf > lib/supabase/types.ts
+```
+
+Never point this command at any other project ref.
+
+## Authentication setup
+
+This app uses Supabase's SSR auth helpers (`@supabase/ssr`) — no deprecated
+`auth-helpers` packages. Flows implemented:
+
+- Sign in / sign up (email + password) — `app/(auth)/login`,
+  `app/(auth)/signup`
+- Forgot password / reset password — `app/(auth)/forgot-password`,
+  `app/(auth)/reset-password`
+- Sign out — `components/app/SignOutButton.tsx`
+- Email confirmation and password-recovery links are exchanged for a
+  session in `app/auth/callback/route.ts`
+- `middleware.ts` refreshes the session on every request and redirects
+  unauthenticated visitors to `/login` with a safe `redirectTo`
+
+### Supabase Auth redirect URLs to configure
+
+In the Supabase dashboard for the **VerexaHQ Tax Office** project → Authentication
+→ URL Configuration, add:
+
+- Site URL: your production URL (e.g. `https://<your-vercel-domain>`)
+- Redirect URLs:
+  - `http://localhost:3000/auth/callback` (local development)
+  - `https://<your-vercel-domain>/auth/callback` (production)
+  - `https://<your-preview-domain>/auth/callback` (if using Vercel preview
+    deployments)
+
+## Deploying to Vercel
+
+1. Import this repository into a **new** Vercel project (do not reuse the
+   VerexaHQ CRM Vercel project).
+2. Set the environment variables listed above in Vercel → Project Settings
+   → Environment Variables (Production, Preview, and Development as
+   needed).
+3. Deploy. Vercel will run `npm install` and `npm run build` automatically.
+4. Add the deployed domain(s) to the Supabase Auth redirect URL
+   configuration above.
+
+## Security notes
+
+- Row-Level Security is enabled on every table in the Supabase project and
+  is never disabled or bypassed from application code.
+- Every workspace-scoped query and Server Action re-derives the current
+  workspace from the authenticated user's active `workspace_members` rows
+  (`lib/auth/workspace.ts`) and explicitly filters by `workspace_id` — a
+  workspace ID typed into the URL cannot grant access to another
+  workspace's data.
+- The Supabase service-role key is read only in `lib/supabase/admin.ts`,
+  a server-only module; it is never imported by a Client Component and
+  never exposed via a `NEXT_PUBLIC_` variable.
+- SSNs and EINs are only ever displayed masked to their last 4 digits
+  (`maskLast4` in `lib/utils.ts`); full numbers are never requested or
+  rendered by this app.
+- Consequential staff actions (approve & lock, reopen) require an explicit
+  confirmation dialog, and reopening an intake requires a recorded reason.
+- Server-rendered error boundaries avoid leaking raw database error text to
+  end users.
+
+## Currently implemented features
+
+- Application foundation: Next.js App Router, TypeScript, Tailwind v4
+  brand theme, generated Supabase types committed to the repo.
+- Supabase SSR authentication: sign in, sign up, forgot/reset password,
+  sign out, session-refresh middleware, safe redirect handling.
+- Workspace-aware authorization: workspace resolution and role checks
+  enforced server-side on every page and Server Action.
+- Staff dashboard with real Supabase-backed metrics and activity feeds.
+- Client management: searchable/filterable/paginated list, tabbed detail
+  page, validated "Add client" workflow.
+- Intake queue with multi-filter support and a two-column intake review
+  workspace (sections, clarifications, activity, staff actions) backed by
+  the existing Postgres intake functions.
+- Document request list and detail pages built on the existing
+  `document_requests` / `document_request_items` tables.
+- Shared component system (StatusBadge, MetricCard, DataTable, Tabs,
+  ConfirmDialog, EmptyState/LoadingState/ErrorState/ForbiddenState, etc.)
+  and a responsive app shell with a mobile drawer.
+
+## Known limitations / next-phase roadmap
+
+- **Team & invitation management**: the Settings page currently shows
+  workspace details and the team roster read-only. Inviting new staff,
+  changing roles, and workspace branding settings are not yet built.
+- **Document uploads**: this app manages document *requests* and their
+  item-level status; it does not yet implement the client-facing upload
+  flow or a `documents` browser (the `documents` / `document_links` /
+  `document_reviews` tables exist in the schema but are out of scope for
+  this initial release).
+- **Compliance case management**: `evaluate_intake_compliance` is
+  invoked and compliance rules are inspected on the intake detail page,
+  but a dedicated compliance case workspace (`compliance_cases`,
+  `compliance_checklists`) is not yet built.
+- **Tax engagements**: `tax_engagements` is used to resolve tax year on
+  document requests, but there is no dedicated engagement management UI
+  yet.
+- **Templates & workflow automation**: the schema's form-template,
+  workflow, and automation tables are not exposed in this release's UI —
+  intakes rely on templates already assigned via existing data.
+- **Client portal**: this release is staff-facing only; there is no
+  client-facing portal for submitting intakes or uploading documents.
+- **Reviewer/document-request-item mutations**: document request item
+  status changes (accept/reject/waive) are not yet exposed as staff
+  actions in the UI — they're visible read-only alongside the existing
+  review actions that already mutate items server-side.
