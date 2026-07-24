@@ -7,9 +7,13 @@ export type ItemStats = { total: number; received: number; outstanding: number }
 
 const RECEIVED_ITEM_STATUSES = new Set(["uploaded", "under_review", "accepted", "waived"]);
 
+export function isDocumentItemReceived(status: string) {
+  return RECEIVED_ITEM_STATUSES.has(status);
+}
+
 export function computeItemStats(items: Pick<DocumentRequestItem, "status">[]): ItemStats {
   const total = items.length;
-  const received = items.filter((item) => RECEIVED_ITEM_STATUSES.has(item.status)).length;
+  const received = items.filter((item) => isDocumentItemReceived(item.status)).length;
   return { total, received, outstanding: total - received };
 }
 

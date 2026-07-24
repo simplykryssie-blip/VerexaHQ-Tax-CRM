@@ -19,6 +19,13 @@ export const intakeSubmissionStatusMeta = build({
   archived: { label: "Archived", tone: "neutral" },
 });
 
+export const intakeAnswerStatusMeta = build({
+  draft: { label: "Draft", tone: "neutral" },
+  final: { label: "Final", tone: "success" },
+  needs_clarification: { label: "Needs clarification", tone: "warning" },
+  verified: { label: "Verified", tone: "success" },
+});
+
 export const reviewResultMeta = build({
   pending: { label: "Not reviewed", tone: "neutral" },
   pass: { label: "Passed", tone: "success" },

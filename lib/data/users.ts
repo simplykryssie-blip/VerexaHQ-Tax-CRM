@@ -32,3 +32,21 @@ export async function getUserSummaryMap(
   }
   return map;
 }
+
+/** Active workspace members with a resolved display name, for reviewer/assignee pickers. */
+export async function listWorkspaceStaff(
+  supabase: SupabaseServerClient,
+  workspaceId: string,
+): Promise<UserSummary[]> {
+  const { data, error } = await supabase
+    .from("workspace_members")
+    .select("user_id")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "active");
+
+  if (error || !data) return [];
+
+  const userIds = data.map((m) => m.user_id);
+  const map = await getUserSummaryMap(supabase, userIds);
+  return userIds.map((id) => map.get(id) ?? { userId: id, name: "Staff member" });
+}
