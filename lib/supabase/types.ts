@@ -5618,6 +5618,25 @@ export type Database = {
         Returns: boolean
       }
       submit_intake: { Args: { p_submission_id: string }; Returns: Json }
+      update_client_mailing_address: {
+        Args: {
+          p_city: string
+          p_client_id: string
+          p_line1: string
+          p_line2: string
+          p_postal_code: string
+          p_state: string
+        }
+        Returns: undefined
+      }
+      update_client_portal_contact_info: {
+        Args: {
+          p_client_id: string
+          p_phone: string
+          p_preferred_contact_method: Database["public"]["Enums"]["contact_method"]
+        }
+        Returns: undefined
+      }
       validate_intake_submission: {
         Args: { p_submission_id: string }
         Returns: Json
