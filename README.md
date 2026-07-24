@@ -147,6 +147,13 @@ Office** project. Regenerate it after any schema change:
 npx supabase gen types typescript --project-id aewqbffscdrziiwfomyf > lib/supabase/types.ts
 ```
 
+The `conversations`/`messages` tables and the two `update_client_*`
+functions added in the client-portal migrations were added to this file by
+hand (the type-generation tool required an approval this session didn't
+have). Running the command above will regenerate the file from the live
+schema and should produce equivalent types — do that instead of trusting
+the hand-edits long-term.
+
 Never point this command at any other project ref.
 
 ## Authentication setup
@@ -207,6 +214,166 @@ In the Supabase dashboard for the **VerexaHQ Tax Office** project → Authentica
 - Server-rendered error boundaries avoid leaking raw database error text to
   end users.
 
+## Client Portal (Phase 2)
+
+A separate, client-facing portal lives alongside the staff app, entirely
+under `/portal/*` (route group `app/(portal)/`). It shares this app's
+Supabase project, auth system, and design language, but staff and portal
+navigation are fully separate — the portal shell (`components/portal/*`)
+never renders a staff link, and vice versa.
+
+### Client-user mapping model
+
+The schema already had a client-identity model designed in from the start;
+this phase used it as-is rather than inventing a new one:
+
+- `clients.portal_user_id` — the primary taxpayer's own `auth.users` id.
+- `client_contacts.auth_user_id` (+ `can_access_portal` + `is_active`) — an
+  additional contact (e.g. a spouse or authorized representative) granted
+  portal access to the same client record.
+
+A single authenticated user can be linked this way to more than one client
+record. `lib/auth/portal.ts` resolves "which client(s) can this user act
+as" strictly from these two columns for the *authenticated user id* —
+never from anything supplied by the browser — mirroring how
+`lib/auth/workspace.ts` resolves staff workspace membership. A cookie
+(`verexa-client-id`) remembers which linked client is "current" when a
+user is linked to more than one, the same way the staff app remembers the
+current workspace.
+
+**Staff vs. client landing page**: `resolveAccountType()` checks for an
+active `workspace_members` row first; if none exists it checks for a
+client link. A user who is both staff and a portal client is treated as
+staff by default for sign-in/root-path redirects (documented priority —
+see `lib/auth/portal.ts`), but can still reach `/portal/*` directly since
+each layout checks the user's *own* access independently. A pure staff
+user with no client link sees `PortalNotLinkedState` if they visit
+`/portal/*`; a pure client with no workspace membership sees
+`NoWorkspaceState` if they visit staff routes — both link across to
+whichever area the user actually has access to, so no one is stuck at a
+dead end.
+
+### Portal routes
+
+```
+app/(portal)/
+  layout.tsx                         resolves the current client, renders PortalShell
+  portal/
+    dashboard/                       status cards, next action, activity feed
+    intakes/                         list of the client's intakes by tax year
+    intakes/[submissionId]/          section-based intake renderer + Review & Submit
+    documents/                       every document the client has uploaded
+    document-requests/               document request queue
+    document-requests/[requestId]/   requested items + upload
+    clarifications/                  open/resolved clarifications + respond
+    messages/                        conversation list + start a conversation
+    messages/[conversationId]/       message thread + send
+    profile/                         overview + self-service contact/address/password
+```
+
+Every page resolves the client server-side (`requirePortalAccess()`) and
+re-verifies ownership of whatever id appears in the URL (submission,
+request, conversation) against that resolved client — a client can never
+reach another client's data by editing a URL, and RLS enforces the same
+boundary independently as a second layer.
+
+### Intake experience
+
+Non-repeatable sections render from `form_sections`/`form_fields` and
+autosave into `intake_answers`, respecting `get_intake_visibility()` so a
+client only ever sees questions relevant to their situation — there is no
+hard-coded questionnaire. `intake_answers` has no way to represent
+multiple instances of one section, so the two repeatable cases use their
+proper dedicated tables instead: the "Dependents" section is backed by
+`intake_household_people`, and every other repeatable section (self-
+employment, rental properties, K-1s, investment sales, etc.) shares one
+generic repeatable-entity manager backed by `intake_repeatable_entities`,
+mapped from `section_key` to `entity_type` in `lib/intake-entity-map.ts`.
+Editing is blocked once a submission is locked or approved, both in the
+UI and independently by the database's own `log_intake_answer_change()`
+trigger. Submitting calls the existing `submit_intake()` function, and
+the action re-reads the submission's status afterward rather than
+trusting the RPC's JSON response alone (it silently no-ops if the
+submission was locked mid-request).
+
+### Document upload and storage behavior
+
+Uploads go to the existing private **`tax-client-documents`** Storage
+bucket — never a public one — at the exact
+`{workspace_id}/{client_id}/{timestamp}-{sanitized filename}` path its own
+Storage RLS policy requires. The file bytes go straight from the browser
+to Storage (using the authenticated session, so Storage's own RLS
+enforces ownership independently of the app); a Server Action then
+creates the row in the existing `documents` table
+(`source='client_upload'`), re-verifying the storage path prefix and —
+when the upload is tied to a document request item — that the request
+actually belongs to the caller's own client. Viewing an uploaded file uses
+a short-lived (5 minute) signed URL, never a public link.
+
+**Supported file types**: PDF, JPG/JPEG, PNG, HEIC/HEIF, CSV, XLS/XLSX,
+DOC/DOCX — matching the bucket's own `allowed_mime_types` exactly.
+**Size limit**: 50MB, matching the bucket's `file_size_limit`. Both are
+enforced client-side (for UX) and by Storage itself (the real boundary);
+executable/script files are rejected outright since they're not on the
+allow-list. Item counts and document-request status update automatically
+via the existing `sync_document_request_item_counts()` trigger once a
+document row is linked — there's no separate/competing progress-tracking
+system.
+
+### Clarification workflow
+
+A client sees only `intake_review_comments` rows staff marked
+`is_client_visible = true`. Responding inserts a **new** comment via the
+`intake_review_comments_client_reply` policy added in this branch's
+migration — self-authored, client-visible, and always unresolved. A
+client can never resolve their own clarification: there is no client
+UPDATE policy on this table, and `resolve_intake_clarification()` (staff-
+only) is the only path to a resolved state.
+
+### Messaging behavior
+
+`conversations` and `messages` are new tables added in this phase (no
+messaging schema previously existed). A client can start a conversation
+or reply to one; every mutation re-verifies the conversation belongs to
+the caller's own client. Messages are immutable after sending — only
+`read_at` can change, enforced by a database trigger — and opening a
+thread marks staff-sent messages as read. No SMS/email delivery is
+implemented; this is in-app only.
+
+### New migrations (all applied to `aewqbffscdrziiwfomyf` only)
+
+| Migration | Purpose |
+|---|---|
+| `client_portal_foundation` | **Security fix**: drops `anon_crud_clients`, a pre-existing policy that let any caller read every client row in every workspace with no scoping at all. Adds the `clients_contact_portal_access` and `intake_review_comments_client_reply` policies described above. Creates `conversations`/`messages` with RLS. Adds indexes on `client_contacts.auth_user_id` and `documents.request_item_id`. |
+| `client_portal_foundation_grant_hardening` | Tightens function EXECUTE grants on the new trigger/helper functions to match the schema's existing stricter convention. |
+| `client_portal_workspace_read_access` | Lets a client read the single `workspaces` row their client record belongs to (needed to display "Your Tax Office" — previously only the overly-broad `anon_crud_workspaces` policy made this incidentally possible). |
+| `client_portal_profile_self_service` | Adds `update_client_portal_contact_info()` and `update_client_mailing_address()` — narrow `SECURITY DEFINER` functions that let a client update only their own phone/preferred-contact-method/mailing-address, plus a read-only `client_addresses` policy so the profile page can display what it now lets them edit. |
+| `client_portal_profile_grant_hardening` | Revokes `anon` EXECUTE on the two functions above (the initial `revoke ... from public` didn't take effect as expected — verified and fixed). |
+
+No new environment variables were required for this phase.
+
+## Security notes — Phase 2 additions
+
+- **Discovered, out-of-scope security issue**: beyond `anon_crud_clients`
+  (fixed above), the schema has several sibling `anon_crud_*` policies
+  (`qual: true`, no scoping) on `workspaces`, `services`, `notifications`,
+  `form_templates`, `form_questions`, `form_response_answers`, and
+  `client_form_assignments`. These predate this branch, aren't touched by
+  the client portal's own security guarantees, and weren't fixed here to
+  keep this migration scoped — they're flagged as a recommended follow-up
+  below.
+- RLS is row-level, not column-level: wherever a client needed to edit
+  *some but not all* columns of a staff-managed table (`clients`,
+  `client_addresses`), this phase used a narrow `SECURITY DEFINER`
+  function instead of a broad UPDATE policy, so a compromised or buggy
+  client request can't reach columns like `status`, `workspace_id`, or
+  assigned preparer.
+- Every portal Server Action re-derives the client from the authenticated
+  user id and re-verifies ownership of any id in its input (submission,
+  request, conversation, document) before mutating — the same "never
+  trust an id from the browser" rule the staff app follows for
+  workspace-scoped data.
+
 ## Currently implemented features
 
 - Application foundation: Next.js App Router, TypeScript, Tailwind v4
@@ -226,6 +393,15 @@ In the Supabase dashboard for the **VerexaHQ Tax Office** project → Authentica
 - Shared component system (StatusBadge, MetricCard, DataTable, Tabs,
   ConfirmDialog, EmptyState/LoadingState/ErrorState/ForbiddenState, etc.)
   and a responsive app shell with a mobile drawer.
+- **Client portal** (Phase 2): secure client sign-in resolved from the
+  existing `clients.portal_user_id`/`client_contacts.auth_user_id` mapping;
+  a client dashboard with status, next-action, and activity; a schema-
+  driven section-based tax intake experience (generic Q&A, household
+  manager, generic repeatable-entity manager, review & submit); secure
+  document upload to private Storage with signed-URL viewing; document
+  request tracking; a clarification response center; a client<->staff
+  messaging center; and self-service profile management for the fields a
+  client should control.
 
 ## Known limitations / next-phase roadmap
 
@@ -247,9 +423,47 @@ In the Supabase dashboard for the **VerexaHQ Tax Office** project → Authentica
 - **Templates & workflow automation**: the schema's form-template,
   workflow, and automation tables are not exposed in this release's UI —
   intakes rely on templates already assigned via existing data.
-- **Client portal**: this release is staff-facing only; there is no
-  client-facing portal for submitting intakes or uploading documents.
 - **Reviewer/document-request-item mutations**: document request item
   status changes (accept/reject/waive) are not yet exposed as staff
   actions in the UI — they're visible read-only alongside the existing
   review actions that already mutate items server-side.
+
+### Phase 2 (client portal) limitations
+
+- **Sibling `anon_crud_*` RLS policies**: `workspaces`, `services`,
+  `notifications`, `form_templates`, `form_questions`,
+  `form_response_answers`, and `client_form_assignments` still have a
+  pre-existing `qual: true` policy allowing any caller to read every row
+  with no workspace scoping. Only `anon_crud_clients` was fixed in this
+  phase (it directly conflicted with the client portal's own security
+  model); the rest predate this branch and are a recommended follow-up.
+- **Clarification attachments**: a client can upload a supporting document
+  from the Documents section, but it isn't linked to the specific
+  clarification comment via `document_links` yet (that table is currently
+  staff-write-only) — the reply and the upload are separate actions.
+- **Repeatable entity forms are generic**: self-employment, rental
+  properties, K-1s, investment sales, etc. all share one generic form
+  renderer driven by each section's `form_fields`, rather than a bespoke
+  per-type UI (e.g. dedicated depreciation schedules for rental
+  properties).
+- **No e-signature capture**: `signature` fields (used on the
+  certification section) are captured as a typed full legal name plus a
+  timestamp, not a drawn/canvas signature.
+- **Read receipts are binary, not per-user**: `messages.read_at` records
+  when the *other party* first read a message, not per-individual-reader
+  receipts (relevant if a client has multiple portal-linked contacts).
+- **No SMS/email delivery**: messaging and clarification notifications are
+  in-app only in this phase.
+
+## Recommended Phase 3
+
+1. Close the remaining `anon_crud_*` RLS gaps flagged above.
+2. Wire clarification-reply attachments through `document_links` (with a
+   client-scoped INSERT policy).
+3. Client-facing document request item interactions beyond upload (e.g.
+   viewing why an item was rejected in more detail).
+4. Per-type repeatable-entity forms for the highest-value sections
+   (self-employment, rental properties) instead of the shared generic
+   renderer.
+5. The two outstanding Phase 1 items (team/invitation management,
+   document request item staff actions) remain open alongside these.
