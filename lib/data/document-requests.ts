@@ -1,5 +1,12 @@
 import type { SupabaseServerClient } from "@/lib/supabase/server";
-import type { Client, DocumentRequest, DocumentRequestItem, DocumentRequestStatus } from "@/lib/types";
+import type {
+  Client,
+  DocumentCategory,
+  DocumentRequest,
+  DocumentRequestItem,
+  DocumentRequestStatus,
+  TaxEngagement,
+} from "@/lib/types";
 
 export const DOCUMENT_REQUESTS_PAGE_SIZE = 20;
 
@@ -46,8 +53,16 @@ async function getItemStatsByRequest(
 
 export type DocumentRequestListItem = DocumentRequest & {
   client: Client | null;
+  engagement: Pick<TaxEngagement, "id" | "tax_year" | "title"> | null;
   itemStats: ItemStats;
+  lastActivityAt: string | null;
 };
+
+function latestOf(...dates: (string | null)[]) {
+  const valid = dates.filter((d): d is string => Boolean(d));
+  if (valid.length === 0) return null;
+  return valid.reduce((latest, current) => (current > latest ? current : latest));
+}
 
 export type DocumentRequestListFilters = {
   q?: string;
@@ -67,7 +82,7 @@ export async function listDocumentRequests(
 
   let query = supabase
     .from("document_requests")
-    .select("*, client:clients(*)", { count: "exact" })
+    .select("*, client:clients(*), engagement:tax_engagements(id, tax_year, title)", { count: "exact" })
     .eq("workspace_id", workspaceId);
 
   if (filters.status) {
@@ -88,10 +103,17 @@ export async function listDocumentRequests(
 
   const statsMap = await getItemStatsByRequest(supabase, workspaceId, data.map((r) => r.id));
 
-  let requests = data.map((request) => ({
-    ...(request as DocumentRequest & { client: Client | null }),
-    itemStats: statsMap.get(request.id) ?? { total: 0, received: 0, outstanding: 0 },
-  }));
+  let requests = data.map((request) => {
+    const row = request as unknown as DocumentRequest & {
+      client: Client | null;
+      engagement: Pick<TaxEngagement, "id" | "tax_year" | "title"> | null;
+    };
+    return {
+      ...row,
+      itemStats: statsMap.get(request.id) ?? { total: 0, received: 0, outstanding: 0 },
+      lastActivityAt: latestOf(row.sent_at, row.viewed_at, row.completed_at, row.updated_at),
+    };
+  });
 
   if (filters.missingDocuments) {
     requests = requests.filter((r) => r.itemStats.outstanding > 0);
@@ -107,7 +129,7 @@ export async function listDocumentRequestsForClient(
 ): Promise<DocumentRequestListItem[]> {
   const { data, error } = await supabase
     .from("document_requests")
-    .select("*, client:clients(*)")
+    .select("*, client:clients(*), engagement:tax_engagements(id, tax_year, title)")
     .eq("workspace_id", workspaceId)
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
@@ -115,16 +137,24 @@ export async function listDocumentRequestsForClient(
   if (error || !data) return [];
 
   const statsMap = await getItemStatsByRequest(supabase, workspaceId, data.map((r) => r.id));
-  return data.map((request) => ({
-    ...(request as DocumentRequest & { client: Client | null }),
-    itemStats: statsMap.get(request.id) ?? { total: 0, received: 0, outstanding: 0 },
-  }));
+  return data.map((request) => {
+    const row = request as unknown as DocumentRequest & {
+      client: Client | null;
+      engagement: Pick<TaxEngagement, "id" | "tax_year" | "title"> | null;
+    };
+    return {
+      ...row,
+      itemStats: statsMap.get(request.id) ?? { total: 0, received: 0, outstanding: 0 },
+      lastActivityAt: latestOf(row.sent_at, row.viewed_at, row.completed_at, row.updated_at),
+    };
+  });
 }
 
 export type DocumentRequestDetail = {
   request: DocumentRequest;
   client: Client | null;
-  items: DocumentRequestItem[];
+  engagement: Pick<TaxEngagement, "id" | "tax_year" | "title"> | null;
+  items: (DocumentRequestItem & { category: DocumentCategory | null })[];
 };
 
 export async function getDocumentRequestDetail(
@@ -134,7 +164,7 @@ export async function getDocumentRequestDetail(
 ): Promise<DocumentRequestDetail | null> {
   const { data: request, error } = await supabase
     .from("document_requests")
-    .select("*, client:clients(*)")
+    .select("*, client:clients(*), engagement:tax_engagements(id, tax_year, title)")
     .eq("workspace_id", workspaceId)
     .eq("id", requestId)
     .maybeSingle();
@@ -143,16 +173,20 @@ export async function getDocumentRequestDetail(
 
   const { data: items } = await supabase
     .from("document_request_items")
-    .select("*")
+    .select("*, category:document_categories(*)")
     .eq("workspace_id", workspaceId)
     .eq("request_id", requestId)
     .order("sort_order", { ascending: true });
 
-  const { client, ...requestRow } = request as DocumentRequest & { client: Client | null };
+  const { client, engagement, ...requestRow } = request as unknown as DocumentRequest & {
+    client: Client | null;
+    engagement: Pick<TaxEngagement, "id" | "tax_year" | "title"> | null;
+  };
 
   return {
     request: requestRow,
     client,
-    items: items ?? [],
+    engagement,
+    items: (items ?? []) as (DocumentRequestItem & { category: DocumentCategory | null })[],
   };
 }

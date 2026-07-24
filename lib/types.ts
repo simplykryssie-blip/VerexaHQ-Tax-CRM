@@ -29,6 +29,8 @@ export type DocumentRequestItem = Tables<"document_request_items">;
 export type FormSection = Tables<"form_sections">;
 export type FormField = Tables<"form_fields">;
 export type UserProfile = Tables<"user_profiles">;
+export type TaxEngagement = Tables<"tax_engagements">;
+export type DocumentCategory = Tables<"document_categories">;
 
 export type MembershipRole = Enums<"membership_role">;
 export type MembershipStatus = Enums<"membership_status">;
