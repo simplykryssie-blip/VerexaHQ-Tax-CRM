@@ -2,6 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "./types";
 
+export type SupabaseServerClient = ReturnType<typeof createServerClient<Database>>;
+
 /**
  * Server Component / Server Action / Route Handler Supabase client.
  * Runs with the caller's session — all queries are still subject to RLS.

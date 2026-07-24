@@ -61,6 +61,28 @@ export function initials(name: string | null | undefined) {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
+export function clientDisplayName(client: {
+  display_name: string | null;
+  preferred_name: string | null;
+  first_name: string;
+  last_name: string;
+  company: string | null;
+}) {
+  return (
+    client.display_name ||
+    (client.preferred_name
+      ? `${client.preferred_name} ${client.last_name}`
+      : `${client.first_name} ${client.last_name}`) ||
+    client.company ||
+    "Unnamed client"
+  );
+}
+
+export function maskLast4(last4: string | null | undefined) {
+  if (!last4) return "—";
+  return `•••-••-${last4}`;
+}
+
 export function titleCase(value: string | null | undefined) {
   if (!value) return "—";
   return value
