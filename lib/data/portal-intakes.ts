@@ -1,4 +1,5 @@
 import type { SupabaseServerClient } from "@/lib/supabase/server";
+import { STAFF_ONLY_SECTION_KEYS } from "@/lib/intake-entity-map";
 import type {
   FormField,
   FormSection,
@@ -120,10 +121,12 @@ export async function getPortalIntakeDetail(
     fieldsBySection.set(field.section_id, list);
   }
 
-  const sections: PortalIntakeSection[] = (sectionsResult.data ?? []).map((section) => ({
-    ...section,
-    fields: fieldsBySection.get(section.id) ?? [],
-  }));
+  const sections: PortalIntakeSection[] = (sectionsResult.data ?? [])
+    .filter((section) => !STAFF_ONLY_SECTION_KEYS.includes(section.section_key))
+    .map((section) => ({
+      ...section,
+      fields: fieldsBySection.get(section.id) ?? [],
+    }));
 
   return {
     submission,
