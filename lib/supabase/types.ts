@@ -1732,6 +1732,89 @@ export type Database = {
           },
         ]
       }
+      engagement_notes: {
+        Row: {
+          author_user_id: string | null
+          body: string
+          created_at: string
+          engagement_id: string
+          id: string
+          is_client_visible: boolean
+          is_pinned: boolean
+          note_type: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          body: string
+          created_at?: string
+          engagement_id: string
+          id?: string
+          is_client_visible?: boolean
+          is_pinned?: boolean
+          note_type?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          author_user_id?: string | null
+          body?: string
+          created_at?: string
+          engagement_id?: string
+          id?: string
+          is_client_visible?: boolean
+          is_pinned?: boolean
+          note_type?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_notes_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_notes_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      engagement_reference_sequences: {
+        Row: {
+          last_number: number
+          tax_year: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          last_number?: number
+          tax_year: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          last_number?: number
+          tax_year?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_reference_sequences_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       engagement_shares: {
         Row: {
           access_level: Database["public"]["Enums"]["access_level"]
@@ -1801,42 +1884,54 @@ export type Database = {
       }
       engagement_status_history: {
         Row: {
+          activity_type: string
           changed_at: string
           changed_by: string | null
+          description: string | null
           engagement_id: string
           from_status: Database["public"]["Enums"]["engagement_status"] | null
           id: number
           metadata: Json
+          new_value: string | null
           notes: string | null
+          old_value: string | null
           reason: string | null
           status_source: string
-          to_status: Database["public"]["Enums"]["engagement_status"]
+          to_status: Database["public"]["Enums"]["engagement_status"] | null
           workspace_id: string
         }
         Insert: {
+          activity_type?: string
           changed_at?: string
           changed_by?: string | null
+          description?: string | null
           engagement_id: string
           from_status?: Database["public"]["Enums"]["engagement_status"] | null
           id?: never
           metadata?: Json
+          new_value?: string | null
           notes?: string | null
+          old_value?: string | null
           reason?: string | null
           status_source?: string
-          to_status: Database["public"]["Enums"]["engagement_status"]
+          to_status?: Database["public"]["Enums"]["engagement_status"] | null
           workspace_id: string
         }
         Update: {
+          activity_type?: string
           changed_at?: string
           changed_by?: string | null
+          description?: string | null
           engagement_id?: string
           from_status?: Database["public"]["Enums"]["engagement_status"] | null
           id?: never
           metadata?: Json
+          new_value?: string | null
           notes?: string | null
+          old_value?: string | null
           reason?: string | null
           status_source?: string
-          to_status?: Database["public"]["Enums"]["engagement_status"]
+          to_status?: Database["public"]["Enums"]["engagement_status"] | null
           workspace_id?: string
         }
         Relationships: [
@@ -3769,27 +3864,52 @@ export type Database = {
       tax_engagements: {
         Row: {
           archived_at: string | null
+          assigned_at: string | null
+          balance_due: number | null
           client_id: string
           completed_at: string | null
           created_at: string
           created_by: string | null
+          description: string | null
+          document_request_id: string | null
           due_date: string | null
+          efile_authorization_received: boolean
+          efile_status: Database["public"]["Enums"]["engagement_efile_status"]
+          engagement_number: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
           ero_workspace_id: string | null
+          extension_due_date: string | null
+          extension_filed: boolean
+          extension_requested: boolean
           external_return_id: string | null
           external_tax_software: string | null
+          federal_return_required: boolean
+          filed_at: string | null
+          filing_status: string | null
           household_id: string | null
           id: string
+          internal_due_date: string | null
+          internal_notes: string | null
+          jurisdiction: string | null
+          local_return_required: boolean
           metadata: Json
           opened_at: string | null
+          payment_status: Database["public"]["Enums"]["engagement_payment_status"]
           primary_preparer_user_id: string | null
-          priority: number
-          return_type: string | null
+          priority: Database["public"]["Enums"]["engagement_priority"]
+          refund_amount: number | null
+          responsible_staff_user_id: string | null
+          return_type: Database["public"]["Enums"]["tax_return_type"] | null
+          reviewed_at: string | null
           reviewer_user_id: string | null
           service_bureau_workspace_id: string | null
+          service_id: string | null
           settings: Json
+          started_at: string | null
+          state_return_required: boolean
           status: Database["public"]["Enums"]["engagement_status"]
           status_source: string
+          submitted_for_review_at: string | null
           tax_year: number | null
           title: string
           updated_at: string
@@ -3797,27 +3917,52 @@ export type Database = {
         }
         Insert: {
           archived_at?: string | null
+          assigned_at?: string | null
+          balance_due?: number | null
           client_id: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
+          description?: string | null
+          document_request_id?: string | null
           due_date?: string | null
+          efile_authorization_received?: boolean
+          efile_status?: Database["public"]["Enums"]["engagement_efile_status"]
+          engagement_number?: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
           ero_workspace_id?: string | null
+          extension_due_date?: string | null
+          extension_filed?: boolean
+          extension_requested?: boolean
           external_return_id?: string | null
           external_tax_software?: string | null
+          federal_return_required?: boolean
+          filed_at?: string | null
+          filing_status?: string | null
           household_id?: string | null
           id?: string
+          internal_due_date?: string | null
+          internal_notes?: string | null
+          jurisdiction?: string | null
+          local_return_required?: boolean
           metadata?: Json
           opened_at?: string | null
+          payment_status?: Database["public"]["Enums"]["engagement_payment_status"]
           primary_preparer_user_id?: string | null
-          priority?: number
-          return_type?: string | null
+          priority?: Database["public"]["Enums"]["engagement_priority"]
+          refund_amount?: number | null
+          responsible_staff_user_id?: string | null
+          return_type?: Database["public"]["Enums"]["tax_return_type"] | null
+          reviewed_at?: string | null
           reviewer_user_id?: string | null
           service_bureau_workspace_id?: string | null
+          service_id?: string | null
           settings?: Json
+          started_at?: string | null
+          state_return_required?: boolean
           status?: Database["public"]["Enums"]["engagement_status"]
           status_source?: string
+          submitted_for_review_at?: string | null
           tax_year?: number | null
           title: string
           updated_at?: string
@@ -3825,27 +3970,52 @@ export type Database = {
         }
         Update: {
           archived_at?: string | null
+          assigned_at?: string | null
+          balance_due?: number | null
           client_id?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
+          description?: string | null
+          document_request_id?: string | null
           due_date?: string | null
+          efile_authorization_received?: boolean
+          efile_status?: Database["public"]["Enums"]["engagement_efile_status"]
+          engagement_number?: string | null
           engagement_type?: Database["public"]["Enums"]["engagement_type"]
           ero_workspace_id?: string | null
+          extension_due_date?: string | null
+          extension_filed?: boolean
+          extension_requested?: boolean
           external_return_id?: string | null
           external_tax_software?: string | null
+          federal_return_required?: boolean
+          filed_at?: string | null
+          filing_status?: string | null
           household_id?: string | null
           id?: string
+          internal_due_date?: string | null
+          internal_notes?: string | null
+          jurisdiction?: string | null
+          local_return_required?: boolean
           metadata?: Json
           opened_at?: string | null
+          payment_status?: Database["public"]["Enums"]["engagement_payment_status"]
           primary_preparer_user_id?: string | null
-          priority?: number
-          return_type?: string | null
+          priority?: Database["public"]["Enums"]["engagement_priority"]
+          refund_amount?: number | null
+          responsible_staff_user_id?: string | null
+          return_type?: Database["public"]["Enums"]["tax_return_type"] | null
+          reviewed_at?: string | null
           reviewer_user_id?: string | null
           service_bureau_workspace_id?: string | null
+          service_id?: string | null
           settings?: Json
+          started_at?: string | null
+          state_return_required?: boolean
           status?: Database["public"]["Enums"]["engagement_status"]
           status_source?: string
+          submitted_for_review_at?: string | null
           tax_year?: number | null
           title?: string
           updated_at?: string
@@ -3857,6 +4027,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_engagements_document_request_id_fkey"
+            columns: ["document_request_id"]
+            isOneToOne: false
+            referencedRelation: "document_requests"
             referencedColumns: ["id"]
           },
           {
@@ -3878,6 +4055,13 @@ export type Database = {
             columns: ["service_bureau_workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_engagements_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
             referencedColumns: ["id"]
           },
           {
@@ -5538,12 +5722,30 @@ export type Database = {
         }
         Returns: boolean
       }
+      log_engagement_activity: {
+        Args: {
+          p_activity_type: string
+          p_description: string
+          p_engagement_id: string
+          p_metadata?: Json
+          p_new_value?: string
+          p_old_value?: string
+        }
+        Returns: number
+      }
       mark_assigned_form_reviewed: {
         Args: {
           p_assignment_id: string
           p_review_notes?: string
         }
         Returns: boolean
+      }
+      next_engagement_reference: {
+        Args: {
+          p_tax_year: number
+          p_workspace_id: string
+        }
+        Returns: string
       }
       publish_template_version: {
         Args: {
@@ -5817,6 +6019,29 @@ export type Database = {
         | "client_only"
         | "shared_office"
         | "restricted"
+      engagement_efile_status:
+          "not_started"
+        | "not_applicable"
+        | "awaiting_authorization"
+        | "ready"
+        | "transmitted"
+        | "accepted"
+        | "rejected"
+        | "corrected"
+        | "paper_filed"
+      engagement_payment_status:
+          "not_required"
+        | "unpaid"
+        | "partially_paid"
+        | "paid"
+        | "payment_plan"
+        | "refund_transfer"
+        | "waived"
+      engagement_priority:
+          "low"
+        | "normal"
+        | "high"
+        | "urgent"
       engagement_status:
           "draft"
         | "intake_not_started"
@@ -5837,6 +6062,15 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "archived"
+        | "awaiting_client"
+        | "documents_requested"
+        | "in_preparation"
+        | "preparer_review"
+        | "reviewer_review"
+        | "ready_to_file"
+        | "filed"
+        | "extended"
+        | "on_hold"
       engagement_type:
           "individual_return"
         | "business_return"
@@ -5846,6 +6080,11 @@ export type Database = {
         | "bookkeeping"
         | "payroll"
         | "other"
+        | "individual"
+        | "business"
+        | "nonprofit"
+        | "extension_only"
+        | "notice_resolution"
       form_component_type:
           "section"
         | "heading"
@@ -5948,6 +6187,22 @@ export type Database = {
         | "moderate"
         | "high"
         | "critical"
+      tax_return_type:
+          "1040"
+        | "1040-X"
+        | "1065"
+        | "1120"
+        | "1120-S"
+        | "1041"
+        | "706"
+        | "709"
+        | "990"
+        | "941"
+        | "940"
+        | "state_individual"
+        | "state_business"
+        | "local"
+        | "other"
       template_kind:
           "form"
         | "workflow"
@@ -6195,8 +6450,11 @@ export const Constants = {
       document_source: ["client_upload", "staff_upload", "email_import", "form_upload", "workflow", "integration", "generated"],
       document_status: ["uploaded", "processing", "available", "needs_review", "approved", "rejected", "replaced", "archived", "deleted"],
       document_visibility: ["client_and_staff", "staff_only", "client_only", "shared_office", "restricted"],
-      engagement_status: ["draft", "intake_not_started", "intake_in_progress", "missing_documents", "ready_for_preparation", "preparation_in_progress", "internal_review", "awaiting_payment", "awaiting_signature", "ready_for_ero", "sent_to_tax_software", "transmitted_externally", "acknowledgement_pending", "accepted", "rejected", "correction_in_progress", "completed", "cancelled", "archived"],
-      engagement_type: ["individual_return", "business_return", "amended_return", "extension", "tax_planning", "bookkeeping", "payroll", "other"],
+      engagement_efile_status: ["not_started", "not_applicable", "awaiting_authorization", "ready", "transmitted", "accepted", "rejected", "corrected", "paper_filed"],
+      engagement_payment_status: ["not_required", "unpaid", "partially_paid", "paid", "payment_plan", "refund_transfer", "waived"],
+      engagement_priority: ["low", "normal", "high", "urgent"],
+      engagement_status: ["draft", "intake_not_started", "intake_in_progress", "missing_documents", "ready_for_preparation", "preparation_in_progress", "internal_review", "awaiting_payment", "awaiting_signature", "ready_for_ero", "sent_to_tax_software", "transmitted_externally", "acknowledgement_pending", "accepted", "rejected", "correction_in_progress", "completed", "cancelled", "archived", "awaiting_client", "documents_requested", "in_preparation", "preparer_review", "reviewer_review", "ready_to_file", "filed", "extended", "on_hold"],
+      engagement_type: ["individual_return", "business_return", "amended_return", "extension", "tax_planning", "bookkeeping", "payroll", "other", "individual", "business", "nonprofit", "extension_only", "notice_resolution"],
       form_component_type: ["section", "heading", "paragraph", "text", "textarea", "number", "currency", "date", "email", "phone", "address", "yes_no", "single_choice", "multiple_choice", "dropdown", "file_upload", "signature", "calculation", "repeatable_group", "staff_only", "divider"],
       intake_answer_status: ["draft", "final", "needs_clarification", "verified"],
       intake_entity_type: ["residence", "employer", "business", "rental_property", "k1_entity", "education_student", "childcare_provider", "estimated_payment", "tax_notice", "investment_sale", "digital_asset_account", "foreign_account", "property_sale", "retirement_account", "other_income"],
@@ -6209,6 +6467,7 @@ export const Constants = {
       relationship_type: ["service_bureau_to_ero", "ero_to_preparer", "ptin_to_ero"],
       review_result: ["pending", "pass", "fail", "needs_clarification", "not_applicable"],
       risk_level: ["low", "moderate", "high", "critical"],
+      tax_return_type: ["1040", "1040-X", "1065", "1120", "1120-S", "1041", "706", "709", "990", "941", "940", "state_individual", "state_business", "local", "other"],
       template_kind: ["form", "workflow", "message", "document_request", "checklist", "engagement", "service_package", "sop"],
       template_share_permission: ["view", "use", "duplicate", "edit", "reshare", "manage"],
       template_status: ["draft", "published", "archived"],
