@@ -141,18 +141,27 @@ npm run build
 ## Regenerating Supabase types
 
 The committed `lib/supabase/types.ts` was generated from the **VerexaHQ Tax
-Office** project. Regenerate it after any schema change:
+Office** project (`aewqbffscdrziiwfomyf`). The normal way to regenerate it
+after a schema change is:
 
 ```bash
 npx supabase gen types typescript --project-id aewqbffscdrziiwfomyf > lib/supabase/types.ts
 ```
 
-The `conversations`/`messages` tables and the two `update_client_*`
-functions added in the client-portal migrations were added to this file by
-hand (the type-generation tool required an approval this session didn't
-have). Running the command above will regenerate the file from the live
-schema and should produce equivalent types — do that instead of trusting
-the hand-edits long-term.
+In this Claude Code execution environment, neither the Supabase CLI (no
+`SUPABASE_ACCESS_TOKEN` is available or requested here) nor the
+`generate_typescript_types` MCP tool could complete, so the current file was
+produced instead by directly introspecting the live database's system
+catalogs (`information_schema.columns`, `pg_enum`, `pg_proc`,
+`pg_constraint`/`information_schema.table_constraints`) for every table,
+view, enum, and function in the `public` schema, then assembling the
+`Database` type in the same structure and conventions the official
+generator produces. There are no hand-written or manually patched type
+blocks left in this file — every table, view, enum, and function entry,
+including `conversations`, `messages`, `client_addresses`, and the
+`update_client_portal_contact_info` / `update_client_mailing_address`
+functions, is derived directly from the live schema. When the CLI/MCP tool
+is available, prefer the command above going forward.
 
 Never point this command at any other project ref.
 
