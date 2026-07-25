@@ -203,6 +203,38 @@ In the Supabase dashboard for the **VerexaHQ Tax Office** project → Authentica
 4. Add the deployed domain(s) to the Supabase Auth redirect URL
    configuration above.
 
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs on every pull request targeting `main` and on
+every push to `main`. Each run does `npm ci`, then `npm run lint`,
+`npm run type-check`, and `npm run build`, followed by a non-blocking
+`npm audit --omit=dev --audit-level=high` informational check. It uses Node.js
+20 (matching this project's `next` requirement of `>=20.9.0`), minimal
+`contents: read` permissions, a concurrency group that cancels superseded
+runs, and a 15-minute timeout. The build does not require any Supabase
+secrets — the Supabase browser/server clients are only exercised at request
+time, not at build time — so the workflow sets `NEXT_PUBLIC_SUPABASE_URL`,
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, and `NEXT_PUBLIC_APP_URL` directly as
+plain (non-secret) workflow values; no repository secrets need to be
+configured. **Merges into `main` should wait for this workflow to pass.**
+
+### Supabase function search-path hardening
+
+`supabase/migrations/20260725010000_harden_function_search_paths.sql` pins an
+explicit `search_path = public, pg_temp` on the 7 functions the Supabase
+security advisor previously flagged as `function_search_path_mutable`
+(`create_form_template`, `add_form_question`, `assign_form_to_client`,
+`save_form_answer`, `submit_assigned_form`, `mark_assigned_form_reviewed`,
+`request_form_changes`), and revokes their unused `PUBLIC`/`anon` EXECUTE
+grants (these are staff-only form-builder/assignment functions with no
+application caller and no legitimate anonymous use). Function bodies,
+signatures, and `SECURITY INVOKER` status are unchanged.
+
+This migration, like every migration in this repository, targets only the
+`aewqbffscdrziiwfomyf` (VerexaHQ Tax Office) project — see the separation
+warning at the top of this file. The existing VerexaHQ CRM repository and
+Supabase project were not accessed while doing this work.
+
 ## Security notes
 
 - Row-Level Security is enabled on every table in the Supabase project and
