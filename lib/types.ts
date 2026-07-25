@@ -31,6 +31,12 @@ export type FormField = Tables<"form_fields">;
 export type UserProfile = Tables<"user_profiles">;
 export type TaxEngagement = Tables<"tax_engagements">;
 export type DocumentCategory = Tables<"document_categories">;
+export type DocumentRow = Tables<"documents">;
+export type DocumentReview = Tables<"document_reviews">;
+export type Conversation = Tables<"conversations">;
+export type Message = Tables<"messages">;
+export type FormTemplate = Tables<"form_templates">;
+export type TemplateVersion = Tables<"template_versions">;
 
 export type MembershipRole = Enums<"membership_role">;
 export type MembershipStatus = Enums<"membership_status">;
@@ -41,6 +47,9 @@ export type ReviewResult = Enums<"review_result">;
 export type DocumentRequestStatus = Enums<"document_request_status">;
 export type DocumentRequestItemStatus = Enums<"document_request_item_status">;
 export type IntakeRevisionReason = Enums<"intake_revision_reason">;
+export type DocumentStatus = Enums<"document_status">;
+export type DocumentReviewStatus = Enums<"document_review_status">;
+export type IntakeEntityType = Enums<"intake_entity_type">;
 
 export const STAFF_ROLES: MembershipRole[] = [
   "owner",

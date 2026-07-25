@@ -22,7 +22,7 @@ export type Database = {
           entity_id: string | null
           entity_type: string
           id: number
-          ip_address: unknown
+          ip_address: unknown | null
           new_values: Json | null
           old_values: Json | null
           request_id: string | null
@@ -36,7 +36,7 @@ export type Database = {
           entity_id?: string | null
           entity_type: string
           id?: never
-          ip_address?: unknown
+          ip_address?: unknown | null
           new_values?: Json | null
           old_values?: Json | null
           request_id?: string | null
@@ -50,7 +50,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string
           id?: never
-          ip_address?: unknown
+          ip_address?: unknown | null
           new_values?: Json | null
           old_values?: Json | null
           request_id?: string | null
@@ -397,13 +397,6 @@ export type Database = {
             referencedRelation: "form_templates"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "client_form_assignments_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "v_form_templates"
-            referencedColumns: ["id"]
-          },
         ]
       }
       client_ownerships: {
@@ -485,9 +478,7 @@ export type Database = {
           phone: string | null
           portal_status: string
           portal_user_id: string | null
-          preferred_contact_method:
-            | Database["public"]["Enums"]["contact_method"]
-            | null
+          preferred_contact_method: Database["public"]["Enums"]["contact_method"] | null
           preferred_language: string
           preferred_name: string | null
           source: string | null
@@ -518,9 +509,7 @@ export type Database = {
           phone?: string | null
           portal_status?: string
           portal_user_id?: string | null
-          preferred_contact_method?:
-            | Database["public"]["Enums"]["contact_method"]
-            | null
+          preferred_contact_method?: Database["public"]["Enums"]["contact_method"] | null
           preferred_language?: string
           preferred_name?: string | null
           source?: string | null
@@ -551,9 +540,7 @@ export type Database = {
           phone?: string | null
           portal_status?: string
           portal_user_id?: string | null
-          preferred_contact_method?:
-            | Database["public"]["Enums"]["contact_method"]
-            | null
+          preferred_contact_method?: Database["public"]["Enums"]["contact_method"] | null
           preferred_language?: string
           preferred_name?: string | null
           source?: string | null
@@ -907,6 +894,54 @@ export type Database = {
           },
         ]
       }
+      conversations: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          last_message_at: string | null
+          subject: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string | null
+          subject?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          last_message_at?: string | null
+          subject?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_access_logs: {
         Row: {
           action: Database["public"]["Enums"]["document_access_action"]
@@ -916,7 +951,7 @@ export type Database = {
           details: Json
           document_id: string | null
           id: number
-          ip_address: unknown
+          ip_address: unknown | null
           request_id: string | null
           user_agent: string | null
           workspace_id: string
@@ -929,7 +964,7 @@ export type Database = {
           details?: Json
           document_id?: string | null
           id?: never
-          ip_address?: unknown
+          ip_address?: unknown | null
           request_id?: string | null
           user_agent?: string | null
           workspace_id: string
@@ -942,7 +977,7 @@ export type Database = {
           details?: Json
           document_id?: string | null
           id?: never
-          ip_address?: unknown
+          ip_address?: unknown | null
           request_id?: string | null
           user_agent?: string | null
           workspace_id?: string
@@ -2067,9 +2102,7 @@ export type Database = {
       }
       form_questions: {
         Row: {
-          component_type:
-            | Database["public"]["Enums"]["form_component_type"]
-            | null
+          component_type: Database["public"]["Enums"]["form_component_type"] | null
           created_at: string | null
           field_key: string | null
           help_text: string | null
@@ -2088,9 +2121,7 @@ export type Database = {
           validation: Json
         }
         Insert: {
-          component_type?:
-            | Database["public"]["Enums"]["form_component_type"]
-            | null
+          component_type?: Database["public"]["Enums"]["form_component_type"] | null
           created_at?: string | null
           field_key?: string | null
           help_text?: string | null
@@ -2109,9 +2140,7 @@ export type Database = {
           validation?: Json
         }
         Update: {
-          component_type?:
-            | Database["public"]["Enums"]["form_component_type"]
-            | null
+          component_type?: Database["public"]["Enums"]["form_component_type"] | null
           created_at?: string | null
           field_key?: string | null
           help_text?: string | null
@@ -2142,13 +2171,6 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "form_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "form_questions_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "v_form_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -2188,20 +2210,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "client_form_assignments"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "form_response_answers_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_form_assignments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "form_response_answers_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "v_client_portal_forms"
-            referencedColumns: ["assignment_id"]
           },
           {
             foreignKeyName: "form_response_answers_question_id_fkey"
@@ -3515,6 +3523,67 @@ export type Database = {
           },
         ]
       }
+      messages: {
+        Row: {
+          attachment_document_id: string | null
+          body: string
+          client_visible: boolean
+          conversation_id: string
+          created_at: string
+          id: string
+          read_at: string | null
+          sender_type: string
+          sender_user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          attachment_document_id?: string | null
+          body: string
+          client_visible?: boolean
+          conversation_id: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_type: string
+          sender_user_id: string
+          workspace_id: string
+        }
+        Update: {
+          attachment_document_id?: string | null
+          body?: string
+          client_visible?: boolean
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          sender_type?: string
+          sender_user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_attachment_document_id_fkey"
+            columns: ["attachment_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           client_id: string | null
@@ -4335,9 +4404,7 @@ export type Database = {
           metadata: Json
           requested_at: string
           requested_by: string | null
-          requested_from_role:
-            | Database["public"]["Enums"]["membership_role"]
-            | null
+          requested_from_role: Database["public"]["Enums"]["membership_role"] | null
           requested_from_user_id: string | null
           resolution_notes: string | null
           resolved_at: string | null
@@ -4355,9 +4422,7 @@ export type Database = {
           metadata?: Json
           requested_at?: string
           requested_by?: string | null
-          requested_from_role?:
-            | Database["public"]["Enums"]["membership_role"]
-            | null
+          requested_from_role?: Database["public"]["Enums"]["membership_role"] | null
           requested_from_user_id?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
@@ -4375,9 +4440,7 @@ export type Database = {
           metadata?: Json
           requested_at?: string
           requested_by?: string | null
-          requested_from_role?:
-            | Database["public"]["Enums"]["membership_role"]
-            | null
+          requested_from_role?: Database["public"]["Enums"]["membership_role"] | null
           requested_from_user_id?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
@@ -5178,13 +5241,6 @@ export type Database = {
             referencedRelation: "form_templates"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "client_form_assignments_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "v_form_templates"
-            referencedColumns: ["id"]
-          },
         ]
       }
       v_client_portal_forms: {
@@ -5218,13 +5274,6 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "form_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "client_form_assignments_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "v_form_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -5285,7 +5334,9 @@ export type Database = {
     }
     Functions: {
       activate_workflow_definition: {
-        Args: { p_definition_id: string }
+        Args: {
+          p_definition_id: string
+        }
         Returns: undefined
       }
       add_form_question: {
@@ -5301,7 +5352,9 @@ export type Database = {
         Returns: string
       }
       approve_and_lock_intake: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: undefined
       }
       assign_form_to_client: {
@@ -5315,37 +5368,82 @@ export type Database = {
         }
         Returns: string
       }
-      begin_intake_review: { Args: { p_submission_id: string }; Returns: Json }
-      can_access_document: { Args: { p_document_id: string }; Returns: boolean }
+      begin_intake_review: {
+        Args: {
+          p_submission_id: string
+        }
+        Returns: Json
+      }
+      can_access_conversation: {
+        Args: {
+          p_conversation_id: string
+        }
+        Returns: boolean
+      }
+      can_access_document: {
+        Args: {
+          p_document_id: string
+        }
+        Returns: boolean
+      }
       can_access_engagement: {
-        Args: { p_engagement_id: string }
+        Args: {
+          p_engagement_id: string
+        }
         Returns: boolean
       }
       can_access_intake_submission: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: boolean
       }
-      can_access_template: { Args: { p_template_id: string }; Returns: boolean }
+      can_access_template: {
+        Args: {
+          p_template_id: string
+        }
+        Returns: boolean
+      }
       can_access_workflow_definition: {
-        Args: { p_definition_id: string }
+        Args: {
+          p_definition_id: string
+        }
         Returns: boolean
       }
-      can_manage_document: { Args: { p_document_id: string }; Returns: boolean }
+      can_manage_document: {
+        Args: {
+          p_document_id: string
+        }
+        Returns: boolean
+      }
       can_manage_engagement: {
-        Args: { p_engagement_id: string }
+        Args: {
+          p_engagement_id: string
+        }
         Returns: boolean
       }
       can_manage_intake_submission: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: boolean
       }
-      can_manage_template: { Args: { p_template_id: string }; Returns: boolean }
+      can_manage_template: {
+        Args: {
+          p_template_id: string
+        }
+        Returns: boolean
+      }
       can_manage_workflow_definition: {
-        Args: { p_definition_id: string }
+        Args: {
+          p_definition_id: string
+        }
         Returns: boolean
       }
       complete_intake_review: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: Json
       }
       create_form_template: {
@@ -5359,7 +5457,10 @@ export type Database = {
         Returns: string
       }
       create_next_template_version: {
-        Args: { p_change_summary?: string; p_template_id: string }
+        Args: {
+          p_change_summary?: string
+          p_template_id: string
+        }
         Returns: string
       }
       create_template_draft: {
@@ -5383,19 +5484,28 @@ export type Database = {
         Returns: string
       }
       ensure_intake_review_sections: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: number
       }
       evaluate_intake_compliance: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: Json
       }
       generate_intake_document_request: {
-        Args: { p_send?: boolean; p_submission_id: string }
+        Args: {
+          p_send?: boolean
+          p_submission_id: string
+        }
         Returns: string
       }
       get_intake_visibility: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: {
           is_visible: boolean
           matched_rules: number
@@ -5418,33 +5528,54 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_platform_admin: { Args: never; Returns: boolean }
+      is_platform_admin: {
+        Args: never
+        Returns: boolean
+      }
       is_workspace_member: {
-        Args: { p_workspace_id: string }
+        Args: {
+          p_workspace_id: string
+        }
         Returns: boolean
       }
       mark_assigned_form_reviewed: {
-        Args: { p_assignment_id: string; p_review_notes?: string }
+        Args: {
+          p_assignment_id: string
+          p_review_notes?: string
+        }
         Returns: boolean
       }
       publish_template_version: {
-        Args: { p_template_id: string; p_version_id: string }
+        Args: {
+          p_template_id: string
+          p_version_id: string
+        }
         Returns: undefined
       }
       recalculate_intake_progress: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: number
       }
       refresh_document_request_progress: {
-        Args: { p_request_id: string }
+        Args: {
+          p_request_id: string
+        }
         Returns: undefined
       }
       reopen_intake: {
-        Args: { p_reason: string; p_submission_id: string }
+        Args: {
+          p_reason: string
+          p_submission_id: string
+        }
         Returns: undefined
       }
       request_form_changes: {
-        Args: { p_assignment_id: string; p_change_request_message: string }
+        Args: {
+          p_assignment_id: string
+          p_change_request_message: string
+        }
         Returns: boolean
       }
       request_intake_clarification: {
@@ -5457,7 +5588,10 @@ export type Database = {
         Returns: string
       }
       resolve_intake_clarification: {
-        Args: { p_comment_id: string; p_resolution?: string }
+        Args: {
+          p_comment_id: string
+          p_resolution?: string
+        }
         Returns: undefined
       }
       resolve_workflow_approval: {
@@ -5505,37 +5639,79 @@ export type Database = {
         Returns: string
       }
       submit_assigned_form: {
-        Args: { p_assignment_id: string }
+        Args: {
+          p_assignment_id: string
+        }
         Returns: boolean
       }
-      submit_intake: { Args: { p_submission_id: string }; Returns: Json }
+      submit_intake: {
+        Args: {
+          p_submission_id: string
+        }
+        Returns: Json
+      }
+      update_client_mailing_address: {
+        Args: {
+          p_city: string
+          p_client_id: string
+          p_line1: string
+          p_line2: string
+          p_postal_code: string
+          p_state: string
+        }
+        Returns: undefined
+      }
+      update_client_portal_contact_info: {
+        Args: {
+          p_client_id: string
+          p_phone: string
+          p_preferred_contact_method: Database["public"]["Enums"]["contact_method"]
+        }
+        Returns: undefined
+      }
       validate_intake_submission: {
-        Args: { p_submission_id: string }
+        Args: {
+          p_submission_id: string
+        }
         Returns: Json
       }
       validate_workflow_definition: {
-        Args: { p_definition_id: string }
+        Args: {
+          p_definition_id: string
+        }
         Returns: Json
       }
     }
     Enums: {
-      access_level: "view" | "collaborate" | "manage"
+      access_level:
+          "view"
+        | "collaborate"
+        | "manage"
       approval_status:
-        | "pending"
+          "pending"
         | "approved"
         | "rejected"
         | "changes_requested"
         | "cancelled"
       automation_job_status:
-        | "queued"
+          "queued"
         | "processing"
         | "completed"
         | "failed"
         | "cancelled"
-      client_status: "lead" | "prospect" | "active" | "inactive" | "archived"
-      client_type: "individual" | "business" | "household" | "organization"
+      client_status:
+          "lead"
+        | "prospect"
+        | "active"
+        | "inactive"
+        | "archived"
+      client_type:
+          "individual"
+        | "business"
+        | "household"
+        | "organization"
       compliance_case_status:
-        | "open"
+          "open"
         | "in_review"
         | "waiting_on_client"
         | "waiting_on_staff"
@@ -5544,7 +5720,7 @@ export type Database = {
         | "escalated"
         | "closed"
       compliance_case_type:
-        | "due_diligence"
+          "due_diligence"
         | "identity_verification"
         | "fraud_risk"
         | "credit_eligibility"
@@ -5555,7 +5731,7 @@ export type Database = {
         | "quality_review"
         | "other"
       condition_operator:
-        | "equals"
+          "equals"
         | "not_equals"
         | "contains"
         | "not_contains"
@@ -5567,16 +5743,21 @@ export type Database = {
         | "is_not_empty"
         | "in"
         | "not_in"
-      contact_method: "email" | "phone" | "sms" | "address" | "other"
+      contact_method:
+          "email"
+        | "phone"
+        | "sms"
+        | "address"
+        | "other"
       contact_type:
-        | "personal"
+          "personal"
         | "business"
         | "spouse"
         | "authorized_contact"
         | "emergency"
         | "other"
       document_access_action:
-        | "view"
+          "view"
         | "download"
         | "upload"
         | "replace"
@@ -5588,7 +5769,7 @@ export type Database = {
         | "delete"
         | "restore"
       document_request_item_status:
-        | "requested"
+          "requested"
         | "uploaded"
         | "under_review"
         | "accepted"
@@ -5596,7 +5777,7 @@ export type Database = {
         | "waived"
         | "not_applicable"
       document_request_status:
-        | "draft"
+          "draft"
         | "sent"
         | "viewed"
         | "in_progress"
@@ -5605,7 +5786,7 @@ export type Database = {
         | "cancelled"
         | "expired"
       document_review_status:
-        | "pending"
+          "pending"
         | "approved"
         | "rejected"
         | "needs_clarification"
@@ -5613,7 +5794,7 @@ export type Database = {
         | "illegible"
         | "wrong_document"
       document_source:
-        | "client_upload"
+          "client_upload"
         | "staff_upload"
         | "email_import"
         | "form_upload"
@@ -5621,7 +5802,7 @@ export type Database = {
         | "integration"
         | "generated"
       document_status:
-        | "uploaded"
+          "uploaded"
         | "processing"
         | "available"
         | "needs_review"
@@ -5631,13 +5812,13 @@ export type Database = {
         | "archived"
         | "deleted"
       document_visibility:
-        | "client_and_staff"
+          "client_and_staff"
         | "staff_only"
         | "client_only"
         | "shared_office"
         | "restricted"
       engagement_status:
-        | "draft"
+          "draft"
         | "intake_not_started"
         | "intake_in_progress"
         | "missing_documents"
@@ -5657,7 +5838,7 @@ export type Database = {
         | "cancelled"
         | "archived"
       engagement_type:
-        | "individual_return"
+          "individual_return"
         | "business_return"
         | "amended_return"
         | "extension"
@@ -5666,7 +5847,7 @@ export type Database = {
         | "payroll"
         | "other"
       form_component_type:
-        | "section"
+          "section"
         | "heading"
         | "paragraph"
         | "text"
@@ -5688,12 +5869,12 @@ export type Database = {
         | "staff_only"
         | "divider"
       intake_answer_status:
-        | "draft"
+          "draft"
         | "final"
         | "needs_clarification"
         | "verified"
       intake_entity_type:
-        | "residence"
+          "residence"
         | "employer"
         | "business"
         | "rental_property"
@@ -5709,14 +5890,14 @@ export type Database = {
         | "retirement_account"
         | "other_income"
       intake_revision_reason:
-        | "client_edit"
+          "client_edit"
         | "staff_edit"
         | "changes_requested"
         | "reopened"
         | "system_update"
         | "import"
       intake_submission_status:
-        | "not_started"
+          "not_started"
         | "in_progress"
         | "submitted"
         | "changes_requested"
@@ -5726,7 +5907,7 @@ export type Database = {
         | "rejected"
         | "archived"
       membership_role:
-        | "owner"
+          "owner"
         | "admin"
         | "ero"
         | "preparer"
@@ -5737,27 +5918,38 @@ export type Database = {
         | "seasonal_staff"
         | "auditor"
         | "client"
-      membership_status: "invited" | "active" | "suspended" | "removed"
-      ownership_type: "workspace_owned" | "preparer_owned" | "shared"
+      membership_status:
+          "invited"
+        | "active"
+        | "suspended"
+        | "removed"
+      ownership_type:
+          "workspace_owned"
+        | "preparer_owned"
+        | "shared"
       relationship_status:
-        | "pending"
+          "pending"
         | "active"
         | "paused"
         | "ended"
         | "declined"
       relationship_type:
-        | "service_bureau_to_ero"
+          "service_bureau_to_ero"
         | "ero_to_preparer"
         | "ptin_to_ero"
       review_result:
-        | "pending"
+          "pending"
         | "pass"
         | "fail"
         | "needs_clarification"
         | "not_applicable"
-      risk_level: "low" | "moderate" | "high" | "critical"
+      risk_level:
+          "low"
+        | "moderate"
+        | "high"
+        | "critical"
       template_kind:
-        | "form"
+          "form"
         | "workflow"
         | "message"
         | "document_request"
@@ -5766,26 +5958,29 @@ export type Database = {
         | "service_package"
         | "sop"
       template_share_permission:
-        | "view"
+          "view"
         | "use"
         | "duplicate"
         | "edit"
         | "reshare"
         | "manage"
-      template_status: "draft" | "published" | "archived"
+      template_status:
+          "draft"
+        | "published"
+        | "archived"
       template_update_mode:
-        | "independent_copy"
+          "independent_copy"
         | "linked_manual"
         | "linked_automatic"
       template_visibility:
-        | "private"
+          "private"
         | "workspace"
         | "connected_users"
         | "connected_offices"
         | "organization_network"
         | "marketplace"
       workflow_event_type:
-        | "run_started"
+          "run_started"
         | "step_started"
         | "step_completed"
         | "step_failed"
@@ -5799,7 +5994,7 @@ export type Database = {
         | "run_completed"
         | "run_cancelled"
       workflow_node_type:
-        | "start"
+          "start"
         | "trigger"
         | "condition"
         | "task"
@@ -5817,14 +6012,14 @@ export type Database = {
         | "parallel_join"
         | "end"
       workflow_run_status:
-        | "queued"
+          "queued"
         | "running"
         | "waiting"
         | "completed"
         | "failed"
         | "cancelled"
       workflow_step_status:
-        | "pending"
+          "pending"
         | "ready"
         | "running"
         | "waiting"
@@ -5833,7 +6028,7 @@ export type Database = {
         | "failed"
         | "cancelled"
       workflow_trigger_type:
-        | "manual"
+          "manual"
         | "engagement_created"
         | "engagement_status_changed"
         | "form_assigned"
@@ -5846,9 +6041,13 @@ export type Database = {
         | "scheduled"
         | "client_portal_activated"
         | "relationship_created"
-      workspace_status: "pending" | "active" | "suspended" | "archived"
+      workspace_status:
+          "pending"
+        | "active"
+        | "suspended"
+        | "archived"
       workspace_type:
-        | "independent_ptin"
+          "independent_ptin"
         | "ero_office"
         | "service_bureau"
         | "platform_admin"
@@ -5980,366 +6179,48 @@ export const Constants = {
   public: {
     Enums: {
       access_level: ["view", "collaborate", "manage"],
-      approval_status: [
-        "pending",
-        "approved",
-        "rejected",
-        "changes_requested",
-        "cancelled",
-      ],
-      automation_job_status: [
-        "queued",
-        "processing",
-        "completed",
-        "failed",
-        "cancelled",
-      ],
+      approval_status: ["pending", "approved", "rejected", "changes_requested", "cancelled"],
+      automation_job_status: ["queued", "processing", "completed", "failed", "cancelled"],
       client_status: ["lead", "prospect", "active", "inactive", "archived"],
       client_type: ["individual", "business", "household", "organization"],
-      compliance_case_status: [
-        "open",
-        "in_review",
-        "waiting_on_client",
-        "waiting_on_staff",
-        "resolved",
-        "not_applicable",
-        "escalated",
-        "closed",
-      ],
-      compliance_case_type: [
-        "due_diligence",
-        "identity_verification",
-        "fraud_risk",
-        "credit_eligibility",
-        "filing_status",
-        "dependent_eligibility",
-        "income_verification",
-        "document_sufficiency",
-        "quality_review",
-        "other",
-      ],
-      condition_operator: [
-        "equals",
-        "not_equals",
-        "contains",
-        "not_contains",
-        "greater_than",
-        "greater_than_or_equal",
-        "less_than",
-        "less_than_or_equal",
-        "is_empty",
-        "is_not_empty",
-        "in",
-        "not_in",
-      ],
+      compliance_case_status: ["open", "in_review", "waiting_on_client", "waiting_on_staff", "resolved", "not_applicable", "escalated", "closed"],
+      compliance_case_type: ["due_diligence", "identity_verification", "fraud_risk", "credit_eligibility", "filing_status", "dependent_eligibility", "income_verification", "document_sufficiency", "quality_review", "other"],
+      condition_operator: ["equals", "not_equals", "contains", "not_contains", "greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal", "is_empty", "is_not_empty", "in", "not_in"],
       contact_method: ["email", "phone", "sms", "address", "other"],
-      contact_type: [
-        "personal",
-        "business",
-        "spouse",
-        "authorized_contact",
-        "emergency",
-        "other",
-      ],
-      document_access_action: [
-        "view",
-        "download",
-        "upload",
-        "replace",
-        "rename",
-        "move",
-        "share",
-        "unshare",
-        "review",
-        "delete",
-        "restore",
-      ],
-      document_request_item_status: [
-        "requested",
-        "uploaded",
-        "under_review",
-        "accepted",
-        "rejected",
-        "waived",
-        "not_applicable",
-      ],
-      document_request_status: [
-        "draft",
-        "sent",
-        "viewed",
-        "in_progress",
-        "partially_complete",
-        "completed",
-        "cancelled",
-        "expired",
-      ],
-      document_review_status: [
-        "pending",
-        "approved",
-        "rejected",
-        "needs_clarification",
-        "duplicate",
-        "illegible",
-        "wrong_document",
-      ],
-      document_source: [
-        "client_upload",
-        "staff_upload",
-        "email_import",
-        "form_upload",
-        "workflow",
-        "integration",
-        "generated",
-      ],
-      document_status: [
-        "uploaded",
-        "processing",
-        "available",
-        "needs_review",
-        "approved",
-        "rejected",
-        "replaced",
-        "archived",
-        "deleted",
-      ],
-      document_visibility: [
-        "client_and_staff",
-        "staff_only",
-        "client_only",
-        "shared_office",
-        "restricted",
-      ],
-      engagement_status: [
-        "draft",
-        "intake_not_started",
-        "intake_in_progress",
-        "missing_documents",
-        "ready_for_preparation",
-        "preparation_in_progress",
-        "internal_review",
-        "awaiting_payment",
-        "awaiting_signature",
-        "ready_for_ero",
-        "sent_to_tax_software",
-        "transmitted_externally",
-        "acknowledgement_pending",
-        "accepted",
-        "rejected",
-        "correction_in_progress",
-        "completed",
-        "cancelled",
-        "archived",
-      ],
-      engagement_type: [
-        "individual_return",
-        "business_return",
-        "amended_return",
-        "extension",
-        "tax_planning",
-        "bookkeeping",
-        "payroll",
-        "other",
-      ],
-      form_component_type: [
-        "section",
-        "heading",
-        "paragraph",
-        "text",
-        "textarea",
-        "number",
-        "currency",
-        "date",
-        "email",
-        "phone",
-        "address",
-        "yes_no",
-        "single_choice",
-        "multiple_choice",
-        "dropdown",
-        "file_upload",
-        "signature",
-        "calculation",
-        "repeatable_group",
-        "staff_only",
-        "divider",
-      ],
-      intake_answer_status: [
-        "draft",
-        "final",
-        "needs_clarification",
-        "verified",
-      ],
-      intake_entity_type: [
-        "residence",
-        "employer",
-        "business",
-        "rental_property",
-        "k1_entity",
-        "education_student",
-        "childcare_provider",
-        "estimated_payment",
-        "tax_notice",
-        "investment_sale",
-        "digital_asset_account",
-        "foreign_account",
-        "property_sale",
-        "retirement_account",
-        "other_income",
-      ],
-      intake_revision_reason: [
-        "client_edit",
-        "staff_edit",
-        "changes_requested",
-        "reopened",
-        "system_update",
-        "import",
-      ],
-      intake_submission_status: [
-        "not_started",
-        "in_progress",
-        "submitted",
-        "changes_requested",
-        "resubmitted",
-        "under_review",
-        "approved",
-        "rejected",
-        "archived",
-      ],
-      membership_role: [
-        "owner",
-        "admin",
-        "ero",
-        "preparer",
-        "reviewer",
-        "intake_specialist",
-        "document_specialist",
-        "billing",
-        "seasonal_staff",
-        "auditor",
-        "client",
-      ],
+      contact_type: ["personal", "business", "spouse", "authorized_contact", "emergency", "other"],
+      document_access_action: ["view", "download", "upload", "replace", "rename", "move", "share", "unshare", "review", "delete", "restore"],
+      document_request_item_status: ["requested", "uploaded", "under_review", "accepted", "rejected", "waived", "not_applicable"],
+      document_request_status: ["draft", "sent", "viewed", "in_progress", "partially_complete", "completed", "cancelled", "expired"],
+      document_review_status: ["pending", "approved", "rejected", "needs_clarification", "duplicate", "illegible", "wrong_document"],
+      document_source: ["client_upload", "staff_upload", "email_import", "form_upload", "workflow", "integration", "generated"],
+      document_status: ["uploaded", "processing", "available", "needs_review", "approved", "rejected", "replaced", "archived", "deleted"],
+      document_visibility: ["client_and_staff", "staff_only", "client_only", "shared_office", "restricted"],
+      engagement_status: ["draft", "intake_not_started", "intake_in_progress", "missing_documents", "ready_for_preparation", "preparation_in_progress", "internal_review", "awaiting_payment", "awaiting_signature", "ready_for_ero", "sent_to_tax_software", "transmitted_externally", "acknowledgement_pending", "accepted", "rejected", "correction_in_progress", "completed", "cancelled", "archived"],
+      engagement_type: ["individual_return", "business_return", "amended_return", "extension", "tax_planning", "bookkeeping", "payroll", "other"],
+      form_component_type: ["section", "heading", "paragraph", "text", "textarea", "number", "currency", "date", "email", "phone", "address", "yes_no", "single_choice", "multiple_choice", "dropdown", "file_upload", "signature", "calculation", "repeatable_group", "staff_only", "divider"],
+      intake_answer_status: ["draft", "final", "needs_clarification", "verified"],
+      intake_entity_type: ["residence", "employer", "business", "rental_property", "k1_entity", "education_student", "childcare_provider", "estimated_payment", "tax_notice", "investment_sale", "digital_asset_account", "foreign_account", "property_sale", "retirement_account", "other_income"],
+      intake_revision_reason: ["client_edit", "staff_edit", "changes_requested", "reopened", "system_update", "import"],
+      intake_submission_status: ["not_started", "in_progress", "submitted", "changes_requested", "resubmitted", "under_review", "approved", "rejected", "archived"],
+      membership_role: ["owner", "admin", "ero", "preparer", "reviewer", "intake_specialist", "document_specialist", "billing", "seasonal_staff", "auditor", "client"],
       membership_status: ["invited", "active", "suspended", "removed"],
       ownership_type: ["workspace_owned", "preparer_owned", "shared"],
       relationship_status: ["pending", "active", "paused", "ended", "declined"],
-      relationship_type: [
-        "service_bureau_to_ero",
-        "ero_to_preparer",
-        "ptin_to_ero",
-      ],
-      review_result: [
-        "pending",
-        "pass",
-        "fail",
-        "needs_clarification",
-        "not_applicable",
-      ],
+      relationship_type: ["service_bureau_to_ero", "ero_to_preparer", "ptin_to_ero"],
+      review_result: ["pending", "pass", "fail", "needs_clarification", "not_applicable"],
       risk_level: ["low", "moderate", "high", "critical"],
-      template_kind: [
-        "form",
-        "workflow",
-        "message",
-        "document_request",
-        "checklist",
-        "engagement",
-        "service_package",
-        "sop",
-      ],
-      template_share_permission: [
-        "view",
-        "use",
-        "duplicate",
-        "edit",
-        "reshare",
-        "manage",
-      ],
+      template_kind: ["form", "workflow", "message", "document_request", "checklist", "engagement", "service_package", "sop"],
+      template_share_permission: ["view", "use", "duplicate", "edit", "reshare", "manage"],
       template_status: ["draft", "published", "archived"],
-      template_update_mode: [
-        "independent_copy",
-        "linked_manual",
-        "linked_automatic",
-      ],
-      template_visibility: [
-        "private",
-        "workspace",
-        "connected_users",
-        "connected_offices",
-        "organization_network",
-        "marketplace",
-      ],
-      workflow_event_type: [
-        "run_started",
-        "step_started",
-        "step_completed",
-        "step_failed",
-        "condition_evaluated",
-        "approval_requested",
-        "approval_resolved",
-        "wait_started",
-        "wait_released",
-        "action_queued",
-        "action_completed",
-        "run_completed",
-        "run_cancelled",
-      ],
-      workflow_node_type: [
-        "start",
-        "trigger",
-        "condition",
-        "task",
-        "approval",
-        "assignment",
-        "wait",
-        "email",
-        "sms",
-        "portal_notification",
-        "document_request",
-        "status_change",
-        "form_assignment",
-        "webhook",
-        "parallel_split",
-        "parallel_join",
-        "end",
-      ],
-      workflow_run_status: [
-        "queued",
-        "running",
-        "waiting",
-        "completed",
-        "failed",
-        "cancelled",
-      ],
-      workflow_step_status: [
-        "pending",
-        "ready",
-        "running",
-        "waiting",
-        "completed",
-        "skipped",
-        "failed",
-        "cancelled",
-      ],
-      workflow_trigger_type: [
-        "manual",
-        "engagement_created",
-        "engagement_status_changed",
-        "form_assigned",
-        "form_submitted",
-        "document_uploaded",
-        "document_request_completed",
-        "invoice_paid",
-        "signature_completed",
-        "date_reached",
-        "scheduled",
-        "client_portal_activated",
-        "relationship_created",
-      ],
+      template_update_mode: ["independent_copy", "linked_manual", "linked_automatic"],
+      template_visibility: ["private", "workspace", "connected_users", "connected_offices", "organization_network", "marketplace"],
+      workflow_event_type: ["run_started", "step_started", "step_completed", "step_failed", "condition_evaluated", "approval_requested", "approval_resolved", "wait_started", "wait_released", "action_queued", "action_completed", "run_completed", "run_cancelled"],
+      workflow_node_type: ["start", "trigger", "condition", "task", "approval", "assignment", "wait", "email", "sms", "portal_notification", "document_request", "status_change", "form_assignment", "webhook", "parallel_split", "parallel_join", "end"],
+      workflow_run_status: ["queued", "running", "waiting", "completed", "failed", "cancelled"],
+      workflow_step_status: ["pending", "ready", "running", "waiting", "completed", "skipped", "failed", "cancelled"],
+      workflow_trigger_type: ["manual", "engagement_created", "engagement_status_changed", "form_assigned", "form_submitted", "document_uploaded", "document_request_completed", "invoice_paid", "signature_completed", "date_reached", "scheduled", "client_portal_activated", "relationship_created"],
       workspace_status: ["pending", "active", "suspended", "archived"],
-      workspace_type: [
-        "independent_ptin",
-        "ero_office",
-        "service_bureau",
-        "platform_admin",
-      ],
-    },
-  },
+      workspace_type: ["independent_ptin", "ero_office", "service_bureau", "platform_admin"],
+    }
+  }
 } as const
