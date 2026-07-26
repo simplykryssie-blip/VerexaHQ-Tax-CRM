@@ -4,6 +4,7 @@ import { getMostRecentIntake } from "@/lib/data/portal-intakes";
 import { countMissingDocuments } from "@/lib/data/portal-document-requests";
 import { countOpenClarifications, listPortalClarifications } from "@/lib/data/portal-clarifications";
 import { countUnreadMessages, listPortalConversations } from "@/lib/data/portal-messages";
+import { countActivePortalEngagements } from "@/lib/data/portal-engagements";
 import type { PortalActivityItem } from "@/components/portal/PortalActivityTimeline";
 import type { IntakeSubmission } from "@/lib/types";
 
@@ -20,6 +21,7 @@ export type PortalDashboardData = {
   missingDocumentsCount: number;
   openClarificationCount: number;
   unreadMessagesCount: number;
+  activeEngagementsCount: number;
   recentActivity: PortalActivityItem[];
   nextAction: PortalNextAction | null;
 };
@@ -28,15 +30,23 @@ export async function getPortalDashboardData(
   supabase: SupabaseServerClient,
   clientId: string,
 ): Promise<PortalDashboardData> {
-  const [currentIntake, missingDocumentsCount, openClarificationCount, unreadMessagesCount, clarifications, conversations] =
-    await Promise.all([
-      getMostRecentIntake(supabase, clientId),
-      countMissingDocuments(supabase, clientId),
-      countOpenClarifications(supabase, clientId),
-      countUnreadMessages(supabase, clientId),
-      listPortalClarifications(supabase, clientId),
-      listPortalConversations(supabase, clientId),
-    ]);
+  const [
+    currentIntake,
+    missingDocumentsCount,
+    openClarificationCount,
+    unreadMessagesCount,
+    clarifications,
+    conversations,
+    activeEngagementsCount,
+  ] = await Promise.all([
+    getMostRecentIntake(supabase, clientId),
+    countMissingDocuments(supabase, clientId),
+    countOpenClarifications(supabase, clientId),
+    countUnreadMessages(supabase, clientId),
+    listPortalClarifications(supabase, clientId),
+    listPortalConversations(supabase, clientId),
+    countActivePortalEngagements(supabase, clientId),
+  ]);
 
   const recentActivity: PortalActivityItem[] = [];
 
@@ -117,6 +127,7 @@ export async function getPortalDashboardData(
     missingDocumentsCount,
     openClarificationCount,
     unreadMessagesCount,
+    activeEngagementsCount,
     recentActivity: recentActivity.slice(0, 6),
     nextAction,
   };

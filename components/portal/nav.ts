@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Home, FileText, FolderOpen, ClipboardList, MessageCircleQuestion, MessagesSquare, UserRound } from "lucide-react";
+import { Home, FileText, FolderOpen, ClipboardList, MessageCircleQuestion, MessagesSquare, UserRound, Briefcase } from "lucide-react";
 
 export type PortalNavItem = {
   href: string;
@@ -10,6 +10,7 @@ export type PortalNavItem = {
 
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { href: "/portal/dashboard", label: "Home", shortLabel: "Home", icon: Home },
+  { href: "/portal/engagements", label: "Engagements", shortLabel: "Engagements", icon: Briefcase },
   { href: "/portal/intakes", label: "Tax Intake", shortLabel: "Intake", icon: FileText },
   { href: "/portal/documents", label: "Documents", shortLabel: "Docs", icon: FolderOpen },
   { href: "/portal/document-requests", label: "Requests", shortLabel: "Requests", icon: ClipboardList },
@@ -18,11 +19,11 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { href: "/portal/profile", label: "Profile", shortLabel: "Profile", icon: UserRound },
 ];
 
-/** Trimmed set for the mobile bottom bar — Documents/Requests share an icon slot via Documents, full list stays in the drawer. */
+/** Trimmed set for the mobile bottom bar — Engagements/Requests share a slot via Documents, full list stays in the drawer. */
 export const PORTAL_BOTTOM_NAV_ITEMS: PortalNavItem[] = [
   PORTAL_NAV_ITEMS[0],
-  PORTAL_NAV_ITEMS[1],
   PORTAL_NAV_ITEMS[2],
+  PORTAL_NAV_ITEMS[3],
   PORTAL_NAV_ITEMS[5],
   PORTAL_NAV_ITEMS[6],
 ];

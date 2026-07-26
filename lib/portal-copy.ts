@@ -58,3 +58,48 @@ export const friendlyDocumentRequestStatusMeta = build(
   },
   "Waiting on you",
 );
+
+/**
+ * Client-facing engagement status copy (Part 7). Internal workflow-stage
+ * names (e.g. "preparer_review" vs "reviewer_review") are collapsed into
+ * plain-language messages a taxpayer can act on.
+ */
+export const friendlyEngagementStatusMeta = build(
+  {
+    draft: { label: "Getting started", tone: "neutral" },
+    awaiting_client: { label: "We are waiting for your information", tone: "warning" },
+    intake_in_progress: { label: "We are waiting for your information", tone: "warning" },
+    documents_requested: { label: "We need documents from you", tone: "warning" },
+    ready_for_preparation: { label: "Your return is queued for preparation", tone: "info" },
+    in_preparation: { label: "Your return is being prepared", tone: "info" },
+    preparer_review: { label: "Your return is being prepared", tone: "info" },
+    reviewer_review: { label: "Your return is under review", tone: "info" },
+    awaiting_signature: { label: "Your signature is needed", tone: "warning" },
+    ready_to_file: { label: "Your return is ready to file", tone: "success" },
+    filed: { label: "Your return was filed", tone: "success" },
+    accepted: { label: "Your return was accepted", tone: "success" },
+    rejected: { label: "We need you to correct or provide more information", tone: "danger" },
+    extended: { label: "An extension is in effect", tone: "warning" },
+    completed: { label: "Your engagement is complete", tone: "success" },
+    on_hold: { label: "Your engagement is on hold", tone: "neutral" },
+    cancelled: { label: "This engagement was cancelled", tone: "neutral" },
+    archived: { label: "This engagement is archived", tone: "neutral" },
+  },
+  "In progress",
+);
+
+export function friendlyEngagementNextAction(status: string | null | undefined): string | null {
+  switch (status) {
+    case "awaiting_client":
+    case "intake_in_progress":
+      return "Complete your tax intake.";
+    case "documents_requested":
+      return "Upload the requested documents.";
+    case "awaiting_signature":
+      return "Provide your signature or e-file authorization.";
+    case "rejected":
+      return "Review the notes from your tax office and respond.";
+    default:
+      return null;
+  }
+}
