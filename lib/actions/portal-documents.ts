@@ -36,7 +36,7 @@ export async function linkUploadedDocumentAction(
     return { error: parsed.error.issues[0]?.message ?? "Invalid upload." };
   }
 
-  const { client } = await requirePortalAccess();
+  const { client, user } = await requirePortalAccess();
   if (!client) return { error: "No linked client account." };
 
   const supabase = await createClient();
@@ -72,6 +72,28 @@ export async function linkUploadedDocumentAction(
     }
   }
 
+  if (parsed.data.engagementId) {
+    const { data: engagement } = await supabase
+      .from("tax_engagements")
+      .select("client_id")
+      .eq("id", parsed.data.engagementId)
+      .maybeSingle();
+    if (!engagement || engagement.client_id !== client.client.id) {
+      return { error: "That engagement was not found." };
+    }
+  }
+
+  if (parsed.data.organizerSubmissionId) {
+    const { data: submission } = await supabase
+      .from("intake_submissions")
+      .select("client_id")
+      .eq("id", parsed.data.organizerSubmissionId)
+      .maybeSingle();
+    if (!submission || submission.client_id !== client.client.id) {
+      return { error: "That organizer was not found." };
+    }
+  }
+
   const sanitizedName = sanitizeFilename(parsed.data.originalFilename);
 
   const { data: inserted, error } = await supabase
@@ -79,6 +101,7 @@ export async function linkUploadedDocumentAction(
     .insert({
       workspace_id: client.client.workspace_id,
       client_id: client.client.id,
+      engagement_id: parsed.data.engagementId ?? null,
       request_item_id: parsed.data.requestItemId ?? null,
       category_id: parsed.data.categoryId ?? null,
       bucket_id: DOCUMENTS_BUCKET,
@@ -99,10 +122,20 @@ export async function linkUploadedDocumentAction(
     return { error: "We couldn't save your upload. Please try again." };
   }
 
+  if (parsed.data.organizerSubmissionId) {
+    await supabase.from("document_links").insert({
+      workspace_id: client.client.workspace_id,
+      document_id: inserted.id,
+      entity_type: "intake_submission",
+      entity_id: parsed.data.organizerSubmissionId,
+      linked_by: user.id,
+    });
+  }
+
   revalidatePath("/portal/documents");
   revalidatePath("/portal/document-requests");
-  if (parsed.data.requestItemId) {
-    revalidatePath("/portal/document-requests");
+  if (parsed.data.organizerSubmissionId) {
+    revalidatePath(`/portal/organizer/${parsed.data.organizerSubmissionId}`);
   }
 
   return { documentId: inserted.id };

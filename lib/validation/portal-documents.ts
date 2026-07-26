@@ -37,5 +37,7 @@ export const linkUploadedDocumentSchema = z.object({
   categoryId: z.string().uuid().optional(),
   displayName: z.string().trim().max(200).optional(),
   taxYear: z.number().int().min(2000).max(2100).optional(),
+  engagementId: z.string().uuid().optional(),
+  organizerSubmissionId: z.string().uuid().optional(),
 });
 export type LinkUploadedDocumentInput = z.infer<typeof linkUploadedDocumentSchema>;

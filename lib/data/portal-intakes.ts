@@ -1,10 +1,12 @@
 import type { SupabaseServerClient } from "@/lib/supabase/server";
 import { STAFF_ONLY_SECTION_KEYS } from "@/lib/intake-entity-map";
 import type {
+  DocumentRow,
   FormField,
   FormSection,
   IntakeAnswer,
   IntakeDeductionCredit,
+  IntakeDocumentRule,
   IntakeHouseholdPerson,
   IntakeIncomeSource,
   IntakeRepeatableEntity,
@@ -47,6 +49,8 @@ export type PortalIntakeDetail = {
   repeatableEntities: IntakeRepeatableEntity[];
   validationResults: IntakeValidationResult[];
   visibility: Map<string, boolean>;
+  documentRules: IntakeDocumentRule[];
+  documents: DocumentRow[];
 };
 
 /**
@@ -68,40 +72,67 @@ export async function getPortalIntakeDetail(
 
   if (error || !submission) return null;
 
-  const [sectionsResult, fieldsResult, answersResult, householdResult, incomeResult, deductionsResult, entitiesResult, validationResult, visibilityResult] =
-    await Promise.all([
-      supabase
-        .from("form_sections")
-        .select("*")
-        .eq("template_version_id", submission.template_version_id)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("form_fields")
-        .select("*")
-        .eq("template_version_id", submission.template_version_id)
-        .eq("is_staff_only", false)
-        .order("sort_order", { ascending: true }),
-      supabase.from("intake_answers").select("*").eq("submission_id", submissionId),
-      supabase
-        .from("intake_household_people")
-        .select("*")
-        .eq("submission_id", submissionId)
-        .order("sort_order", { ascending: true }),
-      supabase.from("intake_income_sources").select("*").eq("submission_id", submissionId),
-      supabase.from("intake_deductions_credits").select("*").eq("submission_id", submissionId),
-      supabase
-        .from("intake_repeatable_entities")
-        .select("*")
-        .eq("submission_id", submissionId)
-        .order("sort_order", { ascending: true }),
-      supabase
-        .from("intake_validation_results")
-        .select("*")
-        .eq("submission_id", submissionId)
-        .eq("is_resolved", false)
-        .order("created_at", { ascending: false }),
-      supabase.rpc("get_intake_visibility", { p_submission_id: submissionId }),
-    ]);
+  const [
+    sectionsResult,
+    fieldsResult,
+    answersResult,
+    householdResult,
+    incomeResult,
+    deductionsResult,
+    entitiesResult,
+    validationResult,
+    visibilityResult,
+    documentRulesResult,
+    documentsResult,
+  ] = await Promise.all([
+    supabase
+      .from("form_sections")
+      .select("*")
+      .eq("template_version_id", submission.template_version_id)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("form_fields")
+      .select("*")
+      .eq("template_version_id", submission.template_version_id)
+      .eq("is_staff_only", false)
+      .order("sort_order", { ascending: true }),
+    supabase.from("intake_answers").select("*").eq("submission_id", submissionId),
+    supabase
+      .from("intake_household_people")
+      .select("*")
+      .eq("submission_id", submissionId)
+      .order("sort_order", { ascending: true }),
+    supabase.from("intake_income_sources").select("*").eq("submission_id", submissionId),
+    supabase.from("intake_deductions_credits").select("*").eq("submission_id", submissionId),
+    supabase
+      .from("intake_repeatable_entities")
+      .select("*")
+      .eq("submission_id", submissionId)
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("intake_validation_results")
+      .select("*")
+      .eq("submission_id", submissionId)
+      .eq("is_resolved", false)
+      .order("created_at", { ascending: false }),
+    supabase.rpc("get_intake_visibility", { p_submission_id: submissionId }),
+    supabase
+      .from("intake_document_rules")
+      .select("*")
+      .eq("template_version_id", submission.template_version_id)
+      .order("priority", { ascending: true }),
+    supabase
+      .from("documents")
+      .select("*")
+      .eq("client_id", clientId)
+      .is("deleted_at", null)
+      .or(
+        submission.engagement_id
+          ? `engagement_id.eq.${submission.engagement_id}`
+          : "engagement_id.eq.00000000-0000-0000-0000-000000000000",
+      )
+      .order("uploaded_at", { ascending: false }),
+  ]);
 
   const answerByField = new Map<string, IntakeAnswer>();
   for (const answer of answersResult.data ?? []) {
@@ -137,6 +168,8 @@ export async function getPortalIntakeDetail(
     repeatableEntities: entitiesResult.data ?? [],
     validationResults: validationResult.data ?? [],
     visibility,
+    documentRules: documentRulesResult.data ?? [],
+    documents: documentsResult.data ?? [],
   };
 }
 

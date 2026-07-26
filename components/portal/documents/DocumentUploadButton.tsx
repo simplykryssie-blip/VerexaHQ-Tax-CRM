@@ -20,6 +20,8 @@ export function DocumentUploadButton({
   requestItemId,
   categoryId,
   displayName,
+  engagementId,
+  organizerSubmissionId,
   label = "Upload file",
   onUploaded,
 }: {
@@ -28,6 +30,8 @@ export function DocumentUploadButton({
   requestItemId?: string;
   categoryId?: string;
   displayName?: string;
+  engagementId?: string;
+  organizerSubmissionId?: string;
   label?: string;
   onUploaded?: () => void;
 }) {
@@ -68,6 +72,8 @@ export function DocumentUploadButton({
         requestItemId,
         categoryId,
         displayName,
+        engagementId,
+        organizerSubmissionId,
       });
 
       if (result.error) {
