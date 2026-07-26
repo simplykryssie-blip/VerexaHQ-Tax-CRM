@@ -415,6 +415,176 @@ No new environment variables were required for this phase.
   trust an id from the browser" rule the staff app follows for
   workspace-scoped data.
 
+## Tax Engagement Management (Phase 4)
+
+Workflow/engagement management for tracking a tax return or other tax
+engagement from intake through filing — creating, assigning, and tracking
+engagements, not tax calculation or return preparation itself.
+
+### What already existed vs. what this phase added
+
+An audit of the live schema (Part 1) found that `tax_engagements`,
+`engagement_assignments`, `engagement_shares`, `engagement_status_history`,
+the `engagement_type`/`engagement_status` enums, and the
+`can_access_engagement()` / `can_manage_engagement()` /
+`log_engagement_status_change()` functions already existed from an earlier
+scaffold. This phase **extended** that foundation rather than duplicating
+it:
+
+- Extended the `engagement_type` and `engagement_status` enums with the
+  new controlled values below (existing enum values cannot be dropped in
+  Postgres, so the original scaffold values remain defined but unused by
+  the new UI).
+- Converted `tax_engagements.priority` from an unvalidated `smallint`
+  (1–5, never read by any application code) to the `engagement_priority`
+  enum, and `return_type` from free-form text to the `tax_return_type`
+  enum.
+- Added the assignment/date/tax-workflow/operational columns described
+  below directly onto `tax_engagements`.
+- Broadened `engagement_status_history` (already a per-status-change audit
+  table) into a general activity log by adding `activity_type`,
+  `description`, `old_value`, and `new_value` columns, rather than creating
+  a second, competing activity table.
+- Reused the existing `documents.engagement_id`, `document_requests
+  .engagement_id`, and `intake_submissions.engagement_id` nullable foreign
+  keys for linking — no new `engagement_documents` link table was needed,
+  since those relationships already existed.
+- Added `engagement_notes` and `engagement_reference_sequences` as the only
+  genuinely new tables (no equivalent existed).
+- **Fixed a pre-existing, unrelated bug found during testing**: two
+  separate triggers on `tax_engagements` (`engagement_status_audit` and
+  `tax_engagement_status_history`) both called
+  `log_engagement_status_change()`, so every insert or status change wrote
+  a duplicate activity row. The duplicate trigger predates this branch;
+  it's dropped in `20260725020500_fix_duplicate_engagement_status_trigger.sql`.
+
+### Controlled vocabularies
+
+Defined once in `lib/validation/engagements.ts` (Zod schemas/options) and
+`lib/status.ts` (staff-facing labels) / `lib/portal-copy.ts` (client-facing
+labels) — never hard-coded per component:
+
+- **Engagement type**: individual, business, nonprofit, amended return,
+  extension only, tax planning, notice resolution, other.
+- **Return type**: 1040, 1040-X, 1065, 1120, 1120-S, 1041, 706, 709, 990,
+  941, 940, state individual, state business, local, other.
+- **Status** (18 values): draft → awaiting_client / intake_in_progress →
+  documents_requested → ready_for_preparation → in_preparation →
+  preparer_review → reviewer_review → awaiting_signature → ready_to_file →
+  filed → accepted / rejected, plus extended, completed, on_hold,
+  cancelled, and archived.
+- **Priority**: low, normal, high, urgent.
+- **E-file status**: not_started, not_applicable, awaiting_authorization,
+  ready, transmitted, accepted, rejected, corrected, paper_filed.
+- **Payment status**: not_required, unpaid, partially_paid, paid,
+  payment_plan, refund_transfer, waived.
+
+### Status transitions
+
+`lib/engagements/transitions.ts` centralizes every legal status move in
+one map (`TRANSITIONS`), rather than letting the UI or a Server Action
+allow an arbitrary jump between any two statuses. `checkStatusTransition()`
+is consulted both when building the Workflow tab's action buttons and
+inside `changeStatusAction` itself — authorization is never enforced by
+simply hiding a button. `on_hold` and `extended` are reachable from any
+active status; an authorized override (workspace owner/admin/ERO role)
+can force any other transition but requires a reason, which is recorded
+in the activity log's metadata. `checkTransitionPrerequisites()` enforces
+role-assignment rules that depend on more than the status alone (a
+preparer must be assigned before moving into preparation; a reviewer must
+be assigned before reviewer review; a cancelled engagement must be
+reopened before it can be marked filed).
+
+### Engagement reference numbers
+
+Format: `TX-2025-000123` (`TX-{tax_year}-{6-digit sequence}`), unique per
+workspace, assigned automatically — the application never generates or
+guesses one. `engagement_reference_sequences` holds one counter row per
+`(workspace_id, tax_year)`; `next_engagement_reference()` increments it
+via `INSERT ... ON CONFLICT DO UPDATE ... RETURNING`, which is atomic and
+therefore safe under concurrent inserts (no `SELECT MAX()+1` race). A
+`BEFORE INSERT` trigger (`assign_engagement_number_trigger`) calls it
+automatically whenever `engagement_number` is null, and a unique index on
+`(workspace_id, engagement_number)` backstops it. Verified live with
+sequential concurrent-safe test inserts (`TX-2025-000001`,
+`TX-2025-000002`, …).
+
+### Staff routes
+
+```
+app/(app)/
+  engagements/                       searchable/filterable/paginated list
+  engagements/new/                   create engagement
+  engagements/[engagementId]/        Overview / Workflow / Documents /
+                                      Intake & Clarifications / Notes /
+                                      Activity tabs
+  engagements/[engagementId]/edit/   edit engagement details
+```
+
+The list page filters by tax year, status, return type, engagement type,
+preparer, reviewer, priority, due-date state (overdue / due within 7 or 30
+days / no due date), and client, applied server-side in
+`lib/data/engagements.ts`. The Workflow tab exposes status transition
+actions, assignment (preparer/reviewer/responsible staff), priority and
+due-date editing, extension/e-file controls, and hold/cancel/archive —
+every one of them re-validated server-side in `lib/actions/engagements.ts`,
+never trusting the browser's workspace/client/actor id.
+
+### Client portal routes
+
+```
+app/(portal)/portal/
+  engagements/                       the client's own engagements
+  engagements/[engagementId]/        client-safe engagement detail
+```
+
+Clients see title, tax year, return type, a plain-language status message
+(e.g. "We are waiting for your information", "Your return is being
+prepared"), due date, linked intake/document-request status, and open
+clarification count. They never see preparer/reviewer identity, internal
+due dates, internal notes, internal activity history, other clients'
+engagements, or internal payment/balance fields. Because Postgres RLS is
+row-level (not column-level), the row-level grant in
+`tax_engagements_portal_access` is paired with a server-side data mapper
+(`lib/data/portal-engagements.ts`) that explicitly selects a fixed, narrow
+column list — the same pattern already used for `clients.ssn_last4` /
+`ein_last4` elsewhere in this codebase. `select("*")` is never used on the
+client side of this table.
+
+### New migrations (all applied to `aewqbffscdrziiwfomyf` only)
+
+| Migration | Purpose |
+|---|---|
+| `20260725020000_engagement_schema_extension` | New enums (`tax_return_type`, `engagement_priority`, `engagement_efile_status`, `engagement_payment_status`) and new `engagement_type`/`engagement_status` enum values. |
+| `20260725020001_engagement_schema_extension_columns` | Converts `priority`/`return_type` to the new enums, adds assignment/date/tax-workflow/operational columns and money/extension CHECK constraints, adds filter indexes. |
+| `20260725020100_engagement_reference_generation` | `engagement_reference_sequences` table, `next_engagement_reference()`, `assign_engagement_number()` trigger, unique reference index. |
+| `20260725020200_engagement_activity` | Broadens `engagement_status_history` into a general activity log; adds `log_engagement_activity()` for explicit activity entries from Server Actions. |
+| `20260725020300_engagement_notes` | `engagement_notes` table with staff/client RLS policies. |
+| `20260725020400_engagement_portal_access` | Client-portal SELECT policy on `tax_engagements`, plus a self-verifying check that no anon or unscoped policy exists on the new/changed tables. |
+| `20260725020500_fix_duplicate_engagement_status_trigger` | Drops the pre-existing duplicate trigger described above. |
+
+No new environment variables were required for this phase.
+
+## Known limitations — Phase 4 additions
+
+- **Portal engagement detail is read-only**: clients can view engagement
+  status and linked intake/document-request/clarification status, but
+  cannot take action (e.g. e-signature capture) from the engagement page
+  itself — those flows remain in their existing dedicated portal sections.
+- **Portal RLS policy not empirically tested with a live linked test
+  client**: `tax_engagements_portal_access` follows the same structural
+  pattern as the already-proven `clients_contact_portal_access`, and the
+  anon-lockout / no-unsafe-policy checks were verified live, but no dev
+  database row currently has `clients.portal_user_id` set to exercise the
+  policy end-to-end as an authenticated client.
+- **No bulk/batch engagement operations**: creating or updating
+  engagements is one-at-a-time; there's no bulk assignment or bulk status
+  change UI.
+- **Fee/payment fields are intentionally minimal on the client side**:
+  `balance_due`/`refund_amount`/`payment_status` are staff-only for now;
+  exposing them to clients (e.g. for online payment) is out of scope for
+  this phase.
+
 ## Currently implemented features
 
 - Application foundation: Next.js App Router, TypeScript, Tailwind v4
@@ -443,6 +613,12 @@ No new environment variables were required for this phase.
   request tracking; a clarification response center; a client<->staff
   messaging center; and self-service profile management for the fields a
   client should control.
+- **Tax Engagement Management** (Phase 4): engagement create/list/detail
+  for staff with search, filtering, and a full Overview / Workflow /
+  Documents / Intake & Clarifications / Notes / Activity tabbed detail
+  view; centralized status-transition rules; automatic workspace-unique
+  engagement reference numbers; and a client-safe portal view of the
+  client's own engagements.
 
 ## Known limitations / next-phase roadmap
 
@@ -458,9 +634,6 @@ No new environment variables were required for this phase.
   invoked and compliance rules are inspected on the intake detail page,
   but a dedicated compliance case workspace (`compliance_cases`,
   `compliance_checklists`) is not yet built.
-- **Tax engagements**: `tax_engagements` is used to resolve tax year on
-  document requests, but there is no dedicated engagement management UI
-  yet.
 - **Templates & workflow automation**: the schema's form-template,
   workflow, and automation tables are not exposed in this release's UI —
   intakes rely on templates already assigned via existing data.

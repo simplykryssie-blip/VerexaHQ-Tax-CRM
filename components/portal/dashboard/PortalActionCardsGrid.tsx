@@ -1,10 +1,21 @@
-import { FileText, FolderOpen, MessageCircleQuestion, ClipboardList, MessagesSquare } from "lucide-react";
+import { FileText, FolderOpen, MessageCircleQuestion, ClipboardList, MessagesSquare, Briefcase } from "lucide-react";
 import { PortalStatusCard } from "@/components/portal/PortalStatusCard";
 import type { PortalDashboardData } from "@/lib/data/portal-dashboard";
 
 export function PortalActionCardsGrid({ data }: { data: PortalDashboardData }) {
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <PortalStatusCard
+        icon={Briefcase}
+        title="Your engagements"
+        description={
+          data.activeEngagementsCount > 0
+            ? `${data.activeEngagementsCount} active engagement${data.activeEngagementsCount === 1 ? "" : "s"}`
+            : "No active engagements"
+        }
+        href="/portal/engagements"
+        tone="neutral"
+      />
       {data.currentIntake && (
         <PortalStatusCard
           icon={FileText}

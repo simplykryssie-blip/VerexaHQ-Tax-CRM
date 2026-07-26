@@ -3,6 +3,12 @@ import type { Database } from "@/lib/supabase/types";
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
 
+export type TablesInsert<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Insert"];
+
+export type TablesUpdate<T extends keyof Database["public"]["Tables"]> =
+  Database["public"]["Tables"][T]["Update"];
+
 export type Enums<T extends keyof Database["public"]["Enums"]> =
   Database["public"]["Enums"][T];
 
@@ -37,6 +43,8 @@ export type Conversation = Tables<"conversations">;
 export type Message = Tables<"messages">;
 export type FormTemplate = Tables<"form_templates">;
 export type TemplateVersion = Tables<"template_versions">;
+export type EngagementActivity = Tables<"engagement_status_history">;
+export type EngagementNote = Tables<"engagement_notes">;
 
 export type MembershipRole = Enums<"membership_role">;
 export type MembershipStatus = Enums<"membership_status">;
@@ -50,6 +58,12 @@ export type IntakeRevisionReason = Enums<"intake_revision_reason">;
 export type DocumentStatus = Enums<"document_status">;
 export type DocumentReviewStatus = Enums<"document_review_status">;
 export type IntakeEntityType = Enums<"intake_entity_type">;
+export type EngagementStatus = Enums<"engagement_status">;
+export type EngagementType = Enums<"engagement_type">;
+export type TaxReturnType = Enums<"tax_return_type">;
+export type EngagementPriority = Enums<"engagement_priority">;
+export type EngagementEfileStatus = Enums<"engagement_efile_status">;
+export type EngagementPaymentStatus = Enums<"engagement_payment_status">;
 
 export const STAFF_ROLES: MembershipRole[] = [
   "owner",
