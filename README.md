@@ -585,6 +585,249 @@ No new environment variables were required for this phase.
   exposing them to clients (e.g. for online payment) is out of scope for
   this phase.
 
+## Guided Tax Organizer (Phase 5)
+
+A single guided flow that replaces "tax intake" as the client-facing name
+for gathering a year's tax information, plus a consolidated staff review
+workspace on the engagement page. This is workflow/data-collection only —
+not tax calculation or return preparation. The most important design
+constraint was reducing steps for both clients and staff: one flow, one
+workspace, auto-save everywhere, no maze of separate pages per section.
+
+### What already existed vs. what this phase added
+
+A live-schema audit (Part 1) found that this codebase already had an
+extremely comprehensive intake engine from earlier phases —
+`intake_submissions` / `form_sections` / `form_fields` / `form_conditions`
+/ `intake_answers` / `intake_household_people` / `intake_repeatable_entities`
+/ `intake_document_rules` / `intake_review_sections` / `intake_review_comments`
+/ `intake_review_actions` / `intake_compliance_rules` /
+`intake_submission_revisions`, the generic `templates` /
+`template_versions` system (`kind = 'form'`), and the RPCs
+`recalculate_intake_progress`, `validate_intake_submission`,
+`get_intake_visibility`, `submit_intake`, `reopen_intake`,
+`begin_intake_review`, `review_intake_section`,
+`request_intake_clarification`, `resolve_intake_clarification`,
+`complete_intake_review`, `approve_and_lock_intake`,
+`generate_intake_document_request`, `create_template_draft`,
+`duplicate_template`, and `publish_template_version` — already implementing
+versioned templates, conditional visibility, repeatable groups, document
+requirement rules, a full review workflow, clarifications, and
+auto-recalculated progress. **This phase extends that engine rather than
+building a second, parallel "organizer" schema** — "Organizer" is a
+client-facing/staff-facing framing layer over the same `intake_*` tables,
+with `intake_submissions.id` serving as the "assignment id" in
+`/portal/organizer/[assignmentId]`.
+
+A separate, dormant scaffold — `form_templates` / `form_questions` /
+`client_form_assignments` / `form_response_answers`, matching the
+`create_form_template` / `add_form_question` / `assign_form_to_client` /
+`save_form_answer` / `submit_assigned_form` / `mark_assigned_form_reviewed`
+/ `request_form_changes` functions — has zero rows and is not called by
+any app code (see the Phase 2 "known limitation" note above). It was
+deliberately **not** built upon here, since the live `intake_*` system is
+the one actually wired into the app.
+
+**Reused as-is**: `intake_submissions`, `form_sections`, `form_fields`,
+`form_conditions`, `intake_answers`, `intake_household_people`,
+`intake_repeatable_entities`, `intake_document_rules`,
+`intake_review_sections`, `intake_review_comments`,
+`intake_validation_results`, `templates`/`template_versions`, every RPC
+listed above, `lib/actions/intakes.ts` (all staff review actions),
+`lib/actions/portal-intake.ts` (client save/submit actions),
+`lib/actions/portal-clarifications.ts`, `lib/data/intakes.ts`,
+`lib/intake-entity-map.ts`, and the generic `document_links` entity-link
+table.
+
+**Extended**: `intake_submissions` gained `due_date`, `current_section_id`,
+`source_submission_id` (prior-year rollover link), and
+`changes_requested_at`; `intake_answers` / `intake_household_people` /
+`intake_repeatable_entities` gained `confirmed_by_client` and
+`rolled_forward` booleans; `form_component_type` gained `percentage`,
+`acknowledgment`, and `year`; `intake_entity_type` gained `vehicle`,
+`bank_account`, `charitable_contribution`, `business_owner`,
+`fixed_asset`, and `state_filing`.
+
+**Newly created**: six seeded organizer templates (below), the guided
+client wizard (`components/portal/organizer/OrganizerWizard.tsx`), the
+engagement-page Organizer tab and assignment/reminder/reopen components,
+`/engagements/[engagementId]/organizer` and `/settings/organizers*`
+routes, and the Server Actions in `lib/actions/organizer.ts`.
+
+### Client experience — one guided flow
+
+`/portal/organizer/[assignmentId]` (`components/portal/organizer/OrganizerWizard.tsx`)
+is the only organizer route a client uses. It builds a single step list —
+one step per visible section, a documents step, and a final review step —
+resuming at `intake_submissions.current_section_id`, auto-saving as the
+client goes (reusing the existing per-field autosave actions), and
+showing one primary action per screen (Continue / Save & Continue /
+Submit). An expandable "Sections" list (not a modal) shows per-section
+completion so the client can jump to anything unfinished. The portal
+dashboard shows exactly one card — "Complete your `{tax_year}` Tax
+Organizer" (`components/portal/dashboard/PortalOrganizerCard.tsx`) — with
+a single Start/Continue/View action; the old separate "continue tax
+intake" card was removed so there's no duplicate entry point. Document
+upload happens inline per document rule
+(`components/portal/organizer/OrganizerDocumentsStep.tsx`), with
+"Not applicable" / "I don't have this" / "I'll provide later" responses
+stored in `intake_submissions.metadata.document_rule_status` — no second
+document system.
+
+### Staff experience — one workspace
+
+The engagement detail page (`/engagements/[engagementId]`) gained one new
+**Organizer** tab (`components/engagements/EngagementOrganizerTab.tsx`)
+showing template, client-completion %, staff-review section count,
+current section, missing-answer count, open clarifications,
+unconfirmed-rolled-forward count, reviewer, last activity, and submission
+date, with one-click actions: Assign Organizer / Copy Prior Year
+(`AssignOrganizerPanel.tsx`), Send Reminder (`SendReminderDialog.tsx`),
+Reopen Organizer (`ReopenOrganizerButton.tsx`), and a "Review Organizer"
+link. That link goes to `/engagements/[engagementId]/organizer`, a thin
+wrapper that resolves the engagement's active `intake_submissions` row
+and renders `components/intakes/IntakeReviewWorkspace.tsx` — the **same**
+consolidated review workspace (answers, household, income, deductions,
+validation, documents, revisions, review sections, clarifications,
+activity, actions) already used at `/intakes/[submissionId]`, extracted
+into a shared component rather than duplicated. There is no second review
+UI to keep in sync.
+
+### Conditional logic, repeating groups, and progress
+
+Section/field visibility is unchanged from the existing engine:
+`form_conditions` rows (with `condition_operator`: equals, not_equals,
+contains, greater_than, less_than, is_answered, is_unanswered, plus
+compound any/all logic) evaluated by `get_intake_visibility()`, so a
+hidden required question never blocks submission. Repeating groups
+(dependents, W-2 employers, vehicles, bank accounts, business owners,
+etc.) reuse `intake_household_people` / `intake_repeatable_entities` and
+the existing generic repeatable-entity manager, mapped in
+`lib/intake-entity-map.ts`. **Progress has one centralized source**:
+`recalculate_intake_progress()` (already trigger-invoked on every answer
+change) drives the client-facing completion percentage;
+staff-review progress is a **separate** percentage computed from
+`intake_review_sections` (reviewed vs. total) — the two numbers are never
+blended into one.
+
+### Prior-year rollover
+
+`rolloverOrganizerAction` (`lib/actions/organizer.ts`) creates a new
+`intake_submissions` row with `source_submission_id` pointing at last
+year's, then copies `intake_household_people` and
+`intake_repeatable_entities` rows with `rolled_forward = true`,
+`confirmed_by_client = false`. A per-entity-type allowlist
+(`ROLLOVER_DATA_ALLOWLIST`) copies only identity/label fields (employer
+name, business name/type, vehicle description, bank name, entity name,
+etc.) — **income, expense, and payment amounts are never copied**, nor
+are signatures, uploaded documents, or prior review decisions. The client
+sees rolled-forward items flagged for confirmation and confirms or edits
+them inline (`confirmRolledForwardAction`); the engagement page shows an
+"unconfirmed rolled-forward" count so staff can see at a glance what
+still needs the client's review.
+
+### Document linking and clarifications
+
+Uploaded organizer documents reuse the existing `documents` table plus
+the generic `document_links` table (`entity_type = 'intake_submission'`)
+— no new document schema. `linkUploadedDocumentAction` now also accepts
+an `engagementId` and `organizerSubmissionId`, verifying ownership of both
+before linking. Clarifications reuse the existing
+`intake_review_comments` / `request_intake_clarification` /
+`resolve_intake_clarification` system unchanged — a staff member asks
+from the review workspace, the client answers inline inside the
+organizer, and the response appears back in the same review workspace.
+
+### Template management
+
+`/settings/organizers` lists every template visible to the workspace
+(global system templates plus any the workspace has cloned), with return
+type, engagement type, current version, status, active-assignment count,
+and last-updated. `/settings/organizers/[templateId]` shows version
+history with a Publish action for draft versions, plus Clone (any
+template) and Activate/Deactivate (workspace-owned templates only —
+global system templates are clone-only from one workspace, since
+archiving them would affect every tenant). Seeded templates (all
+`is_system_template = true`, workspace-independent):
+
+| Template | Return type | Engagement type | Sections |
+|---|---|---|---|
+| Individual Tax Return Intake Questionnaire *(pre-existing, reused)* | 1040 | — | 27 |
+| S Corporation 1120-S Organizer | 1120-S | business | 13 |
+| Partnership 1065 Organizer | 1065 | business | 13 |
+| C Corporation 1120 Organizer | 1120 | business | 13 |
+| Nonprofit 990 Organizer | 990 | nonprofit | 7 |
+| Tax Planning Organizer | — | tax_planning | 4 |
+| Extension Organizer | — | extension_only | 2 |
+
+`assignOrganizerAction` recommends a template automatically from the
+engagement's `return_type` (falling back to `engagement_type`), matched
+against each template's `metadata.tax_form`/`metadata.engagement_type` —
+staff can override the suggestion but don't have to reselect from
+scratch.
+
+### Security model
+
+RLS was already enabled on every table this phase touches; no new tables
+were created, so no new RLS policies were required — the audit confirmed
+zero anon-inclusive or unscoped (`qual = true`) policies remain on any
+`intake_*` or `templates`/`template_versions` table. New Server Actions
+follow the existing pattern: authenticate, re-resolve workspace/client
+identity server-side, verify ownership of every id in the input (never
+trust a workspace/engagement/client/submission/template id from the
+browser), validate with Zod, mutate, and revalidate. `assignOrganizerAction`
+and `rolloverOrganizerAction` enforce "one active organizer per engagement
+unless staff intentionally creates another" at the application layer
+(a DB unique constraint would prevent the explicitly-allowed exception
+case). `setOrganizerTemplateStatusAction` is scoped to
+`workspace_id = caller's workspace`, so no tenant can archive another
+tenant's shared system template. Column-level safety (e.g. a client can
+never set `reviewed_by` or flip their own submission to `approved`)
+continues to rely on the same convention already documented for other
+tables in this codebase: actions write only the specific columns they
+own, rather than exposing a broad UPDATE policy.
+
+### New migrations (all applied to `aewqbffscdrziiwfomyf` only)
+
+| Migration | Purpose |
+|---|---|
+| `20260726010000_organizer_schema_extension` | Adds `due_date`, `current_section_id`, `source_submission_id`, `changes_requested_at` to `intake_submissions`; adds `confirmed_by_client`/`rolled_forward` to `intake_answers`, `intake_household_people`, `intake_repeatable_entities`; adds supporting indexes. |
+| `20260726010001_organizer_enum_values` | Adds `percentage`/`acknowledgment`/`year` to `form_component_type` and `vehicle`/`bank_account`/`charitable_contribution`/`business_owner`/`fixed_asset`/`state_filing` to `intake_entity_type` (its own migration/transaction, since Postgres forbids using a new enum value in the same transaction that adds it). |
+| `20260726010100_organizer_seed_templates` | Seeds the six new organizer templates and their sections/fields/conditions/document rules listed above. |
+
+No new environment variables were required for this phase.
+
+## Known limitations — Guided Tax Organizer additions
+
+- **No in-app template preview renderer**: `/settings/organizers/[templateId]`
+  shows version metadata (status, section/field counts are visible via the
+  DB but not rendered as a live preview) rather than a rendered walkthrough
+  of the template's questions; staff currently verify a template's content
+  by assigning it and viewing it through the same client-facing renderer.
+- **No visual template/question builder**: creating a template via
+  `/settings/organizers` produces an empty draft (`create_template_draft`);
+  authoring new sections/fields/conditions for a workspace-owned template
+  still requires direct schema access, not a form-builder UI. This matches
+  the spec's explicit allowance that "no complex visual template builder"
+  was required for this phase.
+- **Reminders are single-shot, not scheduled**: `sendOrganizerReminderAction`
+  sends one editable, template-based notification per click; there is no
+  automatic recurring reminder (e.g. "remind again in 7 days if still
+  incomplete").
+- **RLS remains row-level, not column-level, on `intake_submissions`**: as
+  documented in the Phase 2 security notes above, this phase did not
+  retrofit a column-guard trigger onto the pre-existing broad client
+  UPDATE policy; column safety continues to rely on each Server Action
+  writing only the columns it owns (e.g. `updateCurrentSectionAction`
+  updates only `current_section_id`).
+- **Manual browser walkthrough not performed in this environment**:
+  verification for this phase was `npm run lint` / `type-check` / `build`
+  (all routes compile) plus live, rolled-back SQL transactions against
+  `aewqbffscdrziiwfomyf` exercising assignment, rollover, confirmation,
+  and progress recalculation — consistent with how prior phases in this
+  repository were validated — but no interactive browser session was
+  driven against the deployed wizard in this pass.
+
 ## Currently implemented features
 
 - Application foundation: Next.js App Router, TypeScript, Tailwind v4
@@ -619,6 +862,14 @@ No new environment variables were required for this phase.
   view; centralized status-transition rules; automatic workspace-unique
   engagement reference numbers; and a client-safe portal view of the
   client's own engagements.
+- **Guided Tax Organizer** (Phase 5): one guided client flow
+  (`/portal/organizer/[assignmentId]`) replacing "tax intake" navigation,
+  with auto-save, resume, inline document upload, and prior-year
+  rollover; an Organizer tab on the engagement page with one-click
+  assignment, reminders, and reopening; a consolidated organizer review
+  workspace shared with the existing intake review UI; and a template
+  management UI (`/settings/organizers`) over six newly seeded organizer
+  templates plus the pre-existing Individual 1040 questionnaire.
 
 ## Known limitations / next-phase roadmap
 
