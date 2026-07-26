@@ -19,7 +19,7 @@ export default async function PortalIntakesPage() {
 
   return (
     <div className="space-y-6">
-      <PortalPageHeader title="Tax Intake" description="Your tax intake for each year." />
+      <PortalPageHeader title="Tax Organizer" description="Your tax organizer for each year." />
 
       {intakes.length === 0 ? (
         <PortalEmptyState
@@ -32,7 +32,7 @@ export default async function PortalIntakesPage() {
           {intakes.map((intake) => {
             const status = friendlyIntakeStatusMeta(intake.status);
             return (
-              <Link key={intake.id} href={`/portal/intakes/${intake.id}`}>
+              <Link key={intake.id} href={`/portal/organizer/${intake.id}`}>
                 <Card className="transition-shadow hover:shadow-md">
                   <CardBody className="flex items-center justify-between gap-3">
                     <div>

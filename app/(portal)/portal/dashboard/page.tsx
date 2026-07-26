@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPortalDashboardData } from "@/lib/data/portal-dashboard";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
 import { PortalDashboardMetrics } from "@/components/portal/dashboard/PortalDashboardMetrics";
+import { PortalOrganizerCard } from "@/components/portal/dashboard/PortalOrganizerCard";
 import { PortalNextActionCard } from "@/components/portal/dashboard/PortalNextActionCard";
 import { PortalActionCardsGrid } from "@/components/portal/dashboard/PortalActionCardsGrid";
 import { PortalActivityTimeline } from "@/components/portal/PortalActivityTimeline";
@@ -23,6 +24,8 @@ export default async function PortalDashboardPage() {
         title={`Welcome, ${clientDisplayName(client.client)}`}
         description="Here's where things stand with your taxes."
       />
+
+      <PortalOrganizerCard organizer={data.currentIntake} />
 
       <PortalNextActionCard action={data.nextAction} />
 

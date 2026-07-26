@@ -104,23 +104,11 @@ export async function getPortalDashboardData(
       icon: FolderOpen,
       tone: "warning",
     };
-  } else if (currentIntake && currentIntake.status === "in_progress") {
-    nextAction = {
-      title: "Continue your tax intake",
-      description: `${currentIntake.progress_percent}% complete — pick up where you left off.`,
-      href: `/portal/intakes/${currentIntake.id}`,
-      icon: FileText,
-      tone: "accent",
-    };
-  } else if (currentIntake && currentIntake.status === "not_started") {
-    nextAction = {
-      title: "Start your tax intake",
-      description: "Let's get your tax information collected.",
-      href: `/portal/intakes/${currentIntake.id}`,
-      icon: FileText,
-      tone: "accent",
-    };
   }
+  // No separate "continue/start organizer" branch here — the dedicated
+  // PortalOrganizerCard (Part 2's "one clear card") already covers that,
+  // so this next-action slot is reserved for the more urgent
+  // clarification/document cases above.
 
   return {
     currentIntake,

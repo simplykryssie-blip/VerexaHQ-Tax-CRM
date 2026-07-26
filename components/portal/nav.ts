@@ -11,7 +11,7 @@ export type PortalNavItem = {
 export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { href: "/portal/dashboard", label: "Home", shortLabel: "Home", icon: Home },
   { href: "/portal/engagements", label: "Engagements", shortLabel: "Engagements", icon: Briefcase },
-  { href: "/portal/intakes", label: "Tax Intake", shortLabel: "Intake", icon: FileText },
+  { href: "/portal/intakes", label: "Tax Organizer", shortLabel: "Organizer", icon: FileText },
   { href: "/portal/documents", label: "Documents", shortLabel: "Docs", icon: FolderOpen },
   { href: "/portal/document-requests", label: "Requests", shortLabel: "Requests", icon: ClipboardList },
   { href: "/portal/clarifications", label: "Clarifications", shortLabel: "Questions", icon: MessageCircleQuestion },

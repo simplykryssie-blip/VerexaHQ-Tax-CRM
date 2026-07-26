@@ -1,4 +1,4 @@
-import { FileText, FolderOpen, MessageCircleQuestion, ClipboardList, MessagesSquare, Briefcase } from "lucide-react";
+import { FolderOpen, MessageCircleQuestion, ClipboardList, MessagesSquare, Briefcase } from "lucide-react";
 import { PortalStatusCard } from "@/components/portal/PortalStatusCard";
 import type { PortalDashboardData } from "@/lib/data/portal-dashboard";
 
@@ -16,15 +16,6 @@ export function PortalActionCardsGrid({ data }: { data: PortalDashboardData }) {
         href="/portal/engagements"
         tone="neutral"
       />
-      {data.currentIntake && (
-        <PortalStatusCard
-          icon={FileText}
-          title="Continue tax intake"
-          description={`${data.currentIntake.progress_percent}% complete`}
-          href={`/portal/intakes/${data.currentIntake.id}`}
-          tone="accent"
-        />
-      )}
       <PortalStatusCard
         icon={FolderOpen}
         title="Upload missing documents"
