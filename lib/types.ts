@@ -45,6 +45,9 @@ export type FormTemplate = Tables<"form_templates">;
 export type TemplateVersion = Tables<"template_versions">;
 export type EngagementActivity = Tables<"engagement_status_history">;
 export type EngagementNote = Tables<"engagement_notes">;
+export type Template = Tables<"templates">;
+export type HouseholdMember = Tables<"household_members">;
+export type Notification = Tables<"notifications">;
 
 export type MembershipRole = Enums<"membership_role">;
 export type MembershipStatus = Enums<"membership_status">;
@@ -64,6 +67,11 @@ export type TaxReturnType = Enums<"tax_return_type">;
 export type EngagementPriority = Enums<"engagement_priority">;
 export type EngagementEfileStatus = Enums<"engagement_efile_status">;
 export type EngagementPaymentStatus = Enums<"engagement_payment_status">;
+export type FormComponentType = Enums<"form_component_type">;
+export type ConditionOperator = Enums<"condition_operator">;
+export type TemplateStatus = Enums<"template_status">;
+export type TemplateVisibility = Enums<"template_visibility">;
+export type TemplateKind = Enums<"template_kind">;
 
 export const STAFF_ROLES: MembershipRole[] = [
   "owner",

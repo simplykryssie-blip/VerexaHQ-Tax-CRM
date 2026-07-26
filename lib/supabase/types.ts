@@ -2653,10 +2653,12 @@ export type Database = {
           answered_by_client_contact_id: string | null
           answered_by_user_id: string | null
           clarification_message: string | null
+          confirmed_by_client: boolean
           field_id: string
           field_key: string
           id: string
           is_staff_override: boolean
+          rolled_forward: boolean
           source: string
           status: Database["public"]["Enums"]["intake_answer_status"]
           submission_id: string
@@ -2671,10 +2673,12 @@ export type Database = {
           answered_by_client_contact_id?: string | null
           answered_by_user_id?: string | null
           clarification_message?: string | null
+          confirmed_by_client?: boolean
           field_id: string
           field_key: string
           id?: string
           is_staff_override?: boolean
+          rolled_forward?: boolean
           source?: string
           status?: Database["public"]["Enums"]["intake_answer_status"]
           submission_id: string
@@ -2689,10 +2693,12 @@ export type Database = {
           answered_by_client_contact_id?: string | null
           answered_by_user_id?: string | null
           clarification_message?: string | null
+          confirmed_by_client?: boolean
           field_id?: string
           field_key?: string
           id?: string
           is_staff_override?: boolean
+          rolled_forward?: boolean
           source?: string
           status?: Database["public"]["Enums"]["intake_answer_status"]
           submission_id?: string
@@ -2923,6 +2929,7 @@ export type Database = {
       }
       intake_household_people: {
         Row: {
+          confirmed_by_client: boolean
           created_at: string
           date_of_birth: string | null
           details: Json
@@ -2938,6 +2945,7 @@ export type Database = {
           occupation: string | null
           person_role: string
           relationship: string | null
+          rolled_forward: boolean
           sort_order: number
           ssn_last4: string | null
           submission_id: string
@@ -2946,6 +2954,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          confirmed_by_client?: boolean
           created_at?: string
           date_of_birth?: string | null
           details?: Json
@@ -2961,6 +2970,7 @@ export type Database = {
           occupation?: string | null
           person_role: string
           relationship?: string | null
+          rolled_forward?: boolean
           sort_order?: number
           ssn_last4?: string | null
           submission_id: string
@@ -2969,6 +2979,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          confirmed_by_client?: boolean
           created_at?: string
           date_of_birth?: string | null
           details?: Json
@@ -2984,6 +2995,7 @@ export type Database = {
           occupation?: string | null
           person_role?: string
           relationship?: string | null
+          rolled_forward?: boolean
           sort_order?: number
           ssn_last4?: string | null
           submission_id?: string
@@ -3094,6 +3106,7 @@ export type Database = {
       }
       intake_repeatable_entities: {
         Row: {
+          confirmed_by_client: boolean
           created_at: string
           created_by: string | null
           data: Json
@@ -3103,6 +3116,7 @@ export type Database = {
           id: string
           is_complete: boolean
           person_id: string | null
+          rolled_forward: boolean
           sort_order: number
           submission_id: string
           updated_at: string
@@ -3110,6 +3124,7 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          confirmed_by_client?: boolean
           created_at?: string
           created_by?: string | null
           data?: Json
@@ -3119,6 +3134,7 @@ export type Database = {
           id?: string
           is_complete?: boolean
           person_id?: string | null
+          rolled_forward?: boolean
           sort_order?: number
           submission_id: string
           updated_at?: string
@@ -3126,6 +3142,7 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          confirmed_by_client?: boolean
           created_at?: string
           created_by?: string | null
           data?: Json
@@ -3135,6 +3152,7 @@ export type Database = {
           id?: string
           is_complete?: boolean
           person_id?: string | null
+          rolled_forward?: boolean
           sort_order?: number
           submission_id?: string
           updated_at?: string
@@ -3413,9 +3431,12 @@ export type Database = {
           assigned_at: string
           assigned_by: string | null
           change_request_message: string | null
+          changes_requested_at: string | null
           client_certification: Json
           client_id: string
           created_at: string
+          current_section_id: string | null
+          due_date: string | null
           engagement_id: string | null
           household_id: string | null
           id: string
@@ -3431,6 +3452,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           revision_number: number
+          source_submission_id: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["intake_submission_status"]
           submitted_at: string | null
@@ -3446,9 +3468,12 @@ export type Database = {
           assigned_at?: string
           assigned_by?: string | null
           change_request_message?: string | null
+          changes_requested_at?: string | null
           client_certification?: Json
           client_id: string
           created_at?: string
+          current_section_id?: string | null
+          due_date?: string | null
           engagement_id?: string | null
           household_id?: string | null
           id?: string
@@ -3464,6 +3489,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           revision_number?: number
+          source_submission_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["intake_submission_status"]
           submitted_at?: string | null
@@ -3479,9 +3505,12 @@ export type Database = {
           assigned_at?: string
           assigned_by?: string | null
           change_request_message?: string | null
+          changes_requested_at?: string | null
           client_certification?: Json
           client_id?: string
           created_at?: string
+          current_section_id?: string | null
+          due_date?: string | null
           engagement_id?: string | null
           household_id?: string | null
           id?: string
@@ -3497,6 +3526,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           revision_number?: number
+          source_submission_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["intake_submission_status"]
           submitted_at?: string | null
@@ -3515,6 +3545,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "intake_submissions_current_section_id_fkey"
+            columns: ["current_section_id"]
+            isOneToOne: false
+            referencedRelation: "form_sections"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "intake_submissions_engagement_id_fkey"
             columns: ["engagement_id"]
             isOneToOne: false
@@ -3526,6 +3563,13 @@ export type Database = {
             columns: ["household_id"]
             isOneToOne: false
             referencedRelation: "tax_households"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_submissions_source_submission_id_fkey"
+            columns: ["source_submission_id"]
+            isOneToOne: false
+            referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
           },
           {
@@ -6107,6 +6151,9 @@ export type Database = {
         | "repeatable_group"
         | "staff_only"
         | "divider"
+        | "percentage"
+        | "acknowledgment"
+        | "year"
       intake_answer_status:
           "draft"
         | "final"
@@ -6128,6 +6175,12 @@ export type Database = {
         | "property_sale"
         | "retirement_account"
         | "other_income"
+        | "vehicle"
+        | "bank_account"
+        | "charitable_contribution"
+        | "business_owner"
+        | "fixed_asset"
+        | "state_filing"
       intake_revision_reason:
           "client_edit"
         | "staff_edit"
@@ -6455,9 +6508,9 @@ export const Constants = {
       engagement_priority: ["low", "normal", "high", "urgent"],
       engagement_status: ["draft", "intake_not_started", "intake_in_progress", "missing_documents", "ready_for_preparation", "preparation_in_progress", "internal_review", "awaiting_payment", "awaiting_signature", "ready_for_ero", "sent_to_tax_software", "transmitted_externally", "acknowledgement_pending", "accepted", "rejected", "correction_in_progress", "completed", "cancelled", "archived", "awaiting_client", "documents_requested", "in_preparation", "preparer_review", "reviewer_review", "ready_to_file", "filed", "extended", "on_hold"],
       engagement_type: ["individual_return", "business_return", "amended_return", "extension", "tax_planning", "bookkeeping", "payroll", "other", "individual", "business", "nonprofit", "extension_only", "notice_resolution"],
-      form_component_type: ["section", "heading", "paragraph", "text", "textarea", "number", "currency", "date", "email", "phone", "address", "yes_no", "single_choice", "multiple_choice", "dropdown", "file_upload", "signature", "calculation", "repeatable_group", "staff_only", "divider"],
+      form_component_type: ["section", "heading", "paragraph", "text", "textarea", "number", "currency", "date", "email", "phone", "address", "yes_no", "single_choice", "multiple_choice", "dropdown", "file_upload", "signature", "calculation", "repeatable_group", "staff_only", "divider", "percentage", "acknowledgment", "year"],
       intake_answer_status: ["draft", "final", "needs_clarification", "verified"],
-      intake_entity_type: ["residence", "employer", "business", "rental_property", "k1_entity", "education_student", "childcare_provider", "estimated_payment", "tax_notice", "investment_sale", "digital_asset_account", "foreign_account", "property_sale", "retirement_account", "other_income"],
+      intake_entity_type: ["residence", "employer", "business", "rental_property", "k1_entity", "education_student", "childcare_provider", "estimated_payment", "tax_notice", "investment_sale", "digital_asset_account", "foreign_account", "property_sale", "retirement_account", "other_income", "vehicle", "bank_account", "charitable_contribution", "business_owner", "fixed_asset", "state_filing"],
       intake_revision_reason: ["client_edit", "staff_edit", "changes_requested", "reopened", "system_update", "import"],
       intake_submission_status: ["not_started", "in_progress", "submitted", "changes_requested", "resubmitted", "under_review", "approved", "rejected", "archived"],
       membership_role: ["owner", "admin", "ero", "preparer", "reviewer", "intake_specialist", "document_specialist", "billing", "seasonal_staff", "auditor", "client"],

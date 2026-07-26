@@ -196,3 +196,49 @@ export const dueDateStateLabels: Record<string, string> = {
   due_soon_30: "Due within 30 days",
   no_due_date: "No due date",
 };
+
+/**
+ * Guided Tax Organizer (Part 28) — shared display metadata. The organizer
+ * reuses intake_submissions/intake_submission_status as its assignment
+ * status (see intakeSubmissionStatusMeta above), so this section only adds
+ * the concepts genuinely new to the organizer: question type labels,
+ * template status, and rollover state.
+ */
+export const questionTypeLabels: Record<string, string> = {
+  section: "Section",
+  heading: "Heading",
+  paragraph: "Paragraph",
+  text: "Short text",
+  textarea: "Long text",
+  number: "Whole number",
+  currency: "Currency",
+  date: "Date",
+  year: "Year",
+  email: "Email",
+  phone: "Phone",
+  address: "Address",
+  yes_no: "Yes / No",
+  single_choice: "Single select",
+  multiple_choice: "Multi-select",
+  dropdown: "Dropdown",
+  file_upload: "Document upload",
+  signature: "Signature acknowledgment",
+  calculation: "Calculation",
+  repeatable_group: "Repeating group",
+  staff_only: "Staff-only",
+  divider: "Divider",
+  percentage: "Percentage",
+  acknowledgment: "Acknowledgment",
+};
+
+export const templateStatusMeta = build({
+  draft: { label: "Draft", tone: "neutral" },
+  published: { label: "Published", tone: "success" },
+  archived: { label: "Archived", tone: "neutral" },
+});
+
+export const rolloverStateLabels: Record<string, string> = {
+  rolled_forward: "Rolled forward from last year",
+  needs_confirmation: "Needs your confirmation",
+  confirmed: "Confirmed",
+};
