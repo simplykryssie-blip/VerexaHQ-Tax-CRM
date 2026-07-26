@@ -5,6 +5,8 @@ import { requireWorkspace } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { getEngagementDetail } from "@/lib/data/engagements";
 import { listWorkspaceStaff } from "@/lib/data/users";
+import { getEngagementOrganizerSummary, listPriorYearOrganizers } from "@/lib/data/organizer";
+import { listOrganizerTemplateOptions, recommendTemplate } from "@/lib/actions/organizer";
 import { REVIEW_ROLES, MANAGE_ROLES, STAFF_ROLES } from "@/lib/types";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Button } from "@/components/ui/Button";
@@ -15,6 +17,7 @@ import { EngagementOverviewTab } from "@/components/engagements/EngagementOvervi
 import { EngagementWorkflowTab } from "@/components/engagements/EngagementWorkflowTab";
 import { EngagementDocumentsTab } from "@/components/engagements/EngagementDocumentsTab";
 import { EngagementIntakeTab } from "@/components/engagements/EngagementIntakeTab";
+import { EngagementOrganizerTab } from "@/components/engagements/EngagementOrganizerTab";
 import { EngagementNotesTab } from "@/components/engagements/EngagementNotesTab";
 import { EngagementActivityList } from "@/components/engagements/EngagementActivityList";
 import { engagementStatusMeta } from "@/lib/status";
@@ -37,6 +40,20 @@ export default async function EngagementDetailPage({
   const canManage = REVIEW_ROLES.includes(workspace.role) || STAFF_ROLES.includes(workspace.role);
   const canArchive = MANAGE_ROLES.includes(workspace.role);
   const statusMeta = engagementStatusMeta(detail.engagement.status);
+
+  const [organizerSummary, organizerTemplates, priorYearOrganizers] = await Promise.all([
+    getEngagementOrganizerSummary(supabase, workspace.workspace.id, engagementId),
+    listOrganizerTemplateOptions(),
+    listPriorYearOrganizers(supabase, detail.engagement.client_id, engagementId),
+  ]);
+  const recommendedTemplateId = organizerSummary
+    ? null
+    : await recommendTemplate(
+        supabase,
+        workspace.workspace.id,
+        detail.engagement.return_type,
+        detail.engagement.engagement_type,
+      );
 
   const tabs: TabDefinition[] = [
     {
@@ -76,6 +93,20 @@ export default async function EngagementDetailPage({
         <EngagementIntakeTab
           intakeSubmissions={detail.intakeSubmissions}
           openClarificationsCount={detail.openClarificationsCount}
+        />
+      ),
+    },
+    {
+      id: "organizer",
+      label: "Organizer",
+      content: (
+        <EngagementOrganizerTab
+          engagementId={engagementId}
+          summary={organizerSummary}
+          templates={organizerTemplates}
+          recommendedTemplateId={recommendedTemplateId}
+          priorYearSubmissions={priorYearOrganizers}
+          canManage={canManage}
         />
       ),
     },
