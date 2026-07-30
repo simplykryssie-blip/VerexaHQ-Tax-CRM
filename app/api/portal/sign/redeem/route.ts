@@ -14,7 +14,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing signing token." }, { status: 400 });
   }
 
-  const admin = createAdminClient();
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return NextResponse.json({ error: "Signing isn't available in this environment (service role not configured)." }, { status: 503 });
+  }
+
   const { data: redeemed, error: redeemError } = await admin.rpc("redeem_signature_token", { p_token: token });
   if (redeemError || !redeemed) {
     return NextResponse.json({ error: "This signing link is invalid, expired, or has already been used." }, { status: 400 });

@@ -18,7 +18,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "A signature is required." }, { status: 400 });
   }
 
-  const admin = createAdminClient();
+  let admin;
+  try {
+    admin = createAdminClient();
+  } catch {
+    return NextResponse.json({ error: "Signing isn't available in this environment (service role not configured)." }, { status: 503 });
+  }
   const tokenHash = createHash("sha256").update(token).digest("hex");
 
   const { data: tokenRow } = await admin
