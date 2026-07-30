@@ -363,6 +363,74 @@ export type Database = {
           },
         ]
       }
+      bank_products: {
+        Row: {
+          bank_name: string
+          created_at: string
+          created_by: string | null
+          engagement_id: string
+          fee_amount: number | null
+          id: string
+          metadata: Json
+          product_type: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          bank_name: string
+          created_at?: string
+          created_by?: string | null
+          engagement_id: string
+          fee_amount?: number | null
+          id?: string
+          metadata?: Json
+          product_type: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          bank_name?: string
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string
+          fee_amount?: number | null
+          id?: string
+          metadata?: Json
+          product_type?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_products_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_products_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_products_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "bank_products_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_addresses: {
         Row: {
           address_type: string
@@ -2916,6 +2984,91 @@ export type Database = {
           },
         ]
       }
+      ero_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          engagement_id: string
+          ero_workspace_id: string
+          id: string
+          ptin_workspace_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["ero_review_status"]
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          engagement_id: string
+          ero_workspace_id: string
+          id?: string
+          ptin_workspace_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["ero_review_status"]
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          engagement_id?: string
+          ero_workspace_id?: string
+          id?: string
+          ptin_workspace_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["ero_review_status"]
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ero_reviews_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ero_workspace_id_fkey"
+            columns: ["ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ero_workspace_id_fkey"
+            columns: ["ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ptin_workspace_id_fkey"
+            columns: ["ptin_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ptin_workspace_id_fkey"
+            columns: ["ptin_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       form_calculations: {
         Row: {
           created_at: string
@@ -5334,6 +5487,107 @@ export type Database = {
           },
         ]
       }
+      payouts: {
+        Row: {
+          amount: number
+          bank_product_id: string | null
+          created_at: string
+          created_by: string | null
+          engagement_id: string
+          id: string
+          method: Database["public"]["Enums"]["payout_method"]
+          notes: string | null
+          paid_at: string | null
+          recipient_workspace_id: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["payout_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          amount: number
+          bank_product_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          engagement_id: string
+          id?: string
+          method: Database["public"]["Enums"]["payout_method"]
+          notes?: string | null
+          paid_at?: string | null
+          recipient_workspace_id: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          bank_product_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payout_method"]
+          notes?: string | null
+          paid_at?: string | null
+          recipient_workspace_id?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_bank_product_id_fkey"
+            columns: ["bank_product_id"]
+            isOneToOne: false
+            referencedRelation: "bank_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_recipient_workspace_id_fkey"
+            columns: ["recipient_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "payouts_recipient_workspace_id_fkey"
+            columns: ["recipient_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "payouts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       portal_activity_logs: {
         Row: {
           action: string
@@ -6629,6 +6883,7 @@ export type Database = {
           efile_status: Database["public"]["Enums"]["engagement_efile_status"]
           engagement_number: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
+          ero_review_status: Database["public"]["Enums"]["ero_review_status"]
           ero_workspace_id: string | null
           extension_due_date: string | null
           extension_filed: boolean
@@ -6682,6 +6937,7 @@ export type Database = {
           efile_status?: Database["public"]["Enums"]["engagement_efile_status"]
           engagement_number?: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
+          ero_review_status?: Database["public"]["Enums"]["ero_review_status"]
           ero_workspace_id?: string | null
           extension_due_date?: string | null
           extension_filed?: boolean
@@ -6735,6 +6991,7 @@ export type Database = {
           efile_status?: Database["public"]["Enums"]["engagement_efile_status"]
           engagement_number?: string | null
           engagement_type?: Database["public"]["Enums"]["engagement_type"]
+          ero_review_status?: Database["public"]["Enums"]["ero_review_status"]
           ero_workspace_id?: string | null
           extension_due_date?: string | null
           extension_filed?: boolean
@@ -9265,6 +9522,10 @@ export type Database = {
           target_type: string
         }[]
       }
+      has_oversight_access: {
+        Args: { p_target_workspace_id: string }
+        Returns: boolean
+      }
       has_workspace_role: {
         Args: {
           p_roles: Database["public"]["Enums"]["membership_role"][]
@@ -9642,6 +9903,11 @@ export type Database = {
         | "nonprofit"
         | "extension_only"
         | "notice_resolution"
+      ero_review_status:
+        | "not_submitted"
+        | "pending_review"
+        | "approved"
+        | "needs_revision"
       form_component_type:
         | "section"
         | "heading"
@@ -9772,6 +10038,8 @@ export type Database = {
         | "cancelled"
         | "refunded"
         | "partially_refunded"
+      payout_method: "via_ero" | "direct_from_bank"
+      payout_status: "pending" | "paid" | "failed"
       relationship_status:
         | "pending"
         | "active"
@@ -10287,6 +10555,12 @@ export const Constants = {
         "extension_only",
         "notice_resolution",
       ],
+      ero_review_status: [
+        "not_submitted",
+        "pending_review",
+        "approved",
+        "needs_revision",
+      ],
       form_component_type: [
         "section",
         "heading",
@@ -10429,6 +10703,8 @@ export const Constants = {
         "refunded",
         "partially_refunded",
       ],
+      payout_method: ["via_ero", "direct_from_bank"],
+      payout_status: ["pending", "paid", "failed"],
       relationship_status: ["pending", "active", "paused", "ended", "declined"],
       relationship_type: [
         "service_bureau_to_ero",
