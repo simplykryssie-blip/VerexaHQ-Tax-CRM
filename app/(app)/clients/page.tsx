@@ -28,7 +28,13 @@ export default async function ClientsPage({
   let query = supabase.from("clients").select("*").eq("workspace_id", workspaceId).is("archived_at", null);
   if (type) query = query.eq("client_type", type as (typeof CLIENT_TYPES)[number]);
   if (status) query = query.eq("status", status);
-  if (q) query = query.or(`first_name.ilike.%${q}%,last_name.ilike.%${q}%,company.ilike.%${q}%,email.ilike.%${q}%`);
+  if (q) {
+    // Comma is PostgREST's field separator inside .or(), and parentheses are
+    // its grouping syntax — a completely normal search like "Smith, John"
+    // would otherwise break the filter string and fail the whole query.
+    const safeQ = q.replace(/[,()]/g, " ").trim();
+    if (safeQ) query = query.or(`first_name.ilike.%${safeQ}%,last_name.ilike.%${safeQ}%,company.ilike.%${safeQ}%,email.ilike.%${safeQ}%`);
+  }
 
   const { data: clients, error } = await query.order("created_at", { ascending: false });
 

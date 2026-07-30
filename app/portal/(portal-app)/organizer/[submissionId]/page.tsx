@@ -64,7 +64,7 @@ export default async function PortalOrganizerDetailPage({ params }: { params: Pr
         initialAnswers={full.answers}
         initialHouseholdPeople={full.household}
         initialEntities={full.entities}
-        clarifications={full.comments}
+        clarifications={full.comments.map((c) => ({ id: c.id, field_id: c.field_id, comment: c.comment, resolved_at: c.resolved_at }))}
         readOnly={!!submission.locked_at}
         hideStaffOnly
       />

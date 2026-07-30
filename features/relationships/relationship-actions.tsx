@@ -107,7 +107,7 @@ export function NewRelationshipDialog({ workspaceId }: { workspaceId: string }) 
   );
 }
 
-export function RelationshipStatusActions({ relationshipId, status, canManage }: { relationshipId: string; status: string; canManage: boolean }) {
+export function RelationshipStatusActions({ relationshipId, status, isSource }: { relationshipId: string; status: string; isSource: boolean }) {
   const router = useRouter();
   const supabase = createClient();
   const [busy, setBusy] = useState(false);
@@ -124,25 +124,38 @@ export function RelationshipStatusActions({ relationshipId, status, canManage }:
     router.refresh();
   }
 
-  if (!canManage) return null;
-
-  return (
-    <div className="flex items-center gap-1">
-      {status === "pending" && (
-        <>
-          <Button size="sm" variant="outline" disabled={busy} onClick={() => updateStatus("active")}>
-            Activate
-          </Button>
+  // A pending request is actioned by whichever side didn't send it — the
+  // receiver accepts or declines. The sender can only withdraw it. Once
+  // active, either side can end the relationship.
+  if (status === "pending") {
+    return (
+      <div className="flex items-center gap-1">
+        {!isSource && (
+          <>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => updateStatus("active")}>
+              Accept
+            </Button>
+            <Button size="sm" variant="ghost" disabled={busy} onClick={() => updateStatus("declined")}>
+              Decline
+            </Button>
+          </>
+        )}
+        {isSource && (
           <Button size="sm" variant="ghost" disabled={busy} onClick={() => updateStatus("declined")}>
-            Cancel request
+            Withdraw request
           </Button>
-        </>
-      )}
-      {status === "active" && (
-        <Button size="sm" variant="ghost" disabled={busy} onClick={() => updateStatus("ended")}>
-          End
-        </Button>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    );
+  }
+
+  if (status === "active") {
+    return (
+      <Button size="sm" variant="ghost" disabled={busy} onClick={() => updateStatus("ended")}>
+        End
+      </Button>
+    );
+  }
+
+  return null;
 }

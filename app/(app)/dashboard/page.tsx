@@ -95,7 +95,7 @@ export default async function DashboardPage() {
       label: "Revenue YTD",
       value: formatCurrency(summary?.revenue_ytd),
       icon: TrendingUp,
-      href: "/reports/revenue",
+      href: "/reports",
       tone: "success" as const,
     },
   ];

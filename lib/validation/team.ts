@@ -26,6 +26,13 @@ export const MEMBERSHIP_STATUS_LABELS: Record<MembershipStatus, string> = {
 
 export const STAFF_ROLES = (Object.keys(MEMBERSHIP_ROLE_LABELS) as MembershipRole[]).filter((r) => r !== "client");
 
+// Ownership isn't something to hand out from a role dropdown — there's
+// exactly one owner per workspace, and granting it is a deliberate,
+// separate action, not a same-menu option alongside "Preparer"/"Billing".
+// Everywhere staff assign a role to someone else (invite, role change)
+// should use this list, never STAFF_ROLES directly.
+export const ASSIGNABLE_STAFF_ROLES = STAFF_ROLES.filter((r) => r !== "owner");
+
 export function membershipRoleLabel(v: string | null | undefined): string {
   if (!v) return "—";
   return (MEMBERSHIP_ROLE_LABELS as Record<string, string>)[v] ?? v.replace(/_/g, " ");

@@ -21,7 +21,9 @@ export default async function IntakeSubmissionPage({ params }: { params: Promise
     full;
   const client = submission.client as { id: string; first_name?: string; last_name?: string; company?: string } | null;
   const template = submission.template as { id: string; name?: string } | null;
-  const clientVisibleComments = comments.filter((c) => c.is_client_visible);
+  const clientVisibleComments = comments
+    .filter((c) => c.is_client_visible)
+    .map((c) => ({ id: c.id, field_id: c.field_id, comment: c.comment, resolved_at: c.resolved_at }));
   const readOnly = submission.locked_at !== null;
 
   return (

@@ -1,28 +1,22 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { CreditCard } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { getPayments } from "@/features/billing/queries";
 import { PAYMENT_STATUS_LABELS, paymentMethodLabel, paymentStatusLabel } from "@/lib/validation/billing";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 
 export default async function PaymentsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { status } = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
+  const active = await getActiveWorkspace();
+  if (!active) redirect("/workspaces");
+  if (!roleHasCapability(active.role, "manage_billing")) redirect("/unauthorized");
+  const workspaceId = active.workspace.id;
 
   const payments = await getPayments(workspaceId, { status });
 

@@ -1,28 +1,22 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Receipt, Plus } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { getInvoices, getOutstandingBalance } from "@/features/billing/queries";
 import { INVOICE_STATUS_LABELS, invoiceStatusLabel } from "@/lib/validation/billing";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 
 export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { status } = await searchParams;
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
+  const active = await getActiveWorkspace();
+  if (!active) redirect("/workspaces");
+  if (!roleHasCapability(active.role, "manage_billing")) redirect("/unauthorized");
+  const workspaceId = active.workspace.id;
 
   const [invoices, outstanding] = await Promise.all([getInvoices(workspaceId, { status }), getOutstandingBalance(workspaceId)]);
 

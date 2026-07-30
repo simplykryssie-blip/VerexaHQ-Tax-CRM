@@ -9,7 +9,7 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@
 import { createClient } from "@/lib/supabase/client";
 import { friendlyDbError } from "@/lib/errors";
 import { toast } from "@/components/ui/toaster";
-import { MEMBERSHIP_ROLE_LABELS, STAFF_ROLES, membershipStatusLabel } from "@/lib/validation/team";
+import { MEMBERSHIP_ROLE_LABELS, ASSIGNABLE_STAFF_ROLES, membershipStatusLabel } from "@/lib/validation/team";
 import { initials } from "@/lib/formatters";
 import type { Enums } from "@/types/database";
 
@@ -93,7 +93,7 @@ export function TeamMemberRow({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {STAFF_ROLES.map((r) => (
+              {ASSIGNABLE_STAFF_ROLES.map((r) => (
                 <SelectItem key={r} value={r}>
                   {MEMBERSHIP_ROLE_LABELS[r]}
                 </SelectItem>

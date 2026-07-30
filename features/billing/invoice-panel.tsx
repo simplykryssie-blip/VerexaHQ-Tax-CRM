@@ -303,6 +303,10 @@ function RefundDialog({ payment }: { payment: Tables<"payments"> }) {
   );
 }
 
+function escapeHtml(value: string): string {
+  return value.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
+}
+
 function PrintReceiptButton({
   invoice,
   items,
@@ -317,17 +321,25 @@ function PrintReceiptButton({
   function print() {
     const w = window.open("", "_blank", "width=640,height=800");
     if (!w) return;
-    const rows = items.map((i) => `<tr><td>${i.description}</td><td>${i.quantity}</td><td>${formatCurrency(i.unit_price)}</td><td>${formatCurrency(i.line_total)}</td></tr>`).join("");
+    // invoice_number/clientName/line-item descriptions are all
+    // staff/client-entered text — document.write() renders them as real
+    // HTML, so they have to be escaped or a description like
+    // "<img src=x onerror=...>" executes in this window.
+    const rows = items
+      .map((i) => `<tr><td>${escapeHtml(i.description)}</td><td>${i.quantity}</td><td>${formatCurrency(i.unit_price)}</td><td>${formatCurrency(i.line_total)}</td></tr>`)
+      .join("");
     const paymentRows = payments
       .filter((p) => p.status === "succeeded" || p.status === "partially_refunded")
       .map((p) => `<tr><td>${formatDate(p.paid_at ?? p.created_at)}</td><td>${paymentMethodLabel(p.method)}</td><td>${formatCurrency(p.amount)}</td></tr>`)
       .join("");
+    const safeInvoiceNumber = escapeHtml(invoice.invoice_number);
+    const safeClientName = escapeHtml(clientName);
     w.document.write(`
-      <html><head><title>Receipt ${invoice.invoice_number}</title>
+      <html><head><title>Receipt ${safeInvoiceNumber}</title>
       <style>body{font-family:system-ui,sans-serif;padding:32px;color:#111} table{width:100%;border-collapse:collapse;margin:16px 0} td,th{padding:6px;border-bottom:1px solid #ddd;text-align:left} h1{font-size:20px}</style>
       </head><body>
-      <h1>Invoice ${invoice.invoice_number}</h1>
-      <p>${clientName}</p>
+      <h1>Invoice ${safeInvoiceNumber}</h1>
+      <p>${safeClientName}</p>
       <table><thead><tr><th>Description</th><th>Qty</th><th>Unit price</th><th>Total</th></tr></thead><tbody>${rows}</tbody></table>
       <p><strong>Total: ${formatCurrency(invoice.total)}</strong> · Paid: ${formatCurrency(invoice.amount_paid)} · Balance due: ${formatCurrency(invoice.balance_due)}</p>
       ${paymentRows ? `<h2>Payments</h2><table><thead><tr><th>Date</th><th>Method</th><th>Amount</th></tr></thead><tbody>${paymentRows}</tbody></table>` : ""}

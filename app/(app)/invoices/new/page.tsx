@@ -1,20 +1,16 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { NewInvoiceForm } from "@/features/billing/new-invoice-form";
 import type { PickerOption } from "@/features/engagements/client-picker";
 
 export default async function NewInvoicePage() {
+  const active = await getActiveWorkspace();
+  if (!active) redirect("/workspaces");
+  if (!roleHasCapability(active.role, "manage_billing")) redirect("/unauthorized");
+  const workspaceId = active.workspace.id;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
 
   const [{ data: clients }, { data: engagements }] = await Promise.all([
     supabase.from("clients").select("id, first_name, last_name, company").eq("workspace_id", workspaceId).is("archived_at", null),

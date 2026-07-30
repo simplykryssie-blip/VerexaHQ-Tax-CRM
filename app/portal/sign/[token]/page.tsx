@@ -55,6 +55,14 @@ export default function PortalSignPage({ params }: { params: Promise<{ token: st
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
+  // The server-side signing RPC doesn't currently check signing order (a
+  // signer who isn't up yet can still call it directly) — this is a UI-only
+  // guard to stop the obvious case; the real enforcement needs to live in
+  // the database function.
+  const waitingOnEarlierSigner =
+    !!data?.request.signingOrderRequired &&
+    data.signers.some((s) => s.signing_order < data.signer.signing_order && s.status !== "signed");
+
   async function submit() {
     if (!data || !typedName.trim() || !agreed) return;
     setSubmitting(true);
@@ -164,20 +172,28 @@ export default function PortalSignPage({ params }: { params: Promise<{ token: st
                   </Alert>
                 )}
 
-                <div className="space-y-3 rounded-md border border-border p-3">
-                  <div className="space-y-1">
-                    <Label htmlFor="typedName">Type your full legal name to sign</Label>
-                    <Input id="typedName" value={typedName} onChange={(e) => setTypedName(e.target.value)} placeholder={data.signer.name} />
+                {waitingOnEarlierSigner ? (
+                  <Alert>
+                    <AlertDescription>
+                      This document requires signatures in order, and an earlier signer hasn&apos;t signed yet. You&apos;ll be notified when it&apos;s your turn.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <div className="space-y-3 rounded-md border border-border p-3">
+                    <div className="space-y-1">
+                      <Label htmlFor="typedName">Type your full legal name to sign</Label>
+                      <Input id="typedName" value={typedName} onChange={(e) => setTypedName(e.target.value)} placeholder={data.signer.name} />
+                    </div>
+                    <label className="flex items-start gap-2 text-xs text-muted-foreground">
+                      <Checkbox checked={agreed} onCheckedChange={(v) => setAgreed(v === true)} className="mt-0.5" />
+                      Typing my name above and clicking &ldquo;Sign&rdquo; constitutes my electronic signature and I agree it is legally binding.
+                    </label>
+                    <Button variant="brand" className="w-full" disabled={!typedName.trim() || !agreed || submitting} onClick={submit}>
+                      {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                      Sign
+                    </Button>
                   </div>
-                  <label className="flex items-start gap-2 text-xs text-muted-foreground">
-                    <Checkbox checked={agreed} onCheckedChange={(v) => setAgreed(v === true)} className="mt-0.5" />
-                    Typing my name above and clicking &ldquo;Sign&rdquo; constitutes my electronic signature and I agree it is legally binding.
-                  </label>
-                  <Button variant="brand" className="w-full" disabled={!typedName.trim() || !agreed || submitting} onClick={submit}>
-                    {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                    Sign
-                  </Button>
-                </div>
+                )}
               </CardContent>
             </Card>
           )}

@@ -31,7 +31,11 @@ import type { Tables } from "@/types/database";
 type AnswerRow = Tables<"intake_answers">;
 type HouseholdRow = Tables<"intake_household_people">;
 type EntityRow = Tables<"intake_repeatable_entities">;
-type CommentRow = Tables<"intake_review_comments">;
+// Narrow on purpose — created_by/resolved_by (staff auth UUIDs) never
+// render here, so callers shouldn't pass the full intake_review_comments
+// row into this client component; it'd ride along in the RSC payload for
+// no reason, including on the client portal page.
+type CommentRow = { id: string; field_id: string | null; comment: string | null; resolved_at: string | null };
 type CalculationRow = Tables<"form_calculations">;
 
 export function OrganizerForm({

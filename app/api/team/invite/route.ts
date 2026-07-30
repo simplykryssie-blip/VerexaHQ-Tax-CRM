@@ -15,6 +15,12 @@ export async function POST(request: Request) {
   if (!workspaceId || !email || !role) {
     return NextResponse.json({ error: "Missing workspaceId, email, or role." }, { status: 400 });
   }
+  // Ownership is granted at workspace creation, never via invite — without
+  // this, any admin (not just the owner) could hand a brand-new invite
+  // full ownership by passing role: "owner" in the request body directly.
+  if (role === "owner") {
+    return NextResponse.json({ error: "New members can't be invited directly as Owner." }, { status: 400 });
+  }
 
   const supabase = await createClient();
   const {

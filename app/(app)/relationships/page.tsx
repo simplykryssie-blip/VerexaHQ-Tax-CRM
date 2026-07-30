@@ -48,7 +48,7 @@ export default async function RelationshipsPage() {
                   <Badge variant={r.status === "active" ? "success" : r.status === "declined" || r.status === "ended" ? "destructive" : "secondary"}>
                     {relationshipStatusLabel(r.status)}
                   </Badge>
-                  <RelationshipStatusActions relationshipId={r.id} status={r.status} canManage={isSource} />
+                  <RelationshipStatusActions relationshipId={r.id} status={r.status} isSource={isSource} />
                 </div>
               </div>
             );
