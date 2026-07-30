@@ -12,6 +12,8 @@ import { ClientNotesTab } from "@/features/clients/client-notes-tab";
 import { ClientActivityTab } from "@/features/clients/client-activity-tab";
 import { ClientCommunicationPreferences } from "@/features/clients/communication-preferences";
 import { PortalInviteButton } from "@/features/clients/portal-invite-button";
+import { EditClientDialog } from "@/features/clients/edit-client-dialog";
+import { getActiveWorkspace } from "@/lib/auth/workspace";
 import { AssignOrganizerDialog } from "@/features/intake/assign-organizer-dialog";
 import { getOrganizerTemplates, getIntakeSubmissionsForWorkspace } from "@/features/intake/queries";
 import { getDocuments, getDocumentCategories } from "@/features/documents/queries";
@@ -22,6 +24,7 @@ import { TaskListView } from "@/features/tasks/task-views";
 import { TaskFormDialog } from "@/features/tasks/task-form-dialog";
 import { intakeStatusLabel } from "@/lib/validation/intake";
 import type { PickerOption } from "@/features/engagements/client-picker";
+import type { MembershipRole } from "@/lib/permissions/roles";
 
 export default async function ClientDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -39,6 +42,10 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
   ]);
 
   if (!client) notFound();
+
+  const activeWorkspace = await getActiveWorkspace();
+  const CLIENT_EDIT_ROLES: MembershipRole[] = ["owner", "admin", "ero", "preparer", "reviewer", "intake_specialist"];
+  const canEdit = !!activeWorkspace && CLIENT_EDIT_ROLES.includes(activeWorkspace.role);
 
   const [intakeSubmissions, organizerTemplates, documents, documentCategories, tasks, { data: staffMembers }, { data: communicationPreferences }] = await Promise.all([
     getIntakeSubmissionsForWorkspace(client.workspace_id, { clientId: id }),
@@ -79,7 +86,10 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ i
             <span className="text-xs text-muted-foreground capitalize">Portal: {client.portal_status.replace("_", " ")}</span>
           </div>
         </div>
-        <PortalInviteButton clientId={client.id} portalStatus={client.portal_status} hasEmail={!!client.email} />
+        <div className="flex items-center gap-2">
+          {canEdit && <EditClientDialog client={client} />}
+          <PortalInviteButton clientId={client.id} portalStatus={client.portal_status} hasEmail={!!client.email} />
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">

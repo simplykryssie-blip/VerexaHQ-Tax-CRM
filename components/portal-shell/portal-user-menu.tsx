@@ -45,12 +45,14 @@ export function PortalUserMenu({ displayName, email }: { displayName: string | n
           </Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild className="gap-2 text-destructive focus:text-destructive">
-          <form action={portalSignOutAction} className="contents">
-            <button type="submit" className="flex w-full items-center gap-2">
-              <LogOut className="h-4 w-4" /> Sign out
-            </button>
-          </form>
+        <DropdownMenuItem
+          className="gap-2 text-destructive focus:text-destructive"
+          onSelect={(e) => {
+            e.preventDefault();
+            void portalSignOutAction();
+          }}
+        >
+          <LogOut className="h-4 w-4" /> Sign out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
