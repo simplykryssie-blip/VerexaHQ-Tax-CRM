@@ -12,7 +12,7 @@ import { SearchablePicker, type PickerOption } from "@/features/engagements/clie
 import { createClient } from "@/lib/supabase/client";
 import { friendlyDbError } from "@/lib/errors";
 import { toast } from "@/components/ui/toaster";
-import { RETURN_TYPES, ENGAGEMENT_TYPES, ENGAGEMENT_PRIORITIES } from "@/lib/validation/engagements";
+import { RETURN_TYPES, ENGAGEMENT_TYPE_OPTIONS, ENGAGEMENT_TYPE_LABELS, ENGAGEMENT_PRIORITIES } from "@/lib/validation/engagements";
 import { Loader2 } from "lucide-react";
 
 export function NewEngagementForm({
@@ -34,11 +34,9 @@ export function NewEngagementForm({
   const [householdId, setHouseholdId] = useState<string | null>(null);
   const [taxYear, setTaxYear] = useState(new Date().getFullYear() - 1);
   const [returnType, setReturnType] = useState<(typeof RETURN_TYPES)[number]>("1040");
-  const [engagementType, setEngagementType] = useState<(typeof ENGAGEMENT_TYPES)[number]>("individual_return");
+  const [engagementType, setEngagementType] = useState<(typeof ENGAGEMENT_TYPE_OPTIONS)[number]>("individual_return");
   const [jurisdiction, setJurisdiction] = useState("federal");
   const [preparerId, setPreparerId] = useState<string | null>(null);
-  const [reviewerId, setReviewerId] = useState<string | null>(null);
-  const [responsibleId, setResponsibleId] = useState<string | null>(null);
   const [priority, setPriority] = useState<(typeof ENGAGEMENT_PRIORITIES)[number]>("normal");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -63,8 +61,6 @@ export function NewEngagementForm({
         engagement_type: engagementType,
         jurisdiction,
         primary_preparer_user_id: preparerId,
-        reviewer_user_id: reviewerId,
-        responsible_staff_user_id: responsibleId,
         priority,
         title: `${clientLabel} — ${taxYear} ${returnType}`,
         status: "draft",
@@ -139,14 +135,14 @@ export function NewEngagementForm({
             </div>
             <div className="space-y-1">
               <Label>Engagement type</Label>
-              <Select value={engagementType} onValueChange={(v) => setEngagementType(v as (typeof ENGAGEMENT_TYPES)[number])}>
+              <Select value={engagementType} onValueChange={(v) => setEngagementType(v as (typeof ENGAGEMENT_TYPE_OPTIONS)[number])}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {ENGAGEMENT_TYPES.map((t) => (
+                  {ENGAGEMENT_TYPE_OPTIONS.map((t) => (
                     <SelectItem key={t} value={t}>
-                      {t.replace(/_/g, " ")}
+                      {ENGAGEMENT_TYPE_LABELS[t]}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -154,19 +150,9 @@ export function NewEngagementForm({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label>Preparer</Label>
-              <SearchablePicker options={staff} value={preparerId} onChange={setPreparerId} placeholder="Assign preparer…" />
-            </div>
-            <div className="space-y-1">
-              <Label>Reviewer</Label>
-              <SearchablePicker options={staff} value={reviewerId} onChange={setReviewerId} placeholder="Assign reviewer…" />
-            </div>
-            <div className="space-y-1">
-              <Label>Responsible staff</Label>
-              <SearchablePicker options={staff} value={responsibleId} onChange={setResponsibleId} placeholder="Assign staff…" />
-            </div>
+          <div className="space-y-1">
+            <Label>Preparer</Label>
+            <SearchablePicker options={staff} value={preparerId} onChange={setPreparerId} placeholder="Assign preparer…" />
           </div>
 
           <div className="space-y-1 max-w-[160px]">

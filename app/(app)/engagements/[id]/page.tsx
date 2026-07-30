@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { EngagementStatusSelect } from "@/features/engagements/status-select";
-import { engagementStatusLabel } from "@/lib/validation/engagements";
+import { engagementStatusLabel, engagementTypeLabel } from "@/lib/validation/engagements";
 import { formatCurrency, formatDate, formatDateTime, titleCase } from "@/lib/formatters";
 import { getDocuments, getDocumentCategories } from "@/features/documents/queries";
 import { DocumentsTable } from "@/features/documents/documents-table";
@@ -123,7 +123,7 @@ export default async function EngagementDetailPage({ params }: { params: Promise
               <Field label="Status" value={engagementStatusLabel(engagement.status)} />
               <Field label="Priority" value={titleCase(engagement.priority)} />
               <Field label="Jurisdiction" value={engagement.jurisdiction} />
-              <Field label="Engagement type" value={titleCase(engagement.engagement_type)} />
+              <Field label="Engagement type" value={engagementTypeLabel(engagement.engagement_type)} />
               <Field label="Due date" value={formatDate(engagement.due_date)} />
               <Field label="Internal due date" value={formatDate(engagement.internal_due_date)} />
               <Field label="Extension due date" value={formatDate(engagement.extension_due_date)} />
