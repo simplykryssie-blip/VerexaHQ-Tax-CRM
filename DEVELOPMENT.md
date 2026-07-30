@@ -10,7 +10,8 @@
 ## First-time setup
 
 ```bash
-cd apps/verexa-tax-office
+git clone https://github.com/simplykryssie-blip/VerexaHQ-Tax-CRM.git
+cd VerexaHQ-Tax-CRM
 npm ci
 cp .env.example .env.local
 ```

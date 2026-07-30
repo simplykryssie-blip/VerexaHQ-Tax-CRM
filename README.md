@@ -4,10 +4,9 @@ A secure tax-office operations platform for independent preparers, EROs, tax off
 bureaus, with a companion client portal. Verexa currently tracks e-file statuses and external
 tax-software references — it does not transmit tax returns.
 
-This app is **independent** from the root `VerexaHQ` app in this repository. It has its own
-`package.json`, its own environment variables, and connects only to its own Supabase project
-(`aewqbffscdrziiwfomyf`). Nothing here reads from, writes to, or shares types with the root app or its
-Supabase project.
+This is a standalone Next.js application — its own repository, its own dependency tree, no monorepo,
+no shared packages, no build-time dependency on any other codebase. It connects to exactly one
+Supabase project (`aewqbffscdrziiwfomyf`, "VerexaHQ Tax Office") and nothing else.
 
 See also: [`ARCHITECTURE.md`](./ARCHITECTURE.md) (how it's built and why), [`DEPLOYMENT.md`](./DEPLOYMENT.md)
 (shipping it), [`DEVELOPMENT.md`](./DEVELOPMENT.md) (local setup, conventions, common tasks).
@@ -21,7 +20,8 @@ Lucide icons.
 ## Setup
 
 ```bash
-cd apps/verexa-tax-office
+git clone https://github.com/simplykryssie-blip/VerexaHQ-Tax-CRM.git
+cd VerexaHQ-Tax-CRM
 npm ci
 cp .env.example .env.local   # fill in the Supabase values below
 npm run dev
@@ -151,8 +151,16 @@ data, no stubbed endpoints, no placeholder screens.
 
 ## Backend additions made during this build
 
-**Phase 1/2:** `create_workspace_with_owner` RPC (workspace bootstrapping — see git history for the
-exact SQL) and seeded `subscription_plans` (three baseline plans; no schema change).
+**Pre-existing, carried forward in `supabase/migrations/`:** 18 migrations (dated 2026-07-24 through
+2026-07-26) from earlier work on this application — client portal foundation and its RLS/grant
+hardening, engagement schema extension and reference generation, and the organizer schema extension
+with its seed templates. These are the actual migrations that built out the client-portal and
+organizer-related schema on the live project; they're kept here as the historical record even though
+the schema they describe is already applied.
+
+**Phase 1/2 (of the application rebuild that became this repo's current codebase):**
+`create_workspace_with_owner` RPC (workspace bootstrapping — see git history for the exact SQL) and
+seeded `subscription_plans` (three baseline plans; no schema change).
 
 **Phase 3 through Phase 8:** none. Every table, enum, RPC, storage bucket, and RLS policy the frontend
 uses across intake, compliance, documents, messages, notifications, appointments, billing, signatures,

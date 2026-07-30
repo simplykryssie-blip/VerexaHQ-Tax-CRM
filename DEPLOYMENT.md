@@ -53,7 +53,8 @@ model everywhere in the codebase.
 ## Build and deploy
 
 ```bash
-cd apps/verexa-tax-office
+git clone https://github.com/simplykryssie-blip/VerexaHQ-Tax-CRM.git
+cd VerexaHQ-Tax-CRM
 npm ci
 npm run typecheck
 npm run lint
@@ -67,8 +68,8 @@ faster failure signal in CI.
 
 ### On Vercel specifically
 
-- Set the **Root Directory** to `apps/verexa-tax-office` (this is a subdirectory of a larger repo, not
-  a standalone repo root).
+- Leave **Root Directory** as the repo root — this is a standalone repository, not a monorepo
+  subdirectory.
 - Set all the environment variables above in the Vercel project settings, scoped to whichever
   environments (Production/Preview/Development) should reach the live Supabase project. Consider using
   a separate Supabase branch/project for Preview deployments if you don't want preview builds writing
