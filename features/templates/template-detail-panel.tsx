@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Rocket, Archive, Plus } from "lucide-react";
+import { Loader2, Rocket, Archive, Plus, Copy, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -10,20 +10,32 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyDbError } from "@/lib/errors";
 import { toast } from "@/components/ui/toaster";
 import { templateStatusLabel, TEMPLATE_VISIBILITY_LABELS } from "@/lib/validation/templates";
 import { formatDateTime } from "@/lib/formatters";
+import { customizeSystemTemplate } from "@/features/templates/customize-template";
+import { OrganizerStructureViewer } from "@/features/templates/organizer-structure-viewer";
 import type { Tables } from "@/types/database";
 
 type TemplateRow = Tables<"templates">;
 type VersionRow = Tables<"template_versions">;
 
-export function TemplateDetailPanel({ template, versions }: { template: TemplateRow; versions: VersionRow[] }) {
+export function TemplateDetailPanel({
+  template,
+  versions,
+  workspaceId,
+}: {
+  template: TemplateRow;
+  versions: VersionRow[];
+  workspaceId: string;
+}) {
   const router = useRouter();
   const supabase = createClient();
   const [busy, setBusy] = useState(false);
+  const [customizing, setCustomizing] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState(template.current_version_id ?? versions[0]?.id ?? "");
   const selectedVersion = versions.find((v) => v.id === selectedVersionId) ?? versions[0];
 
@@ -34,7 +46,21 @@ export function TemplateDetailPanel({ template, versions }: { template: Template
   const [jsonError, setJsonError] = useState<string | null>(null);
 
   const canManage = template.is_system_template !== true;
-  const isEditableVersion = selectedVersion?.status === "draft";
+  const isEditableVersion = canManage && selectedVersion?.status === "draft";
+
+  async function handleCustomize() {
+    if (!selectedVersion) return;
+    setCustomizing(true);
+    try {
+      const newId = await customizeSystemTemplate(template, selectedVersion, workspaceId);
+      toast.success("Created your own editable copy");
+      router.push(`/templates/${newId}`);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Couldn't create a copy. Please try again.");
+    } finally {
+      setCustomizing(false);
+    }
+  }
 
   async function saveContent() {
     if (!selectedVersion) return;
@@ -199,10 +225,33 @@ export function TemplateDetailPanel({ template, versions }: { template: Template
         </CardContent>
       </Card>
 
-      {selectedVersion && canManage && (
+      {!canManage && (
+        <Card className="border-brand/30 bg-brand/5">
+          <CardContent className="pt-5 flex items-start justify-between gap-4 flex-wrap">
+            <div className="flex items-start gap-2.5">
+              <Lock className="h-4 w-4 text-muted-foreground mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm font-medium">This is a preloaded template</p>
+                <p className="text-xs text-muted-foreground mt-0.5 max-w-md">
+                  You can view every question below, but preloaded templates can&apos;t be edited directly — create your own
+                  copy to change wording, add or remove questions, or adjust which documents are requested.
+                </p>
+              </div>
+            </div>
+            <Button size="sm" variant="brand" disabled={customizing} onClick={handleCustomize}>
+              {customizing && <Loader2 className="h-4 w-4 animate-spin" />}
+              <Copy className="h-4 w-4" /> Customize this template
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedVersion && (
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base">Content — Version {selectedVersion.version_number}</CardTitle>
+            <CardTitle className="text-base">
+              {canManage ? `Content — Version ${selectedVersion.version_number}` : "Questions in this organizer"}
+            </CardTitle>
             {isEditableVersion && (
               <Button size="sm" variant="brand" disabled={busy} onClick={publishVersion}>
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -211,8 +260,12 @@ export function TemplateDetailPanel({ template, versions }: { template: Template
             )}
           </CardHeader>
           <CardContent className="space-y-3">
-            {!isEditableVersion && <p className="text-xs text-muted-foreground">Published versions are read-only — create a new draft version to edit.</p>}
-            {template.kind === "message" ? (
+            {canManage && !isEditableVersion && (
+              <p className="text-xs text-muted-foreground">Published versions are read-only — create a new draft version to edit.</p>
+            )}
+            {template.kind === "form" ? (
+              <OrganizerStructureViewer templateVersionId={selectedVersion.id} editable={isEditableVersion} />
+            ) : template.kind === "message" ? (
               <>
                 <div className="space-y-1">
                   <Label className="text-xs">Subject</Label>
@@ -230,7 +283,7 @@ export function TemplateDetailPanel({ template, versions }: { template: Template
                 {jsonError && <p className="text-xs text-destructive">{jsonError}</p>}
               </div>
             )}
-            {isEditableVersion && (
+            {isEditableVersion && template.kind !== "form" && (
               <Button size="sm" variant="outline" disabled={busy} onClick={saveContent}>
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 Save content
