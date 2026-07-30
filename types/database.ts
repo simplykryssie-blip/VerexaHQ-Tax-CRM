@@ -9522,6 +9522,18 @@ export type Database = {
           target_type: string
         }[]
       }
+      get_linked_ero_workspace: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          name: string
+          relationship_id: string
+          workspace_id: string
+        }[]
+      }
+      has_active_ero_relationship: {
+        Args: { p_ero_workspace_id: string; p_ptin_workspace_id: string }
+        Returns: boolean
+      }
       has_oversight_access: {
         Args: { p_target_workspace_id: string }
         Returns: boolean
