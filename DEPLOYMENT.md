@@ -41,6 +41,37 @@ work correctly in production:
 If these aren't set, Supabase's invite/recovery emails will link back to `localhost` or fail to
 redirect, even though the invite/reset logic itself is correct.
 
+## Production domain: tax.verexahq.com
+
+`verexahq.com` is shared with the separate main VerexaHQ CRM app, so the two apps split across
+subdomains rather than both trying to own the apex:
+
+- `verexahq.com` / `www.verexahq.com` → the main VerexaHQ CRM (its own Vercel project)
+- `tax.verexahq.com` → this app (Verexa Tax CRM)
+
+Steps, in order:
+
+1. **Vercel (this project)** — Project Settings → Domains → Add → `tax.verexahq.com`. Vercel will
+   display the exact record to create (normally a `CNAME` pointing at `cname.vercel-dns.com`).
+2. **GoDaddy DNS** — in the GoDaddy DNS Management page for `verexahq.com`, add:
+   | Type | Name | Value | TTL |
+   |---|---|---|---|
+   | CNAME | `tax` | `cname.vercel-dns.com` | 1 hour (default) |
+
+   If GoDaddy already has a conflicting record for the `tax` host (there shouldn't be one on a fresh
+   domain), remove it first — DNS only allows one record per name/type combination.
+3. **Wait for DNS propagation** — Vercel's Domains tab shows a "Valid Configuration" check once the
+   CNAME resolves; this is usually minutes but can take longer depending on GoDaddy's TTL.
+4. **Set `NEXT_PUBLIC_APP_URL=https://tax.verexahq.com`** in this Vercel project's environment
+   variables (Production scope), then redeploy so the build picks it up.
+5. **Update Supabase Auth → URL Configuration** (see above) to use `https://tax.verexahq.com` as the
+   Site URL and in the redirect allow-list, replacing any `localhost` or `*.vercel.app` placeholder
+   values.
+
+None of these five steps can be done from outside your GoDaddy/Vercel/Supabase accounts — there's no
+API access available for any of them from this environment, so they have to be done by hand in each
+dashboard.
+
 ### Storage buckets
 
 Five buckets are used, all already provisioned on the live project: `tax-client-documents`,
