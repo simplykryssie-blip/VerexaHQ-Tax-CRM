@@ -15,6 +15,7 @@ import { createClient } from "@/lib/supabase/client";
 import { friendlyDbError } from "@/lib/errors";
 import { toast } from "@/components/ui/toaster";
 import { formatDateTime } from "@/lib/formatters";
+import { eroReviewStatusLabel } from "@/lib/validation/ero-review";
 import type { Enums, Tables } from "@/types/database";
 
 type EfileEventType = Enums<"efile_event_type">;
@@ -29,11 +30,22 @@ const EFILE_EVENT_LABELS: Record<EfileEventType, string> = {
   withdrawn: "Withdrawn",
 };
 
-export function EfilePanel({ workspaceId, engagementId, events }: { workspaceId: string; engagementId: string; events: Tables<"efile_events">[] }) {
+export function EfilePanel({
+  workspaceId,
+  engagementId,
+  events,
+  eroGate,
+}: {
+  workspaceId: string;
+  engagementId: string;
+  events: Tables<"efile_events">[];
+  eroGate?: { linkedEroName: string; eroReviewStatus: Enums<"ero_review_status"> } | null;
+}) {
   const router = useRouter();
   const supabase = createClient();
   const [open, setOpen] = useState(false);
-  const [eventType, setEventType] = useState<EfileEventType>("ready");
+  const readyBlocked = !!eroGate && eroGate.eroReviewStatus !== "approved";
+  const [eventType, setEventType] = useState<EfileEventType>(readyBlocked ? "not_ready" : "ready");
   const [submissionId, setSubmissionId] = useState("");
   const [ackCode, setAckCode] = useState("");
   const [rejectionCode, setRejectionCode] = useState("");
@@ -95,12 +107,18 @@ export function EfilePanel({ workspaceId, engagementId, events }: { workspaceId:
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(EFILE_EVENT_LABELS).map(([v, l]) => (
-                      <SelectItem key={v} value={v}>
+                      <SelectItem key={v} value={v} disabled={v === "ready" && readyBlocked}>
                         {l}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {readyBlocked && eventType === "ready" && (
+                  <p className="text-xs text-destructive">
+                    {eroGate!.linkedEroName} must approve this engagement (currently {eroReviewStatusLabel(eroGate!.eroReviewStatus)}) before it can be marked ready to
+                    transmit.
+                  </p>
+                )}
               </div>
               <div className="space-y-1">
                 <Label>Submission ID (from your tax software)</Label>
@@ -126,7 +144,7 @@ export function EfilePanel({ workspaceId, engagementId, events }: { workspaceId:
               )}
             </div>
             <DialogFooter>
-              <Button variant="brand" disabled={busy} onClick={logEvent}>
+              <Button variant="brand" disabled={busy || (eventType === "ready" && readyBlocked)} onClick={logEvent}>
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 Log event
               </Button>

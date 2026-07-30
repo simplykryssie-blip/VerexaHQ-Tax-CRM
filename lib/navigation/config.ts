@@ -28,6 +28,7 @@ import {
   Wallet,
   ScrollText,
   Handshake,
+  ClipboardCheck,
 } from "lucide-react";
 import type { Capability } from "@/lib/permissions/capabilities";
 
@@ -71,6 +72,7 @@ export const NAV_SECTIONS: NavSection[] = [
       { label: "Workflows", href: "/workflows", icon: Workflow, requires: "manage_workflows" },
       { label: "Compliance", href: "/compliance", icon: ShieldCheck, requires: "manage_compliance" },
       { label: "Signatures", href: "/signatures", icon: PenTool },
+      { label: "ERO Review", href: "/ero-review", icon: ClipboardCheck, requires: "review_returns" },
     ],
   },
   {

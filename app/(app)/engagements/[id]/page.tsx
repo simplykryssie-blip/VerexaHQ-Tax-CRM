@@ -18,6 +18,11 @@ import { getInvoices } from "@/features/billing/queries";
 import { invoiceStatusLabel } from "@/lib/validation/billing";
 import { ReturnReleasePanel } from "@/features/engagements/return-release-panel";
 import { EfilePanel } from "@/features/engagements/efile-panel";
+import { EroReviewPanel } from "@/features/engagements/ero-review-panel";
+import { PayoutsPanel } from "@/features/engagements/payouts-panel";
+import { eroReviewStatusLabel } from "@/lib/validation/ero-review";
+import { getLinkedEroWorkspace } from "@/lib/auth/ero-links";
+import { getActiveWorkspace } from "@/lib/auth/workspace";
 
 export default async function EngagementDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -41,13 +46,30 @@ export default async function EngagementDetailPage({ params }: { params: Promise
   const client = engagement.client as { id: string; first_name?: string; last_name?: string; company?: string } | null;
   const household = engagement.household as { id: string; household_name?: string } | null;
 
-  const [documents, documentCategories, signatureRequests, invoices, { data: releaseControls }, { data: efileEvents }] = await Promise.all([
+  const [
+    documents,
+    documentCategories,
+    signatureRequests,
+    invoices,
+    { data: releaseControls },
+    { data: efileEvents },
+    { data: eroReviews },
+    linkedEro,
+    activeWorkspace,
+    { data: bankProducts },
+    { data: payouts },
+  ] = await Promise.all([
     getDocuments(engagement.workspace_id, { engagementId: id }),
     getDocumentCategories(),
     getSignatureRequests(engagement.workspace_id, { engagementId: id }),
     getInvoices(engagement.workspace_id, { engagementId: id }),
     supabase.from("return_release_controls").select("*").eq("engagement_id", id).maybeSingle(),
     supabase.from("efile_events").select("*").eq("engagement_id", id).order("occurred_at", { ascending: true }),
+    supabase.from("ero_reviews").select("*").eq("engagement_id", id).order("submitted_at", { ascending: false }),
+    getLinkedEroWorkspace(engagement.workspace_id),
+    getActiveWorkspace(),
+    supabase.from("bank_products").select("*").eq("engagement_id", id).order("created_at", { ascending: false }),
+    supabase.from("payouts").select("*").eq("engagement_id", id).order("created_at", { ascending: false }),
   ]);
 
   return (
@@ -88,6 +110,8 @@ export default async function EngagementDetailPage({ params }: { params: Promise
           <TabsTrigger value="billing">Billing</TabsTrigger>
           <TabsTrigger value="release">Release</TabsTrigger>
           <TabsTrigger value="efile">E-file</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
+          {linkedEro && <TabsTrigger value="ero-review">ERO review</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="overview">
@@ -106,6 +130,7 @@ export default async function EngagementDetailPage({ params }: { params: Promise
               <Field label="Payment status" value={titleCase(engagement.payment_status)} />
               <Field label="Balance due" value={formatCurrency(engagement.balance_due)} />
               <Field label="E-file status" value={titleCase(engagement.efile_status)} />
+              {linkedEro && <Field label="ERO review" value={eroReviewStatusLabel(engagement.ero_review_status)} />}
               <Field label="Extension requested" value={engagement.extension_requested ? "Yes" : "No"} />
               <Field label="Extension filed" value={engagement.extension_filed ? "Yes" : "No"} />
             </CardContent>
@@ -213,8 +238,37 @@ export default async function EngagementDetailPage({ params }: { params: Promise
         </TabsContent>
 
         <TabsContent value="efile">
-          <EfilePanel workspaceId={engagement.workspace_id} engagementId={engagement.id} events={efileEvents ?? []} />
+          <EfilePanel
+            workspaceId={engagement.workspace_id}
+            engagementId={engagement.id}
+            events={efileEvents ?? []}
+            eroGate={linkedEro ? { linkedEroName: linkedEro.name, eroReviewStatus: engagement.ero_review_status } : null}
+          />
         </TabsContent>
+
+        <TabsContent value="payouts">
+          <PayoutsPanel
+            workspaceId={engagement.workspace_id}
+            engagementId={engagement.id}
+            bankProducts={bankProducts ?? []}
+            payouts={payouts ?? []}
+            canManage={activeWorkspace?.workspace.id === engagement.workspace_id}
+          />
+        </TabsContent>
+
+        {linkedEro && (
+          <TabsContent value="ero-review">
+            <EroReviewPanel
+              engagementId={engagement.id}
+              engagementWorkspaceId={engagement.workspace_id}
+              eroReviewStatus={engagement.ero_review_status}
+              reviews={eroReviews ?? []}
+              linkedEro={linkedEro}
+              viewerWorkspaceId={activeWorkspace?.workspace.id ?? null}
+              viewerRole={activeWorkspace?.role ?? null}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );
