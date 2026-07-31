@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validation/auth";
 import { updatePortalPasswordAction } from "@/lib/actions/portal-profile";
 import { toast } from "@/lib/toast";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 
 export function PasswordForm() {

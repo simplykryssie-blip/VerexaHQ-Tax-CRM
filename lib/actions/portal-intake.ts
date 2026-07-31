@@ -14,7 +14,7 @@ import {
   type RepeatableEntityInput,
 } from "@/lib/validation/portal-intake";
 import type { IntakeEntityType } from "@/lib/types";
-import type { Json } from "@/lib/supabase/types";
+import type { Json } from "@/types/database";
 
 type ActionResult = { error?: string; success?: true };
 

@@ -3,7 +3,7 @@ import { requirePortalAccess } from "@/lib/auth/portal";
 import { createClient } from "@/lib/supabase/server";
 import { getPortalProfile } from "@/lib/data/portal-profile";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { ContactInfoForm } from "@/components/portal/profile/ContactInfoForm";
 import { MailingAddressForm } from "@/components/portal/profile/MailingAddressForm";

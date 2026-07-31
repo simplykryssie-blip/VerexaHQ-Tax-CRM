@@ -14,6 +14,206 @@ export type Database = {
   }
   public: {
     Tables: {
+      appointment_types: {
+        Row: {
+          booking_settings: Json
+          buffer_after_minutes: number
+          buffer_before_minutes: number
+          color: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number
+          id: string
+          is_active: boolean
+          location_type: Database["public"]["Enums"]["appointment_location_type"]
+          name: string
+          price: number
+          requires_payment: boolean
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          booking_settings?: Json
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          location_type?: Database["public"]["Enums"]["appointment_location_type"]
+          name: string
+          price?: number
+          requires_payment?: boolean
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          booking_settings?: Json
+          buffer_after_minutes?: number
+          buffer_before_minutes?: number
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number
+          id?: string
+          is_active?: boolean
+          location_type?: Database["public"]["Enums"]["appointment_location_type"]
+          name?: string
+          price?: number
+          requires_payment?: boolean
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_types_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "appointment_types_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          appointment_type_id: string | null
+          assigned_user_id: string | null
+          client_id: string | null
+          client_notes: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string
+          engagement_id: string | null
+          external_calendar_id: string | null
+          external_event_id: string | null
+          id: string
+          internal_notes: string | null
+          lead_id: string | null
+          location_text: string | null
+          location_type: Database["public"]["Enums"]["appointment_location_type"]
+          meeting_url: string | null
+          reminder_settings: Json
+          starts_at: string
+          status: Database["public"]["Enums"]["appointment_status"]
+          timezone: string
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          appointment_type_id?: string | null
+          assigned_user_id?: string | null
+          client_id?: string | null
+          client_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at: string
+          engagement_id?: string | null
+          external_calendar_id?: string | null
+          external_event_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          lead_id?: string | null
+          location_text?: string | null
+          location_type?: Database["public"]["Enums"]["appointment_location_type"]
+          meeting_url?: string | null
+          reminder_settings?: Json
+          starts_at: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          timezone?: string
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          appointment_type_id?: string | null
+          assigned_user_id?: string | null
+          client_id?: string | null
+          client_notes?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string
+          engagement_id?: string | null
+          external_calendar_id?: string | null
+          external_event_id?: string | null
+          id?: string
+          internal_notes?: string | null
+          lead_id?: string | null
+          location_text?: string | null
+          location_type?: Database["public"]["Enums"]["appointment_location_type"]
+          meeting_url?: string | null
+          reminder_settings?: Json
+          starts_at?: string
+          status?: Database["public"]["Enums"]["appointment_status"]
+          timezone?: string
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_appointment_type_id_fkey"
+            columns: ["appointment_type_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "appointments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -22,7 +222,7 @@ export type Database = {
           entity_id: string | null
           entity_type: string
           id: number
-          ip_address: unknown | null
+          ip_address: unknown
           new_values: Json | null
           old_values: Json | null
           request_id: string | null
@@ -36,7 +236,7 @@ export type Database = {
           entity_id?: string | null
           entity_type: string
           id?: never
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           request_id?: string | null
@@ -50,7 +250,7 @@ export type Database = {
           entity_id?: string | null
           entity_type?: string
           id?: never
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_values?: Json | null
           old_values?: Json | null
           request_id?: string | null
@@ -58,6 +258,13 @@ export type Database = {
           workspace_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "audit_logs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
           {
             foreignKeyName: "audit_logs_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -144,6 +351,81 @@ export type Database = {
             foreignKeyName: "automation_jobs_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "automation_jobs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bank_products: {
+        Row: {
+          bank_name: string
+          created_at: string
+          created_by: string | null
+          engagement_id: string
+          fee_amount: number | null
+          id: string
+          metadata: Json
+          product_type: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          bank_name: string
+          created_at?: string
+          created_by?: string | null
+          engagement_id: string
+          fee_amount?: number | null
+          id?: string
+          metadata?: Json
+          product_type: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          bank_name?: string
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string
+          fee_amount?: number | null
+          id?: string
+          metadata?: Json
+          product_type?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_products_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_products_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_products_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "bank_products_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -211,6 +493,162 @@ export type Database = {
           },
           {
             foreignKeyName: "client_addresses_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_addresses_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_banking: {
+        Row: {
+          account_number: string | null
+          account_type: string | null
+          bank_name: string
+          client_id: string
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          routing_number: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string | null
+          bank_name: string
+          client_id: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          routing_number?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string | null
+          bank_name?: string
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          routing_number?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_banking_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_banking_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_banking_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_communication_preferences: {
+        Row: {
+          client_id: string
+          created_at: string
+          email_consent: boolean
+          email_consented_at: string | null
+          email_suppressed: boolean
+          id: string
+          invalid_email: boolean
+          invalid_phone: boolean
+          preferred_contact_method: string | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          sms_consent: boolean
+          sms_consent_source: string | null
+          sms_consented_at: string | null
+          sms_suppressed: boolean
+          timezone: string
+          unsubscribe_reason: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          email_consent?: boolean
+          email_consented_at?: string | null
+          email_suppressed?: boolean
+          id?: string
+          invalid_email?: boolean
+          invalid_phone?: boolean
+          preferred_contact_method?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_consent?: boolean
+          sms_consent_source?: string | null
+          sms_consented_at?: string | null
+          sms_suppressed?: boolean
+          timezone?: string
+          unsubscribe_reason?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          email_consent?: boolean
+          email_consented_at?: string | null
+          email_suppressed?: boolean
+          id?: string
+          invalid_email?: boolean
+          invalid_phone?: boolean
+          preferred_contact_method?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_consent?: boolean
+          sms_consent_source?: string | null
+          sms_consented_at?: string | null
+          sms_suppressed?: boolean
+          timezone?: string
+          unsubscribe_reason?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_communication_preferences_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_communication_preferences_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_communication_preferences_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -312,6 +750,153 @@ export type Database = {
             foreignKeyName: "client_contacts_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_contacts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_dependents: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          date_of_birth: string | null
+          first_name: string
+          id: string
+          is_disabled: boolean | null
+          is_student: boolean | null
+          last_name: string
+          months_lived_with: number | null
+          relationship: string | null
+          ssn_encrypted: string | null
+          support_percent: number | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          first_name: string
+          id?: string
+          is_disabled?: boolean | null
+          is_student?: boolean | null
+          last_name: string
+          months_lived_with?: number | null
+          relationship?: string | null
+          ssn_encrypted?: string | null
+          support_percent?: number | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          first_name?: string
+          id?: string
+          is_disabled?: boolean | null
+          is_student?: boolean | null
+          last_name?: string
+          months_lived_with?: number | null
+          relationship?: string | null
+          ssn_encrypted?: string | null
+          support_percent?: number | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_dependents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_dependents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_dependents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_employment: {
+        Row: {
+          business_entity_type: string | null
+          client_id: string
+          created_at: string | null
+          employer_address: string | null
+          employer_ein: string | null
+          employer_name: string | null
+          id: string
+          income_type: string | null
+          is_self_employed: boolean | null
+          naics_code: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          business_entity_type?: string | null
+          client_id: string
+          created_at?: string | null
+          employer_address?: string | null
+          employer_ein?: string | null
+          employer_name?: string | null
+          id?: string
+          income_type?: string | null
+          is_self_employed?: boolean | null
+          naics_code?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          business_entity_type?: string | null
+          client_id?: string
+          created_at?: string | null
+          employer_address?: string | null
+          employer_ein?: string | null
+          employer_name?: string | null
+          id?: string
+          income_type?: string | null
+          is_self_employed?: boolean | null
+          naics_code?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_employment_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_employment_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_employment_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -397,6 +982,13 @@ export type Database = {
             referencedRelation: "form_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "client_form_assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "v_form_templates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       client_ownerships: {
@@ -451,6 +1043,212 @@ export type Database = {
             foreignKeyName: "client_ownerships_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_ownerships_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_spouses: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          first_name: string
+          id: string
+          id_expiration: string | null
+          id_number: string | null
+          id_state: string | null
+          last_name: string
+          middle_name: string | null
+          occupation: string | null
+          phone: string | null
+          ssn_encrypted: string | null
+          suffix: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          id_expiration?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          last_name: string
+          middle_name?: string | null
+          occupation?: string | null
+          phone?: string | null
+          ssn_encrypted?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          id_expiration?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          last_name?: string
+          middle_name?: string | null
+          occupation?: string | null
+          phone?: string | null
+          ssn_encrypted?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_spouses_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_spouses_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_spouses_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tags: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          client_id: string
+          tag_id: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          client_id: string
+          tag_id: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          client_id?: string
+          tag_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tags_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tax_history: {
+        Row: {
+          agi: number | null
+          carryforward_credits: number | null
+          carryforward_loss: number | null
+          client_id: string
+          created_at: string | null
+          has_irs_notices: boolean | null
+          id: string
+          refund_amount: number | null
+          tax_year: number
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          agi?: number | null
+          carryforward_credits?: number | null
+          carryforward_loss?: number | null
+          client_id: string
+          created_at?: string | null
+          has_irs_notices?: boolean | null
+          id?: string
+          refund_amount?: number | null
+          tax_year: number
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          agi?: number | null
+          carryforward_credits?: number | null
+          carryforward_loss?: number | null
+          client_id?: string
+          created_at?: string | null
+          has_irs_notices?: boolean | null
+          id?: string
+          refund_amount?: number | null
+          tax_year?: number
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tax_history_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tax_history_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_tax_history_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -459,98 +1257,189 @@ export type Database = {
       clients: {
         Row: {
           archived_at: string | null
+          assigned_ero_workspace_id: string | null
+          assigned_reviewer_user_id: string | null
           assigned_user_id: string | null
+          category: string | null
+          client_since: string | null
           client_type: Database["public"]["Enums"]["client_type"]
           company: string | null
           created_at: string | null
           created_by: string | null
+          current_tax_year: number | null
           date_of_birth: string | null
           display_name: string | null
           ein_last4: string | null
           email: string | null
+          ero_user_id: string | null
+          filing_status: string | null
           first_name: string
           id: string
+          id_expiration: string | null
+          id_issue_date: string | null
+          id_number: string | null
+          id_state: string | null
+          itin_last4: string | null
           last_name: string
+          mailing_address_id: string | null
           metadata: Json
+          middle_name: string | null
           notes: string | null
+          occupation: string | null
           owner_user_id: string | null
           owner_workspace_id: string | null
           phone: string | null
           portal_status: string
           portal_user_id: string | null
-          preferred_contact_method: Database["public"]["Enums"]["contact_method"] | null
+          preferred_contact_method:
+            | Database["public"]["Enums"]["contact_method"]
+            | null
           preferred_language: string
           preferred_name: string | null
+          referral_source: string | null
+          service_package: string | null
           source: string | null
           ssn_last4: string | null
           status: string
+          suffix: string | null
           timezone: string
           updated_at: string | null
+          updated_by_user_id: string | null
           workspace_id: string
         }
         Insert: {
           archived_at?: string | null
+          assigned_ero_workspace_id?: string | null
+          assigned_reviewer_user_id?: string | null
           assigned_user_id?: string | null
+          category?: string | null
+          client_since?: string | null
           client_type?: Database["public"]["Enums"]["client_type"]
           company?: string | null
           created_at?: string | null
           created_by?: string | null
+          current_tax_year?: number | null
           date_of_birth?: string | null
           display_name?: string | null
           ein_last4?: string | null
           email?: string | null
+          ero_user_id?: string | null
+          filing_status?: string | null
           first_name: string
           id?: string
+          id_expiration?: string | null
+          id_issue_date?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          itin_last4?: string | null
           last_name: string
+          mailing_address_id?: string | null
           metadata?: Json
+          middle_name?: string | null
           notes?: string | null
+          occupation?: string | null
           owner_user_id?: string | null
           owner_workspace_id?: string | null
           phone?: string | null
           portal_status?: string
           portal_user_id?: string | null
-          preferred_contact_method?: Database["public"]["Enums"]["contact_method"] | null
+          preferred_contact_method?:
+            | Database["public"]["Enums"]["contact_method"]
+            | null
           preferred_language?: string
           preferred_name?: string | null
+          referral_source?: string | null
+          service_package?: string | null
           source?: string | null
           ssn_last4?: string | null
           status?: string
+          suffix?: string | null
           timezone?: string
           updated_at?: string | null
+          updated_by_user_id?: string | null
           workspace_id: string
         }
         Update: {
           archived_at?: string | null
+          assigned_ero_workspace_id?: string | null
+          assigned_reviewer_user_id?: string | null
           assigned_user_id?: string | null
+          category?: string | null
+          client_since?: string | null
           client_type?: Database["public"]["Enums"]["client_type"]
           company?: string | null
           created_at?: string | null
           created_by?: string | null
+          current_tax_year?: number | null
           date_of_birth?: string | null
           display_name?: string | null
           ein_last4?: string | null
           email?: string | null
+          ero_user_id?: string | null
+          filing_status?: string | null
           first_name?: string
           id?: string
+          id_expiration?: string | null
+          id_issue_date?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          itin_last4?: string | null
           last_name?: string
+          mailing_address_id?: string | null
           metadata?: Json
+          middle_name?: string | null
           notes?: string | null
+          occupation?: string | null
           owner_user_id?: string | null
           owner_workspace_id?: string | null
           phone?: string | null
           portal_status?: string
           portal_user_id?: string | null
-          preferred_contact_method?: Database["public"]["Enums"]["contact_method"] | null
+          preferred_contact_method?:
+            | Database["public"]["Enums"]["contact_method"]
+            | null
           preferred_language?: string
           preferred_name?: string | null
+          referral_source?: string | null
+          service_package?: string | null
           source?: string | null
           ssn_last4?: string | null
           status?: string
+          suffix?: string | null
           timezone?: string
           updated_at?: string | null
+          updated_by_user_id?: string | null
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "clients_assigned_ero_workspace_id_fkey"
+            columns: ["assigned_ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "clients_assigned_ero_workspace_id_fkey"
+            columns: ["assigned_ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_mailing_address_id_fkey"
+            columns: ["mailing_address_id"]
+            isOneToOne: false
+            referencedRelation: "client_addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_owner_workspace_id_fkey"
+            columns: ["owner_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
           {
             foreignKeyName: "clients_owner_workspace_id_fkey"
             columns: ["owner_workspace_id"]
@@ -560,6 +1449,217 @@ export type Database = {
           },
           {
             foreignKeyName: "clients_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "clients_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_events: {
+        Row: {
+          created_at: string
+          event_at: string
+          event_type: string
+          id: number
+          outbox_id: string | null
+          payload: Json
+          provider: Database["public"]["Enums"]["integration_provider"] | null
+          provider_message_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_at?: string
+          event_type: string
+          id?: never
+          outbox_id?: string | null
+          payload?: Json
+          provider?: Database["public"]["Enums"]["integration_provider"] | null
+          provider_message_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          event_at?: string
+          event_type?: string
+          id?: never
+          outbox_id?: string | null
+          payload?: Json
+          provider?: Database["public"]["Enums"]["integration_provider"] | null
+          provider_message_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_events_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "communication_outbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "communication_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      communication_outbox: {
+        Row: {
+          attempt_count: number
+          body_html: string | null
+          body_text: string | null
+          channel: Database["public"]["Enums"]["outbox_channel"]
+          client_id: string | null
+          conversation_id: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          engagement_id: string | null
+          error_message: string | null
+          failed_at: string | null
+          id: string
+          idempotency_key: string | null
+          last_attempt_at: string | null
+          max_attempts: number
+          metadata: Json
+          provider: Database["public"]["Enums"]["integration_provider"] | null
+          provider_message_id: string | null
+          recipient_address: string
+          recipient_user_id: string | null
+          scheduled_for: string
+          sender_address: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["outbox_status"]
+          subject: string | null
+          template_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          body_html?: string | null
+          body_text?: string | null
+          channel: Database["public"]["Enums"]["outbox_channel"]
+          client_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          engagement_id?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          last_attempt_at?: string | null
+          max_attempts?: number
+          metadata?: Json
+          provider?: Database["public"]["Enums"]["integration_provider"] | null
+          provider_message_id?: string | null
+          recipient_address: string
+          recipient_user_id?: string | null
+          scheduled_for?: string
+          sender_address?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["outbox_status"]
+          subject?: string | null
+          template_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          attempt_count?: number
+          body_html?: string | null
+          body_text?: string | null
+          channel?: Database["public"]["Enums"]["outbox_channel"]
+          client_id?: string | null
+          conversation_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          delivered_at?: string | null
+          engagement_id?: string | null
+          error_message?: string | null
+          failed_at?: string | null
+          id?: string
+          idempotency_key?: string | null
+          last_attempt_at?: string | null
+          max_attempts?: number
+          metadata?: Json
+          provider?: Database["public"]["Enums"]["integration_provider"] | null
+          provider_message_id?: string | null
+          recipient_address?: string
+          recipient_user_id?: string | null
+          scheduled_for?: string
+          sender_address?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["outbox_status"]
+          subject?: string | null
+          template_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_outbox_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_outbox_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_outbox_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_outbox_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_outbox_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_outbox_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "communication_outbox_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -650,11 +1750,25 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "compliance_cases_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "compliance_cases_intake_submission_id_fkey"
             columns: ["intake_submission_id"]
             isOneToOne: false
             referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_cases_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "compliance_cases_workspace_id_fkey"
@@ -731,6 +1845,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "documents"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "compliance_checklist_items_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "compliance_checklist_items_workspace_id_fkey"
@@ -813,6 +1934,13 @@ export type Database = {
             foreignKeyName: "compliance_checklists_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "compliance_checklists_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -889,6 +2017,13 @@ export type Database = {
             foreignKeyName: "compliance_flags_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "compliance_flags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -937,6 +2072,13 @@ export type Database = {
             foreignKeyName: "conversations_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "conversations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -951,7 +2093,7 @@ export type Database = {
           details: Json
           document_id: string | null
           id: number
-          ip_address: unknown | null
+          ip_address: unknown
           request_id: string | null
           user_agent: string | null
           workspace_id: string
@@ -964,7 +2106,7 @@ export type Database = {
           details?: Json
           document_id?: string | null
           id?: never
-          ip_address?: unknown | null
+          ip_address?: unknown
           request_id?: string | null
           user_agent?: string | null
           workspace_id: string
@@ -977,7 +2119,7 @@ export type Database = {
           details?: Json
           document_id?: string | null
           id?: never
-          ip_address?: unknown | null
+          ip_address?: unknown
           request_id?: string | null
           user_agent?: string | null
           workspace_id?: string
@@ -996,6 +2138,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "documents"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "document_access_logs_workspace_id_fkey"
@@ -1067,6 +2216,104 @@ export type Database = {
             foreignKeyName: "document_categories_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "document_categories_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_folders: {
+        Row: {
+          client_id: string
+          client_visible: boolean
+          created_at: string
+          created_by: string | null
+          engagement_id: string | null
+          id: string
+          metadata: Json
+          name: string
+          parent_folder_id: string | null
+          sort_order: number
+          tax_year: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          client_visible?: boolean
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          parent_folder_id?: string | null
+          sort_order?: number
+          tax_year?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          client_visible?: boolean
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          parent_folder_id?: string | null
+          sort_order?: number
+          tax_year?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_folders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "document_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "document_folders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -1107,6 +2354,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "documents"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_links_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "document_links_workspace_id_fkey"
@@ -1204,6 +2458,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "document_requests"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_request_items_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "v_missing_document_aging"
+            referencedColumns: ["document_request_id"]
+          },
+          {
+            foreignKeyName: "document_request_items_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "document_request_items_workspace_id_fkey"
@@ -1333,6 +2601,13 @@ export type Database = {
             foreignKeyName: "document_request_templates_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "document_request_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -1424,6 +2699,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "document_requests_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "document_requests_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
@@ -1436,6 +2718,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "template_versions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "document_requests_workspace_id_fkey"
@@ -1511,6 +2800,13 @@ export type Database = {
             foreignKeyName: "document_reviews_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "document_reviews_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -1518,32 +2814,41 @@ export type Database = {
       }
       documents: {
         Row: {
+          ai_metadata: Json
           archived_at: string | null
           bucket_id: string
           category_id: string | null
           checksum_sha256: string | null
           client_id: string | null
           created_at: string
+          created_by_user_id: string | null
           deleted_at: string | null
           display_name: string
           document_date: string | null
           engagement_id: string | null
+          expires_at: string | null
           file_extension: string | null
           file_size_bytes: number | null
+          folder_id: string | null
           household_member_id: string | null
           id: string
           is_latest_version: boolean
+          is_missing: boolean
           metadata: Json
           mime_type: string | null
           notes: string | null
+          ocr_metadata: Json
           original_filename: string
+          preview_metadata: Json
           replaces_document_id: string | null
           request_item_id: string | null
+          signature_status: string | null
           source: Database["public"]["Enums"]["document_source"]
           status: Database["public"]["Enums"]["document_status"]
           storage_path: string
           tax_year: number | null
           updated_at: string
+          updated_by_user_id: string | null
           uploaded_at: string
           uploaded_by_client_contact_id: string | null
           uploaded_by_user_id: string | null
@@ -1552,32 +2857,41 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          ai_metadata?: Json
           archived_at?: string | null
           bucket_id: string
           category_id?: string | null
           checksum_sha256?: string | null
           client_id?: string | null
           created_at?: string
+          created_by_user_id?: string | null
           deleted_at?: string | null
           display_name: string
           document_date?: string | null
           engagement_id?: string | null
+          expires_at?: string | null
           file_extension?: string | null
           file_size_bytes?: number | null
+          folder_id?: string | null
           household_member_id?: string | null
           id?: string
           is_latest_version?: boolean
+          is_missing?: boolean
           metadata?: Json
           mime_type?: string | null
           notes?: string | null
+          ocr_metadata?: Json
           original_filename: string
+          preview_metadata?: Json
           replaces_document_id?: string | null
           request_item_id?: string | null
+          signature_status?: string | null
           source?: Database["public"]["Enums"]["document_source"]
           status?: Database["public"]["Enums"]["document_status"]
           storage_path: string
           tax_year?: number | null
           updated_at?: string
+          updated_by_user_id?: string | null
           uploaded_at?: string
           uploaded_by_client_contact_id?: string | null
           uploaded_by_user_id?: string | null
@@ -1586,32 +2900,41 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          ai_metadata?: Json
           archived_at?: string | null
           bucket_id?: string
           category_id?: string | null
           checksum_sha256?: string | null
           client_id?: string | null
           created_at?: string
+          created_by_user_id?: string | null
           deleted_at?: string | null
           display_name?: string
           document_date?: string | null
           engagement_id?: string | null
+          expires_at?: string | null
           file_extension?: string | null
           file_size_bytes?: number | null
+          folder_id?: string | null
           household_member_id?: string | null
           id?: string
           is_latest_version?: boolean
+          is_missing?: boolean
           metadata?: Json
           mime_type?: string | null
           notes?: string | null
+          ocr_metadata?: Json
           original_filename?: string
+          preview_metadata?: Json
           replaces_document_id?: string | null
           request_item_id?: string | null
+          signature_status?: string | null
           source?: Database["public"]["Enums"]["document_source"]
           status?: Database["public"]["Enums"]["document_status"]
           storage_path?: string
           tax_year?: number | null
           updated_at?: string
+          updated_by_user_id?: string | null
           uploaded_at?: string
           uploaded_by_client_contact_id?: string | null
           uploaded_by_user_id?: string | null
@@ -1639,6 +2962,20 @@ export type Database = {
             columns: ["engagement_id"]
             isOneToOne: false
             referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "document_folders"
             referencedColumns: ["id"]
           },
           {
@@ -1671,6 +3008,87 @@ export type Database = {
           },
           {
             foreignKeyName: "documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "documents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      efile_events: {
+        Row: {
+          acknowledgment_code: string | null
+          created_at: string
+          created_by: string | null
+          engagement_id: string
+          event_type: Database["public"]["Enums"]["efile_event_type"]
+          external_submission_id: string | null
+          id: number
+          occurred_at: string
+          payload: Json
+          rejection_code: string | null
+          rejection_message: string | null
+          workspace_id: string
+        }
+        Insert: {
+          acknowledgment_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          engagement_id: string
+          event_type: Database["public"]["Enums"]["efile_event_type"]
+          external_submission_id?: string | null
+          id?: never
+          occurred_at?: string
+          payload?: Json
+          rejection_code?: string | null
+          rejection_message?: string | null
+          workspace_id: string
+        }
+        Update: {
+          acknowledgment_code?: string | null
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string
+          event_type?: Database["public"]["Enums"]["efile_event_type"]
+          external_submission_id?: string | null
+          id?: never
+          occurred_at?: string
+          payload?: Json
+          rejection_code?: string | null
+          rejection_message?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "efile_events_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "efile_events_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "efile_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "efile_events_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1724,7 +3142,118 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "engagement_assignments_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "engagement_assignments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "engagement_assignments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      engagement_letters: {
+        Row: {
+          accepted_at: string | null
+          body_html: string
+          client_id: string
+          created_at: string
+          created_by: string | null
+          engagement_id: string | null
+          expires_at: string | null
+          id: string
+          sent_at: string | null
+          status: string
+          template_id: string | null
+          title: string
+          updated_at: string
+          version: number
+          workspace_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          body_html: string
+          client_id: string
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string | null
+          expires_at?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          template_id?: string | null
+          title: string
+          updated_at?: string
+          version?: number
+          workspace_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          body_html?: string
+          client_id?: string
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string | null
+          expires_at?: string | null
+          id?: string
+          sent_at?: string | null
+          status?: string
+          template_id?: string | null
+          title?: string
+          updated_at?: string
+          version?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_letters_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_letters_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_letters_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_letters_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_letters_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "engagement_letters_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -1778,6 +3307,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "engagement_notes_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_notes_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
             foreignKeyName: "engagement_notes_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -1806,6 +3349,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "engagement_reference_sequences_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
           {
             foreignKeyName: "engagement_reference_sequences_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -1867,11 +3417,32 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "engagement_shares_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_shares_owner_workspace_id_fkey"
+            columns: ["owner_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
             foreignKeyName: "engagement_shares_owner_workspace_id_fkey"
             columns: ["owner_workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_shares_shared_with_workspace_id_fkey"
+            columns: ["shared_with_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "engagement_shares_shared_with_workspace_id_fkey"
@@ -1943,6 +3514,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "engagement_status_history_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_status_history_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
             foreignKeyName: "engagement_status_history_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
@@ -1990,6 +3575,98 @@ export type Database = {
             foreignKeyName: "ero_office_profiles_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: true
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "ero_office_profiles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ero_reviews: {
+        Row: {
+          comment: string | null
+          created_at: string
+          engagement_id: string
+          ero_workspace_id: string
+          id: string
+          ptin_workspace_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["ero_review_status"]
+          submitted_at: string
+          submitted_by: string | null
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          engagement_id: string
+          ero_workspace_id: string
+          id?: string
+          ptin_workspace_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["ero_review_status"]
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          engagement_id?: string
+          ero_workspace_id?: string
+          id?: string
+          ptin_workspace_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["ero_review_status"]
+          submitted_at?: string
+          submitted_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ero_reviews_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ero_workspace_id_fkey"
+            columns: ["ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ero_workspace_id_fkey"
+            columns: ["ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ptin_workspace_id_fkey"
+            columns: ["ptin_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "ero_reviews_ptin_workspace_id_fkey"
+            columns: ["ptin_workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -2197,7 +3874,9 @@ export type Database = {
       }
       form_questions: {
         Row: {
-          component_type: Database["public"]["Enums"]["form_component_type"] | null
+          component_type:
+            | Database["public"]["Enums"]["form_component_type"]
+            | null
           created_at: string | null
           field_key: string | null
           help_text: string | null
@@ -2216,7 +3895,9 @@ export type Database = {
           validation: Json
         }
         Insert: {
-          component_type?: Database["public"]["Enums"]["form_component_type"] | null
+          component_type?:
+            | Database["public"]["Enums"]["form_component_type"]
+            | null
           created_at?: string | null
           field_key?: string | null
           help_text?: string | null
@@ -2235,7 +3916,9 @@ export type Database = {
           validation?: Json
         }
         Update: {
-          component_type?: Database["public"]["Enums"]["form_component_type"] | null
+          component_type?:
+            | Database["public"]["Enums"]["form_component_type"]
+            | null
           created_at?: string | null
           field_key?: string | null
           help_text?: string | null
@@ -2266,6 +3949,13 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "form_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_questions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "v_form_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -2305,6 +3995,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "client_form_assignments"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_response_answers_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_form_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "form_response_answers_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "v_client_portal_forms"
+            referencedColumns: ["assignment_id"]
           },
           {
             foreignKeyName: "form_response_answers_question_id_fkey"
@@ -2452,6 +4156,13 @@ export type Database = {
             foreignKeyName: "form_templates_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "form_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -2570,6 +4281,13 @@ export type Database = {
             foreignKeyName: "household_members_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "household_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -2636,6 +4354,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_answer_history_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "intake_answer_history_workspace_id_fkey"
@@ -2728,6 +4453,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_answers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "intake_answers_workspace_id_fkey"
@@ -2858,6 +4590,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_deductions_credits_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "intake_deductions_credits_workspace_id_fkey"
@@ -3022,6 +4761,13 @@ export type Database = {
             foreignKeyName: "intake_household_people_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "intake_household_people_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3094,6 +4840,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_income_sources_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "intake_income_sources_workspace_id_fkey"
@@ -3178,6 +4931,13 @@ export type Database = {
             foreignKeyName: "intake_repeatable_entities_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "intake_repeatable_entities_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3243,6 +5003,13 @@ export type Database = {
             foreignKeyName: "intake_review_actions_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "intake_review_actions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3299,6 +5066,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_review_comments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "intake_review_comments_workspace_id_fkey"
@@ -3368,6 +5142,13 @@ export type Database = {
             foreignKeyName: "intake_review_sections_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "intake_review_sections_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3414,6 +5195,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "intake_submissions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_submission_revisions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "intake_submission_revisions_workspace_id_fkey"
@@ -3559,6 +5347,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "intake_submissions_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "intake_submissions_household_id_fkey"
             columns: ["household_id"]
             isOneToOne: false
@@ -3585,6 +5380,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "template_versions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_submissions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "intake_submissions_workspace_id_fkey"
@@ -3657,6 +5459,400 @@ export type Database = {
             foreignKeyName: "intake_validation_results_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "intake_validation_results_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      integration_health_checks: {
+        Row: {
+          checked_at: string
+          details: Json
+          id: number
+          provider: Database["public"]["Enums"]["integration_provider"]
+          response_ms: number | null
+          status: string
+          workspace_id: string
+        }
+        Insert: {
+          checked_at?: string
+          details?: Json
+          id?: never
+          provider: Database["public"]["Enums"]["integration_provider"]
+          response_ms?: number | null
+          status: string
+          workspace_id: string
+        }
+        Update: {
+          checked_at?: string
+          details?: Json
+          id?: never
+          provider?: Database["public"]["Enums"]["integration_provider"]
+          response_ms?: number | null
+          status?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "integration_health_checks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "integration_health_checks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_items: {
+        Row: {
+          created_at: string
+          description: string
+          discount_amount: number
+          id: string
+          invoice_id: string
+          line_total: number | null
+          quantity: number
+          service_id: string | null
+          sort_order: number
+          tax_amount: number
+          unit_price: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          discount_amount?: number
+          id?: string
+          invoice_id: string
+          line_total?: number | null
+          quantity?: number
+          service_id?: string | null
+          sort_order?: number
+          tax_amount?: number
+          unit_price?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          discount_amount?: number
+          id?: string
+          invoice_id?: string
+          line_total?: number | null
+          quantity?: number
+          service_id?: string | null
+          sort_order?: number
+          tax_amount?: number
+          unit_price?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "invoice_items_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoice_reference_sequences: {
+        Row: {
+          next_number: number
+          prefix: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          next_number?: number
+          prefix?: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          next_number?: number
+          prefix?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_reference_sequences_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "invoice_reference_sequences_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount_paid: number
+          balance_due: number | null
+          client_id: string
+          client_message: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          discount_total: number
+          due_date: string | null
+          engagement_id: string | null
+          external_invoice_id: string | null
+          external_processor: string | null
+          id: string
+          internal_notes: string | null
+          invoice_number: string
+          issue_date: string
+          metadata: Json
+          paid_at: string | null
+          payment_terms: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          subtotal: number
+          tax_total: number
+          total: number
+          updated_at: string
+          updated_by_user_id: string | null
+          viewed_at: string | null
+          voided_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          amount_paid?: number
+          balance_due?: number | null
+          client_id: string
+          client_message?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount_total?: number
+          due_date?: string | null
+          engagement_id?: string | null
+          external_invoice_id?: string | null
+          external_processor?: string | null
+          id?: string
+          internal_notes?: string | null
+          invoice_number: string
+          issue_date?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_terms?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_total?: number
+          total?: number
+          updated_at?: string
+          updated_by_user_id?: string | null
+          viewed_at?: string | null
+          voided_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          amount_paid?: number
+          balance_due?: number | null
+          client_id?: string
+          client_message?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          discount_total?: number
+          due_date?: string | null
+          engagement_id?: string | null
+          external_invoice_id?: string | null
+          external_processor?: string | null
+          id?: string
+          internal_notes?: string | null
+          invoice_number?: string
+          issue_date?: string
+          metadata?: Json
+          paid_at?: string | null
+          payment_terms?: string | null
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          subtotal?: number
+          tax_total?: number
+          total?: number
+          updated_at?: string
+          updated_by_user_id?: string | null
+          viewed_at?: string | null
+          voided_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "invoices_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      leads: {
+        Row: {
+          assigned_user_id: string | null
+          company: string | null
+          consultation_at: string | null
+          converted_at: string | null
+          converted_client_id: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          estimated_value: number
+          first_name: string
+          id: string
+          last_name: string
+          lost_reason: string | null
+          metadata: Json
+          notes: string | null
+          phone: string | null
+          referral_name: string | null
+          service_interest: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_user_id?: string | null
+          company?: string | null
+          consultation_at?: string | null
+          converted_at?: string | null
+          converted_client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_value?: number
+          first_name: string
+          id?: string
+          last_name: string
+          lost_reason?: string | null
+          metadata?: Json
+          notes?: string | null
+          phone?: string | null
+          referral_name?: string | null
+          service_interest?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_user_id?: string | null
+          company?: string | null
+          consultation_at?: string | null
+          converted_at?: string | null
+          converted_client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          estimated_value?: number
+          first_name?: string
+          id?: string
+          last_name?: string
+          lost_reason?: string | null
+          metadata?: Json
+          notes?: string | null
+          phone?: string | null
+          referral_name?: string | null
+          service_interest?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "leads_converted_client_id_fkey"
+            columns: ["converted_client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "leads_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3718,6 +5914,13 @@ export type Database = {
             foreignKeyName: "messages_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "messages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3764,6 +5967,296 @@ export type Database = {
           },
           {
             foreignKeyName: "notifications_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "notifications_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payments: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string
+          created_by_user_id: string | null
+          currency: string
+          engagement_id: string | null
+          failure_reason: string | null
+          id: string
+          invoice_id: string | null
+          metadata: Json
+          method: Database["public"]["Enums"]["payment_method"]
+          notes: string | null
+          paid_at: string | null
+          processor: string | null
+          processor_payment_id: string | null
+          recorded_by: string | null
+          reference_number: string | null
+          refunded_amount: number
+          status: Database["public"]["Enums"]["payment_record_status"]
+          updated_at: string
+          updated_by_user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string
+          created_by_user_id?: string | null
+          currency?: string
+          engagement_id?: string | null
+          failure_reason?: string | null
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json
+          method: Database["public"]["Enums"]["payment_method"]
+          notes?: string | null
+          paid_at?: string | null
+          processor?: string | null
+          processor_payment_id?: string | null
+          recorded_by?: string | null
+          reference_number?: string | null
+          refunded_amount?: number
+          status?: Database["public"]["Enums"]["payment_record_status"]
+          updated_at?: string
+          updated_by_user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string
+          created_by_user_id?: string | null
+          currency?: string
+          engagement_id?: string | null
+          failure_reason?: string | null
+          id?: string
+          invoice_id?: string | null
+          metadata?: Json
+          method?: Database["public"]["Enums"]["payment_method"]
+          notes?: string | null
+          paid_at?: string | null
+          processor?: string | null
+          processor_payment_id?: string | null
+          recorded_by?: string | null
+          reference_number?: string | null
+          refunded_amount?: number
+          status?: Database["public"]["Enums"]["payment_record_status"]
+          updated_at?: string
+          updated_by_user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "payments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      payouts: {
+        Row: {
+          amount: number
+          bank_product_id: string | null
+          created_at: string
+          created_by: string | null
+          engagement_id: string
+          id: string
+          method: Database["public"]["Enums"]["payout_method"]
+          notes: string | null
+          paid_at: string | null
+          recipient_workspace_id: string
+          reference_number: string | null
+          status: Database["public"]["Enums"]["payout_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          amount: number
+          bank_product_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          engagement_id: string
+          id?: string
+          method: Database["public"]["Enums"]["payout_method"]
+          notes?: string | null
+          paid_at?: string | null
+          recipient_workspace_id: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          amount?: number
+          bank_product_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string
+          id?: string
+          method?: Database["public"]["Enums"]["payout_method"]
+          notes?: string | null
+          paid_at?: string | null
+          recipient_workspace_id?: string
+          reference_number?: string | null
+          status?: Database["public"]["Enums"]["payout_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payouts_bank_product_id_fkey"
+            columns: ["bank_product_id"]
+            isOneToOne: false
+            referencedRelation: "bank_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_recipient_workspace_id_fkey"
+            columns: ["recipient_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "payouts_recipient_workspace_id_fkey"
+            columns: ["recipient_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payouts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "payouts_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portal_activity_logs: {
+        Row: {
+          action: string
+          client_id: string | null
+          created_at: string
+          entity_id: string | null
+          entity_type: string | null
+          id: number
+          ip_address: unknown
+          metadata: Json
+          user_agent: string | null
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          action: string
+          client_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: never
+          ip_address?: unknown
+          metadata?: Json
+          user_agent?: string | null
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          action?: string
+          client_id?: string | null
+          created_at?: string
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: never
+          ip_address?: unknown
+          metadata?: Json
+          user_agent?: string | null
+          user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "portal_activity_logs_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "portal_activity_logs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "portal_activity_logs_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -3819,6 +6312,246 @@ export type Database = {
         }
         Relationships: []
       }
+      reminders: {
+        Row: {
+          appointment_id: string | null
+          channel: Database["public"]["Enums"]["outbox_channel"]
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          document_request_id: string | null
+          engagement_id: string | null
+          error_message: string | null
+          id: string
+          invoice_id: string | null
+          outbox_id: string | null
+          payload: Json
+          recipient_address: string | null
+          reminder_type: string
+          scheduled_for: string
+          sent_at: string | null
+          signature_request_id: string | null
+          skipped_reason: string | null
+          status: Database["public"]["Enums"]["reminder_status"]
+          template_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          channel: Database["public"]["Enums"]["outbox_channel"]
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_request_id?: string | null
+          engagement_id?: string | null
+          error_message?: string | null
+          id?: string
+          invoice_id?: string | null
+          outbox_id?: string | null
+          payload?: Json
+          recipient_address?: string | null
+          reminder_type: string
+          scheduled_for: string
+          sent_at?: string | null
+          signature_request_id?: string | null
+          skipped_reason?: string | null
+          status?: Database["public"]["Enums"]["reminder_status"]
+          template_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          channel?: Database["public"]["Enums"]["outbox_channel"]
+          client_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_request_id?: string | null
+          engagement_id?: string | null
+          error_message?: string | null
+          id?: string
+          invoice_id?: string | null
+          outbox_id?: string | null
+          payload?: Json
+          recipient_address?: string | null
+          reminder_type?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          signature_request_id?: string | null
+          skipped_reason?: string | null
+          status?: Database["public"]["Enums"]["reminder_status"]
+          template_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminders_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_document_request_id_fkey"
+            columns: ["document_request_id"]
+            isOneToOne: false
+            referencedRelation: "document_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_document_request_id_fkey"
+            columns: ["document_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_missing_document_aging"
+            referencedColumns: ["document_request_id"]
+          },
+          {
+            foreignKeyName: "reminders_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_outbox_id_fkey"
+            columns: ["outbox_id"]
+            isOneToOne: false
+            referencedRelation: "communication_outbox"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_signature_request_id_fkey"
+            columns: ["signature_request_id"]
+            isOneToOne: false
+            referencedRelation: "signature_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reminders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "reminders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      return_release_controls: {
+        Row: {
+          created_at: string
+          engagement_id: string
+          id: string
+          payment_satisfied_at: string | null
+          release_notes: string | null
+          released_at: string | null
+          released_by: string | null
+          require_payment: boolean
+          require_review_approval: boolean
+          require_signature: boolean
+          review_satisfied_at: string | null
+          signature_satisfied_at: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          engagement_id: string
+          id?: string
+          payment_satisfied_at?: string | null
+          release_notes?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          require_payment?: boolean
+          require_review_approval?: boolean
+          require_signature?: boolean
+          review_satisfied_at?: string | null
+          signature_satisfied_at?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          engagement_id?: string
+          id?: string
+          payment_satisfied_at?: string | null
+          release_notes?: string | null
+          released_at?: string | null
+          released_by?: string | null
+          require_payment?: boolean
+          require_review_approval?: boolean
+          require_signature?: boolean
+          review_satisfied_at?: string | null
+          signature_satisfied_at?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "return_release_controls_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: true
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_release_controls_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: true
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "return_release_controls_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "return_release_controls_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_bureau_profiles: {
         Row: {
           created_at: string
@@ -3848,6 +6581,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "service_bureau_profiles_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
           {
             foreignKeyName: "service_bureau_profiles_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -3900,6 +6640,894 @@ export type Database = {
             foreignKeyName: "services_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "services_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_access_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          revoked_at: string | null
+          signature_request_id: string
+          signer_id: string
+          token_hash: string
+          used_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          revoked_at?: string | null
+          signature_request_id: string
+          signer_id: string
+          token_hash: string
+          used_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          revoked_at?: string | null
+          signature_request_id?: string
+          signer_id?: string
+          token_hash?: string
+          used_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_access_tokens_signature_request_id_fkey"
+            columns: ["signature_request_id"]
+            isOneToOne: false
+            referencedRelation: "signature_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_access_tokens_signer_id_fkey"
+            columns: ["signer_id"]
+            isOneToOne: false
+            referencedRelation: "signature_signers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_access_tokens_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "signature_access_tokens_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_certificates: {
+        Row: {
+          certificate_document_id: string | null
+          certificate_number: string
+          completed_at: string
+          created_at: string
+          document_sha256: string | null
+          evidence_summary: Json
+          id: string
+          signature_request_id: string
+          signed_document_id: string | null
+          signer_summary: Json
+          workspace_id: string
+        }
+        Insert: {
+          certificate_document_id?: string | null
+          certificate_number: string
+          completed_at: string
+          created_at?: string
+          document_sha256?: string | null
+          evidence_summary?: Json
+          id?: string
+          signature_request_id: string
+          signed_document_id?: string | null
+          signer_summary?: Json
+          workspace_id: string
+        }
+        Update: {
+          certificate_document_id?: string | null
+          certificate_number?: string
+          completed_at?: string
+          created_at?: string
+          document_sha256?: string | null
+          evidence_summary?: Json
+          id?: string
+          signature_request_id?: string
+          signed_document_id?: string | null
+          signer_summary?: Json
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_certificates_certificate_document_id_fkey"
+            columns: ["certificate_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_certificates_signature_request_id_fkey"
+            columns: ["signature_request_id"]
+            isOneToOne: true
+            referencedRelation: "signature_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_certificates_signed_document_id_fkey"
+            columns: ["signed_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_certificates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "signature_certificates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_events: {
+        Row: {
+          actor_email: string | null
+          actor_user_id: string | null
+          created_at: string
+          event_at: string
+          event_type: string
+          evidence: Json
+          id: number
+          ip_address: unknown
+          signature_request_id: string
+          signer_id: string | null
+          user_agent: string | null
+          workspace_id: string
+        }
+        Insert: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_at?: string
+          event_type: string
+          evidence?: Json
+          id?: never
+          ip_address?: unknown
+          signature_request_id: string
+          signer_id?: string | null
+          user_agent?: string | null
+          workspace_id: string
+        }
+        Update: {
+          actor_email?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          event_at?: string
+          event_type?: string
+          evidence?: Json
+          id?: never
+          ip_address?: unknown
+          signature_request_id?: string
+          signer_id?: string | null
+          user_agent?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_events_signature_request_id_fkey"
+            columns: ["signature_request_id"]
+            isOneToOne: false
+            referencedRelation: "signature_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_events_signer_id_fkey"
+            columns: ["signer_id"]
+            isOneToOne: false
+            referencedRelation: "signature_signers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "signature_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_requests: {
+        Row: {
+          client_id: string
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          document_id: string | null
+          engagement_id: string | null
+          engagement_letter_id: string | null
+          expires_at: string | null
+          external_provider: string | null
+          external_request_id: string | null
+          id: string
+          message: string | null
+          metadata: Json
+          sent_at: string | null
+          signing_order_required: boolean
+          status: Database["public"]["Enums"]["signature_request_status"]
+          title: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          engagement_id?: string | null
+          engagement_letter_id?: string | null
+          expires_at?: string | null
+          external_provider?: string | null
+          external_request_id?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json
+          sent_at?: string | null
+          signing_order_required?: boolean
+          status?: Database["public"]["Enums"]["signature_request_status"]
+          title: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          document_id?: string | null
+          engagement_id?: string | null
+          engagement_letter_id?: string | null
+          expires_at?: string | null
+          external_provider?: string | null
+          external_request_id?: string | null
+          id?: string
+          message?: string | null
+          metadata?: Json
+          sent_at?: string | null
+          signing_order_required?: boolean
+          status?: Database["public"]["Enums"]["signature_request_status"]
+          title?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_engagement_letter_id_fkey"
+            columns: ["engagement_letter_id"]
+            isOneToOne: false
+            referencedRelation: "engagement_letters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "signature_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signature_signers: {
+        Row: {
+          client_contact_id: string | null
+          created_at: string
+          decline_reason: string | null
+          declined_at: string | null
+          email: string
+          id: string
+          ip_address: unknown
+          name: string
+          role: string | null
+          signature_data: Json
+          signature_request_id: string
+          signed_at: string | null
+          signing_order: number
+          status: Database["public"]["Enums"]["signer_status"]
+          updated_at: string
+          user_agent: string | null
+          user_id: string | null
+          viewed_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          client_contact_id?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          declined_at?: string | null
+          email: string
+          id?: string
+          ip_address?: unknown
+          name: string
+          role?: string | null
+          signature_data?: Json
+          signature_request_id: string
+          signed_at?: string | null
+          signing_order?: number
+          status?: Database["public"]["Enums"]["signer_status"]
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          viewed_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          client_contact_id?: string | null
+          created_at?: string
+          decline_reason?: string | null
+          declined_at?: string | null
+          email?: string
+          id?: string
+          ip_address?: unknown
+          name?: string
+          role?: string | null
+          signature_data?: Json
+          signature_request_id?: string
+          signed_at?: string | null
+          signing_order?: number
+          status?: Database["public"]["Enums"]["signer_status"]
+          updated_at?: string
+          user_agent?: string | null
+          user_id?: string | null
+          viewed_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signature_signers_client_contact_id_fkey"
+            columns: ["client_contact_id"]
+            isOneToOne: false
+            referencedRelation: "client_contacts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_signers_signature_request_id_fkey"
+            columns: ["signature_request_id"]
+            isOneToOne: false
+            referencedRelation: "signature_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signature_signers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "signature_signers_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_availability_rules: {
+        Row: {
+          appointment_type_id: string | null
+          created_at: string
+          effective_from: string | null
+          effective_to: string | null
+          ends_at: string
+          id: string
+          is_active: boolean
+          starts_at: string
+          timezone: string
+          updated_at: string
+          user_id: string
+          weekday: number
+          workspace_id: string
+        }
+        Insert: {
+          appointment_type_id?: string | null
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          ends_at: string
+          id?: string
+          is_active?: boolean
+          starts_at: string
+          timezone?: string
+          updated_at?: string
+          user_id: string
+          weekday: number
+          workspace_id: string
+        }
+        Update: {
+          appointment_type_id?: string | null
+          created_at?: string
+          effective_from?: string | null
+          effective_to?: string | null
+          ends_at?: string
+          id?: string
+          is_active?: boolean
+          starts_at?: string
+          timezone?: string
+          updated_at?: string
+          user_id?: string
+          weekday?: number
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_availability_rules_appointment_type_id_fkey"
+            columns: ["appointment_type_id"]
+            isOneToOne: false
+            referencedRelation: "appointment_types"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "staff_availability_rules_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "staff_availability_rules_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      staff_blackout_periods: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          ends_at: string
+          id: string
+          reason: string | null
+          starts_at: string
+          user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          ends_at: string
+          id?: string
+          reason?: string | null
+          starts_at: string
+          user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          ends_at?: string
+          id?: string
+          reason?: string | null
+          starts_at?: string
+          user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "staff_blackout_periods_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "staff_blackout_periods_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      subscription_plans: {
+        Row: {
+          annual_price: number | null
+          code: string
+          created_at: string
+          description: string | null
+          features: Json
+          id: string
+          is_active: boolean
+          max_clients: number | null
+          max_staff: number | null
+          max_storage_gb: number | null
+          monthly_price: number
+          name: string
+          trial_days: number
+          updated_at: string
+        }
+        Insert: {
+          annual_price?: number | null
+          code: string
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_clients?: number | null
+          max_staff?: number | null
+          max_storage_gb?: number | null
+          monthly_price?: number
+          name: string
+          trial_days?: number
+          updated_at?: string
+        }
+        Update: {
+          annual_price?: number | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          features?: Json
+          id?: string
+          is_active?: boolean
+          max_clients?: number | null
+          max_staff?: number | null
+          max_storage_gb?: number | null
+          monthly_price?: number
+          name?: string
+          trial_days?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          author_user_id: string | null
+          body: string
+          client_visible: boolean
+          created_at: string
+          id: string
+          task_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          author_user_id?: string | null
+          body: string
+          client_visible?: boolean
+          created_at?: string
+          id?: string
+          task_id: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          author_user_id?: string | null
+          body?: string
+          client_visible?: boolean
+          created_at?: string
+          id?: string
+          task_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "task_comments_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          assigned_by_user_id: string | null
+          assigned_to_user_id: string | null
+          checklist: Json
+          client_id: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          due_at: string | null
+          engagement_id: string | null
+          id: string
+          lead_id: string | null
+          metadata: Json
+          priority: Database["public"]["Enums"]["task_priority"]
+          recurrence_rule: string | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["task_status"]
+          task_type: string | null
+          title: string
+          updated_at: string
+          updated_by_user_id: string | null
+          workspace_id: string
+        }
+        Insert: {
+          assigned_by_user_id?: string | null
+          assigned_to_user_id?: string | null
+          checklist?: Json
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          engagement_id?: string | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json
+          priority?: Database["public"]["Enums"]["task_priority"]
+          recurrence_rule?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          task_type?: string | null
+          title: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+          workspace_id: string
+        }
+        Update: {
+          assigned_by_user_id?: string | null
+          assigned_to_user_id?: string | null
+          checklist?: Json
+          client_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          due_at?: string | null
+          engagement_id?: string | null
+          id?: string
+          lead_id?: string | null
+          metadata?: Json
+          priority?: Database["public"]["Enums"]["task_priority"]
+          recurrence_rule?: string | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["task_status"]
+          task_type?: string | null
+          title?: string
+          updated_at?: string
+          updated_by_user_id?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "tasks_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_deadline_rules: {
+        Row: {
+          created_at: string
+          extension_due_date: string | null
+          id: string
+          internal_lead_days: number
+          is_active: boolean
+          jurisdiction: string
+          metadata: Json
+          original_due_date: string
+          return_type: Database["public"]["Enums"]["tax_return_type"]
+          tax_year: number
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          extension_due_date?: string | null
+          id?: string
+          internal_lead_days?: number
+          is_active?: boolean
+          jurisdiction?: string
+          metadata?: Json
+          original_due_date: string
+          return_type: Database["public"]["Enums"]["tax_return_type"]
+          tax_year: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          extension_due_date?: string | null
+          id?: string
+          internal_lead_days?: number
+          is_active?: boolean
+          jurisdiction?: string
+          metadata?: Json
+          original_due_date?: string
+          return_type?: Database["public"]["Enums"]["tax_return_type"]
+          tax_year?: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_deadline_rules_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "tax_deadline_rules_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -3921,6 +7549,7 @@ export type Database = {
           efile_status: Database["public"]["Enums"]["engagement_efile_status"]
           engagement_number: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
+          ero_review_status: Database["public"]["Enums"]["ero_review_status"]
           ero_workspace_id: string | null
           extension_due_date: string | null
           extension_filed: boolean
@@ -3974,6 +7603,7 @@ export type Database = {
           efile_status?: Database["public"]["Enums"]["engagement_efile_status"]
           engagement_number?: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
+          ero_review_status?: Database["public"]["Enums"]["ero_review_status"]
           ero_workspace_id?: string | null
           extension_due_date?: string | null
           extension_filed?: boolean
@@ -4027,6 +7657,7 @@ export type Database = {
           efile_status?: Database["public"]["Enums"]["engagement_efile_status"]
           engagement_number?: string | null
           engagement_type?: Database["public"]["Enums"]["engagement_type"]
+          ero_review_status?: Database["public"]["Enums"]["ero_review_status"]
           ero_workspace_id?: string | null
           extension_due_date?: string | null
           extension_filed?: boolean
@@ -4081,6 +7712,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tax_engagements_document_request_id_fkey"
+            columns: ["document_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_missing_document_aging"
+            referencedColumns: ["document_request_id"]
+          },
+          {
+            foreignKeyName: "tax_engagements_ero_workspace_id_fkey"
+            columns: ["ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
             foreignKeyName: "tax_engagements_ero_workspace_id_fkey"
             columns: ["ero_workspace_id"]
             isOneToOne: false
@@ -4098,6 +7743,13 @@ export type Database = {
             foreignKeyName: "tax_engagements_service_bureau_workspace_id_fkey"
             columns: ["service_bureau_workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "tax_engagements_service_bureau_workspace_id_fkey"
+            columns: ["service_bureau_workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -4107,6 +7759,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "services"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_engagements_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "tax_engagements_workspace_id_fkey"
@@ -4163,6 +7822,13 @@ export type Database = {
             foreignKeyName: "tax_households_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "tax_households_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -4212,6 +7878,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "templates"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_installations_installed_workspace_id_fkey"
+            columns: ["installed_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "template_installations_installed_workspace_id_fkey"
@@ -4335,8 +8008,22 @@ export type Database = {
             foreignKeyName: "template_shares_owner_workspace_id_fkey"
             columns: ["owner_workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "template_shares_owner_workspace_id_fkey"
+            columns: ["owner_workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "template_shares_shared_with_workspace_id_fkey"
+            columns: ["shared_with_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "template_shares_shared_with_workspace_id_fkey"
@@ -4499,6 +8186,13 @@ export type Database = {
             foreignKeyName: "templates_original_workspace_id_fkey"
             columns: ["original_workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "templates_original_workspace_id_fkey"
+            columns: ["original_workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -4508,6 +8202,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "templates"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "templates_workspace_id_fkey"
@@ -4556,6 +8257,148 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      webhook_deliveries: {
+        Row: {
+          attempt_count: number
+          created_at: string
+          delivered_at: string | null
+          endpoint_id: string
+          error_message: string | null
+          event_id: string
+          event_type: string
+          failed_at: string | null
+          id: string
+          payload: Json
+          response_body: string | null
+          response_status: number | null
+          scheduled_for: string
+          status: Database["public"]["Enums"]["outbox_status"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          created_at?: string
+          delivered_at?: string | null
+          endpoint_id: string
+          error_message?: string | null
+          event_id: string
+          event_type: string
+          failed_at?: string | null
+          id?: string
+          payload: Json
+          response_body?: string | null
+          response_status?: number | null
+          scheduled_for?: string
+          status?: Database["public"]["Enums"]["outbox_status"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          attempt_count?: number
+          created_at?: string
+          delivered_at?: string | null
+          endpoint_id?: string
+          error_message?: string | null
+          event_id?: string
+          event_type?: string
+          failed_at?: string | null
+          id?: string
+          payload?: Json
+          response_body?: string | null
+          response_status?: number | null
+          scheduled_for?: string
+          status?: Database["public"]["Enums"]["outbox_status"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_deliveries_endpoint_id_fkey"
+            columns: ["endpoint_id"]
+            isOneToOne: false
+            referencedRelation: "webhook_endpoints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "webhook_deliveries_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      webhook_endpoints: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          endpoint_url: string
+          id: string
+          is_active: boolean
+          last_delivery_at: string | null
+          last_error: string | null
+          last_status_code: number | null
+          name: string
+          secret_reference: string | null
+          subscribed_events: string[]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          endpoint_url: string
+          id?: string
+          is_active?: boolean
+          last_delivery_at?: string | null
+          last_error?: string | null
+          last_status_code?: number | null
+          name: string
+          secret_reference?: string | null
+          subscribed_events?: string[]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          endpoint_url?: string
+          id?: string
+          is_active?: boolean
+          last_delivery_at?: string | null
+          last_error?: string | null
+          last_status_code?: number | null
+          name?: string
+          secret_reference?: string | null
+          subscribed_events?: string[]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_endpoints_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "webhook_endpoints_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workflow_action_outbox: {
         Row: {
@@ -4619,6 +8462,13 @@ export type Database = {
             foreignKeyName: "workflow_action_outbox_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workflow_action_outbox_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -4632,7 +8482,9 @@ export type Database = {
           metadata: Json
           requested_at: string
           requested_by: string | null
-          requested_from_role: Database["public"]["Enums"]["membership_role"] | null
+          requested_from_role:
+            | Database["public"]["Enums"]["membership_role"]
+            | null
           requested_from_user_id: string | null
           resolution_notes: string | null
           resolved_at: string | null
@@ -4650,7 +8502,9 @@ export type Database = {
           metadata?: Json
           requested_at?: string
           requested_by?: string | null
-          requested_from_role?: Database["public"]["Enums"]["membership_role"] | null
+          requested_from_role?:
+            | Database["public"]["Enums"]["membership_role"]
+            | null
           requested_from_user_id?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
@@ -4668,7 +8522,9 @@ export type Database = {
           metadata?: Json
           requested_at?: string
           requested_by?: string | null
-          requested_from_role?: Database["public"]["Enums"]["membership_role"] | null
+          requested_from_role?:
+            | Database["public"]["Enums"]["membership_role"]
+            | null
           requested_from_user_id?: string | null
           resolution_notes?: string | null
           resolved_at?: string | null
@@ -4693,6 +8549,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "workflow_run_steps"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_approvals_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "workflow_approvals_workspace_id_fkey"
@@ -4835,6 +8698,13 @@ export type Database = {
             foreignKeyName: "workflow_definitions_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workflow_definitions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -4885,6 +8755,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "workflow_run_steps"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_events_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "workflow_events_workspace_id_fkey"
@@ -5106,6 +8983,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "workflow_runs_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "workflow_runs_template_version_id_fkey"
             columns: ["template_version_id"]
             isOneToOne: false
@@ -5118,6 +9002,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "workflow_definitions"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
           },
           {
             foreignKeyName: "workflow_runs_workspace_id_fkey"
@@ -5187,6 +9078,73 @@ export type Database = {
             foreignKeyName: "workflow_waits_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workflow_waits_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_integrations: {
+        Row: {
+          configuration: Json
+          created_at: string
+          created_by: string | null
+          credential_reference: string | null
+          display_name: string | null
+          id: string
+          is_enabled: boolean
+          last_error: string | null
+          last_verified_at: string | null
+          provider: Database["public"]["Enums"]["integration_provider"]
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          configuration?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_reference?: string | null
+          display_name?: string | null
+          id?: string
+          is_enabled?: boolean
+          last_error?: string | null
+          last_verified_at?: string | null
+          provider: Database["public"]["Enums"]["integration_provider"]
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          created_by?: string | null
+          credential_reference?: string | null
+          display_name?: string | null
+          id?: string
+          is_enabled?: boolean
+          last_error?: string | null
+          last_verified_at?: string | null
+          provider?: Database["public"]["Enums"]["integration_provider"]
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_integrations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workspace_integrations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -5233,6 +9191,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workspace_invitations_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
           {
             foreignKeyName: "workspace_invitations_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -5286,6 +9251,13 @@ export type Database = {
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
           {
             foreignKeyName: "workspace_members_workspace_id_fkey"
             columns: ["workspace_id"]
@@ -5346,6 +9318,13 @@ export type Database = {
             foreignKeyName: "workspace_relationships_source_workspace_id_fkey"
             columns: ["source_workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workspace_relationships_source_workspace_id_fkey"
+            columns: ["source_workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -5353,6 +9332,143 @@ export type Database = {
             foreignKeyName: "workspace_relationships_target_workspace_id_fkey"
             columns: ["target_workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workspace_relationships_target_workspace_id_fkey"
+            columns: ["target_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_role_definitions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          permissions: Json
+          role_key: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          permissions?: Json
+          role_key: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          permissions?: Json
+          role_key?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_role_definitions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workspace_role_definitions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workspace_subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          external_customer_id: string | null
+          external_processor: string | null
+          external_subscription_id: string | null
+          id: string
+          metadata: Json
+          plan_id: string
+          status: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          external_customer_id?: string | null
+          external_processor?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          metadata?: Json
+          plan_id: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          external_customer_id?: string | null
+          external_processor?: string | null
+          external_subscription_id?: string | null
+          id?: string
+          metadata?: Json
+          plan_id?: string
+          status?: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workspace_subscriptions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workspace_subscriptions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: true
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
@@ -5415,6 +9531,94 @@ export type Database = {
         }
         Relationships: []
       }
+      zoom_meetings: {
+        Row: {
+          agenda: string | null
+          appointment_id: string
+          created_at: string
+          duration_minutes: number
+          host_user_id: string | null
+          id: string
+          join_url: string | null
+          password: string | null
+          provider_payload: Json
+          settings: Json
+          start_url: string | null
+          starts_at: string
+          status: string
+          timezone: string
+          topic: string
+          updated_at: string
+          workspace_id: string
+          zoom_meeting_id: string | null
+          zoom_occurrence_id: string | null
+        }
+        Insert: {
+          agenda?: string | null
+          appointment_id: string
+          created_at?: string
+          duration_minutes: number
+          host_user_id?: string | null
+          id?: string
+          join_url?: string | null
+          password?: string | null
+          provider_payload?: Json
+          settings?: Json
+          start_url?: string | null
+          starts_at: string
+          status?: string
+          timezone?: string
+          topic: string
+          updated_at?: string
+          workspace_id: string
+          zoom_meeting_id?: string | null
+          zoom_occurrence_id?: string | null
+        }
+        Update: {
+          agenda?: string | null
+          appointment_id?: string
+          created_at?: string
+          duration_minutes?: number
+          host_user_id?: string | null
+          id?: string
+          join_url?: string | null
+          password?: string | null
+          provider_payload?: Json
+          settings?: Json
+          start_url?: string | null
+          starts_at?: string
+          status?: string
+          timezone?: string
+          topic?: string
+          updated_at?: string
+          workspace_id?: string
+          zoom_meeting_id?: string | null
+          zoom_occurrence_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "zoom_meetings_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: true
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "zoom_meetings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "zoom_meetings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       v_client_form_assignments: {
@@ -5469,6 +9673,13 @@ export type Database = {
             referencedRelation: "form_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "client_form_assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "v_form_templates"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_client_portal_forms: {
@@ -5504,6 +9715,60 @@ export type Database = {
             referencedRelation: "form_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "client_form_assignments_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "v_form_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_engagement_work_queue: {
+        Row: {
+          balance_due: number | null
+          client_email: string | null
+          client_id: string | null
+          client_name: string | null
+          client_phone: string | null
+          due_date: string | null
+          engagement_number: string | null
+          id: string | null
+          internal_due_date: string | null
+          missing_document_count: number | null
+          open_task_count: number | null
+          primary_preparer_user_id: string | null
+          priority: Database["public"]["Enums"]["engagement_priority"] | null
+          return_type: Database["public"]["Enums"]["tax_return_type"] | null
+          reviewer_user_id: string | null
+          status: Database["public"]["Enums"]["engagement_status"] | null
+          tax_year: number | null
+          title: string | null
+          updated_at: string | null
+          workspace_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tax_engagements_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tax_engagements_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "tax_engagements_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
         ]
       }
       v_form_templates: {
@@ -5521,6 +9786,62 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "form_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "form_templates_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_missing_document_aging: {
+        Row: {
+          age_days: number | null
+          client_id: string | null
+          created_at: string | null
+          document_request_id: string | null
+          engagement_id: string | null
+          outstanding_items: number | null
+          status: Database["public"]["Enums"]["document_request_status"] | null
+          workspace_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_requests_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requests_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requests_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_requests_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "document_requests_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
@@ -5554,17 +9875,113 @@ export type Database = {
             foreignKeyName: "notifications_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "notifications_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
             referencedRelation: "workspaces"
             referencedColumns: ["id"]
           },
         ]
       }
+      v_revenue_summary: {
+        Row: {
+          collected: number | null
+          invoice_count: number | null
+          invoiced: number | null
+          outstanding: number | null
+          period: string | null
+          workspace_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "invoices_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_staff_workload: {
+        Row: {
+          open_engagements: number | null
+          open_tasks: number | null
+          role: Database["public"]["Enums"]["membership_role"] | null
+          upcoming_appointments: number | null
+          user_id: string | null
+          workspace_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workspace_members_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      v_tax_office_dashboard: {
+        Row: {
+          active_clients: number | null
+          appointments_today: number | null
+          awaiting_review: number | null
+          open_engagements: number | null
+          open_leads: number | null
+          outstanding_balance: number | null
+          overdue_tasks: number | null
+          revenue_ytd: number | null
+          waiting_on_clients: number | null
+          workspace_id: string | null
+        }
+        Insert: {
+          active_clients?: never
+          appointments_today?: never
+          awaiting_review?: never
+          open_engagements?: never
+          open_leads?: never
+          outstanding_balance?: never
+          overdue_tasks?: never
+          revenue_ytd?: never
+          waiting_on_clients?: never
+          workspace_id?: string | null
+        }
+        Update: {
+          active_clients?: never
+          appointments_today?: never
+          awaiting_review?: never
+          open_engagements?: never
+          open_leads?: never
+          outstanding_balance?: never
+          overdue_tasks?: never
+          revenue_ytd?: never
+          waiting_on_clients?: never
+          workspace_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       activate_workflow_definition: {
-        Args: {
-          p_definition_id: string
-        }
+        Args: { p_definition_id: string }
         Returns: undefined
       }
       add_form_question: {
@@ -5579,10 +9996,9 @@ export type Database = {
         }
         Returns: string
       }
+      apply_tax_deadline: { Args: { p_engagement_id: string }; Returns: Json }
       approve_and_lock_intake: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: undefined
       }
       assign_form_to_client: {
@@ -5596,84 +10012,130 @@ export type Database = {
         }
         Returns: string
       }
-      begin_intake_review: {
-        Args: {
-          p_submission_id: string
-        }
-        Returns: Json
+      begin_intake_review: { Args: { p_submission_id: string }; Returns: Json }
+      can_access_client_record: {
+        Args: { p_client_id: string; p_workspace_id: string }
+        Returns: boolean
       }
       can_access_conversation: {
-        Args: {
-          p_conversation_id: string
-        }
+        Args: { p_conversation_id: string }
         Returns: boolean
       }
-      can_access_document: {
-        Args: {
-          p_document_id: string
-        }
-        Returns: boolean
-      }
+      can_access_document: { Args: { p_document_id: string }; Returns: boolean }
       can_access_engagement: {
-        Args: {
-          p_engagement_id: string
-        }
+        Args: { p_engagement_id: string }
         Returns: boolean
       }
       can_access_intake_submission: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: boolean
       }
-      can_access_template: {
-        Args: {
-          p_template_id: string
-        }
-        Returns: boolean
-      }
+      can_access_template: { Args: { p_template_id: string }; Returns: boolean }
       can_access_workflow_definition: {
-        Args: {
-          p_definition_id: string
-        }
+        Args: { p_definition_id: string }
         Returns: boolean
       }
-      can_manage_document: {
-        Args: {
-          p_document_id: string
-        }
-        Returns: boolean
-      }
+      can_manage_document: { Args: { p_document_id: string }; Returns: boolean }
       can_manage_engagement: {
-        Args: {
-          p_engagement_id: string
-        }
+        Args: { p_engagement_id: string }
         Returns: boolean
       }
       can_manage_intake_submission: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: boolean
       }
-      can_manage_template: {
-        Args: {
-          p_template_id: string
-        }
-        Returns: boolean
-      }
+      can_manage_template: { Args: { p_template_id: string }; Returns: boolean }
       can_manage_workflow_definition: {
-        Args: {
-          p_definition_id: string
-        }
+        Args: { p_definition_id: string }
         Returns: boolean
+      }
+      claim_due_outbox: {
+        Args: { p_limit?: number }
+        Returns: {
+          attempt_count: number
+          body_html: string | null
+          body_text: string | null
+          channel: Database["public"]["Enums"]["outbox_channel"]
+          client_id: string | null
+          conversation_id: string | null
+          created_at: string
+          created_by: string | null
+          delivered_at: string | null
+          engagement_id: string | null
+          error_message: string | null
+          failed_at: string | null
+          id: string
+          idempotency_key: string | null
+          last_attempt_at: string | null
+          max_attempts: number
+          metadata: Json
+          provider: Database["public"]["Enums"]["integration_provider"] | null
+          provider_message_id: string | null
+          recipient_address: string
+          recipient_user_id: string | null
+          scheduled_for: string
+          sender_address: string | null
+          sent_at: string | null
+          status: Database["public"]["Enums"]["outbox_status"]
+          subject: string | null
+          template_id: string | null
+          updated_at: string
+          workspace_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "communication_outbox"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      claim_due_reminders: {
+        Args: { p_limit?: number }
+        Returns: {
+          appointment_id: string | null
+          channel: Database["public"]["Enums"]["outbox_channel"]
+          client_id: string | null
+          created_at: string
+          created_by: string | null
+          document_request_id: string | null
+          engagement_id: string | null
+          error_message: string | null
+          id: string
+          invoice_id: string | null
+          outbox_id: string | null
+          payload: Json
+          recipient_address: string | null
+          reminder_type: string
+          scheduled_for: string
+          sent_at: string | null
+          signature_request_id: string | null
+          skipped_reason: string | null
+          status: Database["public"]["Enums"]["reminder_status"]
+          template_id: string | null
+          updated_at: string
+          workspace_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "reminders"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       complete_intake_review: {
+        Args: { p_submission_id: string }
+        Returns: Json
+      }
+      complete_signature: {
         Args: {
-          p_submission_id: string
+          p_ip_address?: unknown
+          p_signature_data: Json
+          p_signer_id: string
+          p_user_agent?: string
         }
         Returns: Json
       }
+      convert_lead_to_client: { Args: { p_lead_id: string }; Returns: string }
       create_form_template: {
         Args: {
           p_description?: string
@@ -5685,9 +10147,15 @@ export type Database = {
         Returns: string
       }
       create_next_template_version: {
+        Args: { p_change_summary?: string; p_template_id: string }
+        Returns: string
+      }
+      create_signature_certificate: {
         Args: {
-          p_change_summary?: string
-          p_template_id: string
+          p_certificate_document_id?: string
+          p_document_sha256?: string
+          p_signature_request_id: string
+          p_signed_document_id?: string
         }
         Returns: string
       }
@@ -5702,6 +10170,43 @@ export type Database = {
         }
         Returns: string
       }
+      create_workspace_with_owner: {
+        Args: {
+          p_dba_name?: string
+          p_email?: string
+          p_legal_name?: string
+          p_name: string
+          p_phone?: string
+          p_plan_code?: string
+          p_settings?: Json
+          p_website?: string
+          p_workspace_type: Database["public"]["Enums"]["workspace_type"]
+        }
+        Returns: {
+          archived_at: string | null
+          branding: Json
+          created_at: string | null
+          dba_name: string | null
+          email: string | null
+          id: string
+          legal_name: string | null
+          name: string
+          owner_user_id: string | null
+          phone: string | null
+          settings: Json
+          slug: string
+          status: Database["public"]["Enums"]["workspace_status"]
+          updated_at: string | null
+          website: string | null
+          workspace_type: Database["public"]["Enums"]["workspace_type"]
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workspaces"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       duplicate_template: {
         Args: {
           p_new_name: string
@@ -5712,34 +10217,53 @@ export type Database = {
         Returns: string
       }
       ensure_intake_review_sections: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: number
       }
       evaluate_intake_compliance: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: Json
       }
+      evaluate_return_release: {
+        Args: { p_engagement_id: string }
+        Returns: Json
+      }
+      finish_outbox_failure: {
+        Args: { p_error: string; p_outbox_id: string }
+        Returns: undefined
+      }
       generate_intake_document_request: {
-        Args: {
-          p_send?: boolean
-          p_submission_id: string
-        }
+        Args: { p_send?: boolean; p_submission_id: string }
         Returns: string
       }
       get_intake_visibility: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: {
           is_visible: boolean
           matched_rules: number
           target_key: string
           target_type: string
         }[]
+      }
+      get_linked_ero_workspace: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          name: string
+          relationship_id: string
+          workspace_id: string
+        }[]
+      }
+      has_active_ero_relationship: {
+        Args: { p_ero_workspace_id: string; p_ptin_workspace_id: string }
+        Returns: boolean
+      }
+      has_oversight_access: {
+        Args: { p_target_workspace_id: string }
+        Returns: boolean
+      }
+      has_relationship_with_workspace: {
+        Args: { p_other_workspace_id: string }
+        Returns: boolean
       }
       has_workspace_role: {
         Args: {
@@ -5756,15 +10280,14 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_platform_admin: {
-        Args: never
+      is_platform_admin: { Args: never; Returns: boolean }
+      is_workspace_member: {
+        Args: { p_workspace_id: string }
         Returns: boolean
       }
-      is_workspace_member: {
-        Args: {
-          p_workspace_id: string
-        }
-        Returns: boolean
+      issue_signature_token: {
+        Args: { p_expires_in_hours?: number; p_signer_id: string }
+        Returns: string
       }
       log_engagement_activity: {
         Args: {
@@ -5778,50 +10301,53 @@ export type Database = {
         Returns: number
       }
       mark_assigned_form_reviewed: {
-        Args: {
-          p_assignment_id: string
-          p_review_notes?: string
-        }
+        Args: { p_assignment_id: string; p_review_notes?: string }
         Returns: boolean
       }
       next_engagement_reference: {
+        Args: { p_tax_year: number; p_workspace_id: string }
+        Returns: string
+      }
+      next_invoice_number: { Args: { p_workspace_id: string }; Returns: string }
+      publish_template_version: {
+        Args: { p_template_id: string; p_version_id: string }
+        Returns: undefined
+      }
+      queue_communication: {
         Args: {
-          p_tax_year: number
+          p_body_html?: string
+          p_body_text?: string
+          p_channel: Database["public"]["Enums"]["outbox_channel"]
+          p_client_id?: string
+          p_engagement_id?: string
+          p_idempotency_key?: string
+          p_metadata?: Json
+          p_recipient: string
+          p_scheduled_for?: string
+          p_subject?: string
           p_workspace_id: string
         }
         Returns: string
       }
-      publish_template_version: {
-        Args: {
-          p_template_id: string
-          p_version_id: string
-        }
-        Returns: undefined
-      }
       recalculate_intake_progress: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: number
       }
+      redeem_signature_token: { Args: { p_token: string }; Returns: Json }
       refresh_document_request_progress: {
-        Args: {
-          p_request_id: string
-        }
+        Args: { p_request_id: string }
+        Returns: undefined
+      }
+      release_completed_return: {
+        Args: { p_engagement_id: string; p_notes?: string }
         Returns: undefined
       }
       reopen_intake: {
-        Args: {
-          p_reason: string
-          p_submission_id: string
-        }
+        Args: { p_reason: string; p_submission_id: string }
         Returns: undefined
       }
       request_form_changes: {
-        Args: {
-          p_assignment_id: string
-          p_change_request_message: string
-        }
+        Args: { p_assignment_id: string; p_change_request_message: string }
         Returns: boolean
       }
       request_intake_clarification: {
@@ -5834,10 +10360,7 @@ export type Database = {
         Returns: string
       }
       resolve_intake_clarification: {
-        Args: {
-          p_comment_id: string
-          p_resolution?: string
-        }
+        Args: { p_comment_id: string; p_resolution?: string }
         Returns: undefined
       }
       resolve_workflow_approval: {
@@ -5885,17 +10408,10 @@ export type Database = {
         Returns: string
       }
       submit_assigned_form: {
-        Args: {
-          p_assignment_id: string
-        }
+        Args: { p_assignment_id: string }
         Returns: boolean
       }
-      submit_intake: {
-        Args: {
-          p_submission_id: string
-        }
-        Returns: Json
-      }
+      submit_intake: { Args: { p_submission_id: string }; Returns: Json }
       update_client_mailing_address: {
         Args: {
           p_city: string
@@ -5916,48 +10432,46 @@ export type Database = {
         Returns: undefined
       }
       validate_intake_submission: {
-        Args: {
-          p_submission_id: string
-        }
+        Args: { p_submission_id: string }
         Returns: Json
       }
       validate_workflow_definition: {
-        Args: {
-          p_definition_id: string
-        }
+        Args: { p_definition_id: string }
         Returns: Json
       }
     }
     Enums: {
-      access_level:
-          "view"
-        | "collaborate"
-        | "manage"
+      access_level: "view" | "collaborate" | "manage"
+      appointment_location_type:
+        | "office"
+        | "phone"
+        | "video"
+        | "client_location"
+        | "other"
+      appointment_status:
+        | "scheduled"
+        | "confirmed"
+        | "checked_in"
+        | "completed"
+        | "cancelled"
+        | "no_show"
+        | "rescheduled"
       approval_status:
-          "pending"
+        | "pending"
         | "approved"
         | "rejected"
         | "changes_requested"
         | "cancelled"
       automation_job_status:
-          "queued"
+        | "queued"
         | "processing"
         | "completed"
         | "failed"
         | "cancelled"
-      client_status:
-          "lead"
-        | "prospect"
-        | "active"
-        | "inactive"
-        | "archived"
-      client_type:
-          "individual"
-        | "business"
-        | "household"
-        | "organization"
+      client_status: "lead" | "prospect" | "active" | "inactive" | "archived"
+      client_type: "individual" | "business" | "household" | "organization"
       compliance_case_status:
-          "open"
+        | "open"
         | "in_review"
         | "waiting_on_client"
         | "waiting_on_staff"
@@ -5966,7 +10480,7 @@ export type Database = {
         | "escalated"
         | "closed"
       compliance_case_type:
-          "due_diligence"
+        | "due_diligence"
         | "identity_verification"
         | "fraud_risk"
         | "credit_eligibility"
@@ -5977,7 +10491,7 @@ export type Database = {
         | "quality_review"
         | "other"
       condition_operator:
-          "equals"
+        | "equals"
         | "not_equals"
         | "contains"
         | "not_contains"
@@ -5989,21 +10503,16 @@ export type Database = {
         | "is_not_empty"
         | "in"
         | "not_in"
-      contact_method:
-          "email"
-        | "phone"
-        | "sms"
-        | "address"
-        | "other"
+      contact_method: "email" | "phone" | "sms" | "address" | "other"
       contact_type:
-          "personal"
+        | "personal"
         | "business"
         | "spouse"
         | "authorized_contact"
         | "emergency"
         | "other"
       document_access_action:
-          "view"
+        | "view"
         | "download"
         | "upload"
         | "replace"
@@ -6015,7 +10524,7 @@ export type Database = {
         | "delete"
         | "restore"
       document_request_item_status:
-          "requested"
+        | "requested"
         | "uploaded"
         | "under_review"
         | "accepted"
@@ -6023,7 +10532,7 @@ export type Database = {
         | "waived"
         | "not_applicable"
       document_request_status:
-          "draft"
+        | "draft"
         | "sent"
         | "viewed"
         | "in_progress"
@@ -6032,7 +10541,7 @@ export type Database = {
         | "cancelled"
         | "expired"
       document_review_status:
-          "pending"
+        | "pending"
         | "approved"
         | "rejected"
         | "needs_clarification"
@@ -6040,7 +10549,7 @@ export type Database = {
         | "illegible"
         | "wrong_document"
       document_source:
-          "client_upload"
+        | "client_upload"
         | "staff_upload"
         | "email_import"
         | "form_upload"
@@ -6048,7 +10557,7 @@ export type Database = {
         | "integration"
         | "generated"
       document_status:
-          "uploaded"
+        | "uploaded"
         | "processing"
         | "available"
         | "needs_review"
@@ -6058,13 +10567,21 @@ export type Database = {
         | "archived"
         | "deleted"
       document_visibility:
-          "client_and_staff"
+        | "client_and_staff"
         | "staff_only"
         | "client_only"
         | "shared_office"
         | "restricted"
+      efile_event_type:
+        | "not_ready"
+        | "ready"
+        | "transmitted"
+        | "accepted"
+        | "rejected"
+        | "acknowledged"
+        | "withdrawn"
       engagement_efile_status:
-          "not_started"
+        | "not_started"
         | "not_applicable"
         | "awaiting_authorization"
         | "ready"
@@ -6074,20 +10591,16 @@ export type Database = {
         | "corrected"
         | "paper_filed"
       engagement_payment_status:
-          "not_required"
+        | "not_required"
         | "unpaid"
         | "partially_paid"
         | "paid"
         | "payment_plan"
         | "refund_transfer"
         | "waived"
-      engagement_priority:
-          "low"
-        | "normal"
-        | "high"
-        | "urgent"
+      engagement_priority: "low" | "normal" | "high" | "urgent"
       engagement_status:
-          "draft"
+        | "draft"
         | "intake_not_started"
         | "intake_in_progress"
         | "missing_documents"
@@ -6116,7 +10629,7 @@ export type Database = {
         | "extended"
         | "on_hold"
       engagement_type:
-          "individual_return"
+        | "individual_return"
         | "business_return"
         | "amended_return"
         | "extension"
@@ -6129,8 +10642,13 @@ export type Database = {
         | "nonprofit"
         | "extension_only"
         | "notice_resolution"
+      ero_review_status:
+        | "not_submitted"
+        | "pending_review"
+        | "approved"
+        | "needs_revision"
       form_component_type:
-          "section"
+        | "section"
         | "heading"
         | "paragraph"
         | "text"
@@ -6155,12 +10673,12 @@ export type Database = {
         | "acknowledgment"
         | "year"
       intake_answer_status:
-          "draft"
+        | "draft"
         | "final"
         | "needs_clarification"
         | "verified"
       intake_entity_type:
-          "residence"
+        | "residence"
         | "employer"
         | "business"
         | "rental_property"
@@ -6182,14 +10700,14 @@ export type Database = {
         | "fixed_asset"
         | "state_filing"
       intake_revision_reason:
-          "client_edit"
+        | "client_edit"
         | "staff_edit"
         | "changes_requested"
         | "reopened"
         | "system_update"
         | "import"
       intake_submission_status:
-          "not_started"
+        | "not_started"
         | "in_progress"
         | "submitted"
         | "changes_requested"
@@ -6198,8 +10716,32 @@ export type Database = {
         | "approved"
         | "rejected"
         | "archived"
+      integration_provider:
+        | "twilio"
+        | "resend"
+        | "zoom"
+        | "stripe"
+        | "verexa_signature"
+      invoice_status:
+        | "draft"
+        | "sent"
+        | "viewed"
+        | "partially_paid"
+        | "paid"
+        | "past_due"
+        | "void"
+        | "refunded"
+      lead_status:
+        | "new"
+        | "contacted"
+        | "consultation_scheduled"
+        | "consultation_completed"
+        | "proposal_sent"
+        | "won"
+        | "lost"
+        | "do_not_contact"
       membership_role:
-          "owner"
+        | "owner"
         | "admin"
         | "ero"
         | "preparer"
@@ -6210,38 +10752,90 @@ export type Database = {
         | "seasonal_staff"
         | "auditor"
         | "client"
-      membership_status:
-          "invited"
-        | "active"
-        | "suspended"
-        | "removed"
-      ownership_type:
-          "workspace_owned"
-        | "preparer_owned"
-        | "shared"
+      membership_status: "invited" | "active" | "suspended" | "removed"
+      outbox_channel: "sms" | "email" | "portal" | "webhook"
+      outbox_status:
+        | "queued"
+        | "processing"
+        | "sent"
+        | "delivered"
+        | "failed"
+        | "cancelled"
+      ownership_type: "workspace_owned" | "preparer_owned" | "shared"
+      payment_method:
+        | "card"
+        | "ach"
+        | "cash"
+        | "check"
+        | "money_order"
+        | "refund_transfer"
+        | "other"
+      payment_record_status:
+        | "pending"
+        | "succeeded"
+        | "failed"
+        | "cancelled"
+        | "refunded"
+        | "partially_refunded"
+      payout_method: "via_ero" | "direct_from_bank"
+      payout_status: "pending" | "paid" | "failed"
       relationship_status:
-          "pending"
+        | "pending"
         | "active"
         | "paused"
         | "ended"
         | "declined"
       relationship_type:
-          "service_bureau_to_ero"
+        | "service_bureau_to_ero"
         | "ero_to_preparer"
         | "ptin_to_ero"
+      reminder_status:
+        | "scheduled"
+        | "processing"
+        | "sent"
+        | "skipped"
+        | "failed"
+        | "cancelled"
       review_result:
-          "pending"
+        | "pending"
         | "pass"
         | "fail"
         | "needs_clarification"
         | "not_applicable"
-      risk_level:
-          "low"
-        | "moderate"
-        | "high"
-        | "critical"
+      risk_level: "low" | "moderate" | "high" | "critical"
+      signature_request_status:
+        | "draft"
+        | "sent"
+        | "viewed"
+        | "partially_signed"
+        | "completed"
+        | "declined"
+        | "expired"
+        | "cancelled"
+      signer_status:
+        | "pending"
+        | "sent"
+        | "viewed"
+        | "signed"
+        | "declined"
+        | "expired"
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "paused"
+        | "cancelled"
+        | "expired"
+      task_priority: "low" | "normal" | "high" | "urgent"
+      task_status:
+        | "not_started"
+        | "in_progress"
+        | "waiting_on_client"
+        | "waiting_on_staff"
+        | "completed"
+        | "cancelled"
       tax_return_type:
-          "1040"
+        | "1040"
         | "1040-X"
         | "1065"
         | "1120"
@@ -6257,7 +10851,7 @@ export type Database = {
         | "local"
         | "other"
       template_kind:
-          "form"
+        | "form"
         | "workflow"
         | "message"
         | "document_request"
@@ -6266,29 +10860,26 @@ export type Database = {
         | "service_package"
         | "sop"
       template_share_permission:
-          "view"
+        | "view"
         | "use"
         | "duplicate"
         | "edit"
         | "reshare"
         | "manage"
-      template_status:
-          "draft"
-        | "published"
-        | "archived"
+      template_status: "draft" | "published" | "archived"
       template_update_mode:
-          "independent_copy"
+        | "independent_copy"
         | "linked_manual"
         | "linked_automatic"
       template_visibility:
-          "private"
+        | "private"
         | "workspace"
         | "connected_users"
         | "connected_offices"
         | "organization_network"
         | "marketplace"
       workflow_event_type:
-          "run_started"
+        | "run_started"
         | "step_started"
         | "step_completed"
         | "step_failed"
@@ -6302,7 +10893,7 @@ export type Database = {
         | "run_completed"
         | "run_cancelled"
       workflow_node_type:
-          "start"
+        | "start"
         | "trigger"
         | "condition"
         | "task"
@@ -6320,14 +10911,14 @@ export type Database = {
         | "parallel_join"
         | "end"
       workflow_run_status:
-          "queued"
+        | "queued"
         | "running"
         | "waiting"
         | "completed"
         | "failed"
         | "cancelled"
       workflow_step_status:
-          "pending"
+        | "pending"
         | "ready"
         | "running"
         | "waiting"
@@ -6336,7 +10927,7 @@ export type Database = {
         | "failed"
         | "cancelled"
       workflow_trigger_type:
-          "manual"
+        | "manual"
         | "engagement_created"
         | "engagement_status_changed"
         | "form_assigned"
@@ -6349,13 +10940,9 @@ export type Database = {
         | "scheduled"
         | "client_portal_activated"
         | "relationship_created"
-      workspace_status:
-          "pending"
-        | "active"
-        | "suspended"
-        | "archived"
+      workspace_status: "pending" | "active" | "suspended" | "archived"
       workspace_type:
-          "independent_ptin"
+        | "independent_ptin"
         | "ero_office"
         | "service_bureau"
         | "platform_admin"
@@ -6487,52 +11074,556 @@ export const Constants = {
   public: {
     Enums: {
       access_level: ["view", "collaborate", "manage"],
-      approval_status: ["pending", "approved", "rejected", "changes_requested", "cancelled"],
-      automation_job_status: ["queued", "processing", "completed", "failed", "cancelled"],
+      appointment_location_type: [
+        "office",
+        "phone",
+        "video",
+        "client_location",
+        "other",
+      ],
+      appointment_status: [
+        "scheduled",
+        "confirmed",
+        "checked_in",
+        "completed",
+        "cancelled",
+        "no_show",
+        "rescheduled",
+      ],
+      approval_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "changes_requested",
+        "cancelled",
+      ],
+      automation_job_status: [
+        "queued",
+        "processing",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
       client_status: ["lead", "prospect", "active", "inactive", "archived"],
       client_type: ["individual", "business", "household", "organization"],
-      compliance_case_status: ["open", "in_review", "waiting_on_client", "waiting_on_staff", "resolved", "not_applicable", "escalated", "closed"],
-      compliance_case_type: ["due_diligence", "identity_verification", "fraud_risk", "credit_eligibility", "filing_status", "dependent_eligibility", "income_verification", "document_sufficiency", "quality_review", "other"],
-      condition_operator: ["equals", "not_equals", "contains", "not_contains", "greater_than", "greater_than_or_equal", "less_than", "less_than_or_equal", "is_empty", "is_not_empty", "in", "not_in"],
+      compliance_case_status: [
+        "open",
+        "in_review",
+        "waiting_on_client",
+        "waiting_on_staff",
+        "resolved",
+        "not_applicable",
+        "escalated",
+        "closed",
+      ],
+      compliance_case_type: [
+        "due_diligence",
+        "identity_verification",
+        "fraud_risk",
+        "credit_eligibility",
+        "filing_status",
+        "dependent_eligibility",
+        "income_verification",
+        "document_sufficiency",
+        "quality_review",
+        "other",
+      ],
+      condition_operator: [
+        "equals",
+        "not_equals",
+        "contains",
+        "not_contains",
+        "greater_than",
+        "greater_than_or_equal",
+        "less_than",
+        "less_than_or_equal",
+        "is_empty",
+        "is_not_empty",
+        "in",
+        "not_in",
+      ],
       contact_method: ["email", "phone", "sms", "address", "other"],
-      contact_type: ["personal", "business", "spouse", "authorized_contact", "emergency", "other"],
-      document_access_action: ["view", "download", "upload", "replace", "rename", "move", "share", "unshare", "review", "delete", "restore"],
-      document_request_item_status: ["requested", "uploaded", "under_review", "accepted", "rejected", "waived", "not_applicable"],
-      document_request_status: ["draft", "sent", "viewed", "in_progress", "partially_complete", "completed", "cancelled", "expired"],
-      document_review_status: ["pending", "approved", "rejected", "needs_clarification", "duplicate", "illegible", "wrong_document"],
-      document_source: ["client_upload", "staff_upload", "email_import", "form_upload", "workflow", "integration", "generated"],
-      document_status: ["uploaded", "processing", "available", "needs_review", "approved", "rejected", "replaced", "archived", "deleted"],
-      document_visibility: ["client_and_staff", "staff_only", "client_only", "shared_office", "restricted"],
-      engagement_efile_status: ["not_started", "not_applicable", "awaiting_authorization", "ready", "transmitted", "accepted", "rejected", "corrected", "paper_filed"],
-      engagement_payment_status: ["not_required", "unpaid", "partially_paid", "paid", "payment_plan", "refund_transfer", "waived"],
+      contact_type: [
+        "personal",
+        "business",
+        "spouse",
+        "authorized_contact",
+        "emergency",
+        "other",
+      ],
+      document_access_action: [
+        "view",
+        "download",
+        "upload",
+        "replace",
+        "rename",
+        "move",
+        "share",
+        "unshare",
+        "review",
+        "delete",
+        "restore",
+      ],
+      document_request_item_status: [
+        "requested",
+        "uploaded",
+        "under_review",
+        "accepted",
+        "rejected",
+        "waived",
+        "not_applicable",
+      ],
+      document_request_status: [
+        "draft",
+        "sent",
+        "viewed",
+        "in_progress",
+        "partially_complete",
+        "completed",
+        "cancelled",
+        "expired",
+      ],
+      document_review_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "needs_clarification",
+        "duplicate",
+        "illegible",
+        "wrong_document",
+      ],
+      document_source: [
+        "client_upload",
+        "staff_upload",
+        "email_import",
+        "form_upload",
+        "workflow",
+        "integration",
+        "generated",
+      ],
+      document_status: [
+        "uploaded",
+        "processing",
+        "available",
+        "needs_review",
+        "approved",
+        "rejected",
+        "replaced",
+        "archived",
+        "deleted",
+      ],
+      document_visibility: [
+        "client_and_staff",
+        "staff_only",
+        "client_only",
+        "shared_office",
+        "restricted",
+      ],
+      efile_event_type: [
+        "not_ready",
+        "ready",
+        "transmitted",
+        "accepted",
+        "rejected",
+        "acknowledged",
+        "withdrawn",
+      ],
+      engagement_efile_status: [
+        "not_started",
+        "not_applicable",
+        "awaiting_authorization",
+        "ready",
+        "transmitted",
+        "accepted",
+        "rejected",
+        "corrected",
+        "paper_filed",
+      ],
+      engagement_payment_status: [
+        "not_required",
+        "unpaid",
+        "partially_paid",
+        "paid",
+        "payment_plan",
+        "refund_transfer",
+        "waived",
+      ],
       engagement_priority: ["low", "normal", "high", "urgent"],
-      engagement_status: ["draft", "intake_not_started", "intake_in_progress", "missing_documents", "ready_for_preparation", "preparation_in_progress", "internal_review", "awaiting_payment", "awaiting_signature", "ready_for_ero", "sent_to_tax_software", "transmitted_externally", "acknowledgement_pending", "accepted", "rejected", "correction_in_progress", "completed", "cancelled", "archived", "awaiting_client", "documents_requested", "in_preparation", "preparer_review", "reviewer_review", "ready_to_file", "filed", "extended", "on_hold"],
-      engagement_type: ["individual_return", "business_return", "amended_return", "extension", "tax_planning", "bookkeeping", "payroll", "other", "individual", "business", "nonprofit", "extension_only", "notice_resolution"],
-      form_component_type: ["section", "heading", "paragraph", "text", "textarea", "number", "currency", "date", "email", "phone", "address", "yes_no", "single_choice", "multiple_choice", "dropdown", "file_upload", "signature", "calculation", "repeatable_group", "staff_only", "divider", "percentage", "acknowledgment", "year"],
-      intake_answer_status: ["draft", "final", "needs_clarification", "verified"],
-      intake_entity_type: ["residence", "employer", "business", "rental_property", "k1_entity", "education_student", "childcare_provider", "estimated_payment", "tax_notice", "investment_sale", "digital_asset_account", "foreign_account", "property_sale", "retirement_account", "other_income", "vehicle", "bank_account", "charitable_contribution", "business_owner", "fixed_asset", "state_filing"],
-      intake_revision_reason: ["client_edit", "staff_edit", "changes_requested", "reopened", "system_update", "import"],
-      intake_submission_status: ["not_started", "in_progress", "submitted", "changes_requested", "resubmitted", "under_review", "approved", "rejected", "archived"],
-      membership_role: ["owner", "admin", "ero", "preparer", "reviewer", "intake_specialist", "document_specialist", "billing", "seasonal_staff", "auditor", "client"],
+      engagement_status: [
+        "draft",
+        "intake_not_started",
+        "intake_in_progress",
+        "missing_documents",
+        "ready_for_preparation",
+        "preparation_in_progress",
+        "internal_review",
+        "awaiting_payment",
+        "awaiting_signature",
+        "ready_for_ero",
+        "sent_to_tax_software",
+        "transmitted_externally",
+        "acknowledgement_pending",
+        "accepted",
+        "rejected",
+        "correction_in_progress",
+        "completed",
+        "cancelled",
+        "archived",
+        "awaiting_client",
+        "documents_requested",
+        "in_preparation",
+        "preparer_review",
+        "reviewer_review",
+        "ready_to_file",
+        "filed",
+        "extended",
+        "on_hold",
+      ],
+      engagement_type: [
+        "individual_return",
+        "business_return",
+        "amended_return",
+        "extension",
+        "tax_planning",
+        "bookkeeping",
+        "payroll",
+        "other",
+        "individual",
+        "business",
+        "nonprofit",
+        "extension_only",
+        "notice_resolution",
+      ],
+      ero_review_status: [
+        "not_submitted",
+        "pending_review",
+        "approved",
+        "needs_revision",
+      ],
+      form_component_type: [
+        "section",
+        "heading",
+        "paragraph",
+        "text",
+        "textarea",
+        "number",
+        "currency",
+        "date",
+        "email",
+        "phone",
+        "address",
+        "yes_no",
+        "single_choice",
+        "multiple_choice",
+        "dropdown",
+        "file_upload",
+        "signature",
+        "calculation",
+        "repeatable_group",
+        "staff_only",
+        "divider",
+        "percentage",
+        "acknowledgment",
+        "year",
+      ],
+      intake_answer_status: [
+        "draft",
+        "final",
+        "needs_clarification",
+        "verified",
+      ],
+      intake_entity_type: [
+        "residence",
+        "employer",
+        "business",
+        "rental_property",
+        "k1_entity",
+        "education_student",
+        "childcare_provider",
+        "estimated_payment",
+        "tax_notice",
+        "investment_sale",
+        "digital_asset_account",
+        "foreign_account",
+        "property_sale",
+        "retirement_account",
+        "other_income",
+        "vehicle",
+        "bank_account",
+        "charitable_contribution",
+        "business_owner",
+        "fixed_asset",
+        "state_filing",
+      ],
+      intake_revision_reason: [
+        "client_edit",
+        "staff_edit",
+        "changes_requested",
+        "reopened",
+        "system_update",
+        "import",
+      ],
+      intake_submission_status: [
+        "not_started",
+        "in_progress",
+        "submitted",
+        "changes_requested",
+        "resubmitted",
+        "under_review",
+        "approved",
+        "rejected",
+        "archived",
+      ],
+      integration_provider: [
+        "twilio",
+        "resend",
+        "zoom",
+        "stripe",
+        "verexa_signature",
+      ],
+      invoice_status: [
+        "draft",
+        "sent",
+        "viewed",
+        "partially_paid",
+        "paid",
+        "past_due",
+        "void",
+        "refunded",
+      ],
+      lead_status: [
+        "new",
+        "contacted",
+        "consultation_scheduled",
+        "consultation_completed",
+        "proposal_sent",
+        "won",
+        "lost",
+        "do_not_contact",
+      ],
+      membership_role: [
+        "owner",
+        "admin",
+        "ero",
+        "preparer",
+        "reviewer",
+        "intake_specialist",
+        "document_specialist",
+        "billing",
+        "seasonal_staff",
+        "auditor",
+        "client",
+      ],
       membership_status: ["invited", "active", "suspended", "removed"],
+      outbox_channel: ["sms", "email", "portal", "webhook"],
+      outbox_status: [
+        "queued",
+        "processing",
+        "sent",
+        "delivered",
+        "failed",
+        "cancelled",
+      ],
       ownership_type: ["workspace_owned", "preparer_owned", "shared"],
+      payment_method: [
+        "card",
+        "ach",
+        "cash",
+        "check",
+        "money_order",
+        "refund_transfer",
+        "other",
+      ],
+      payment_record_status: [
+        "pending",
+        "succeeded",
+        "failed",
+        "cancelled",
+        "refunded",
+        "partially_refunded",
+      ],
+      payout_method: ["via_ero", "direct_from_bank"],
+      payout_status: ["pending", "paid", "failed"],
       relationship_status: ["pending", "active", "paused", "ended", "declined"],
-      relationship_type: ["service_bureau_to_ero", "ero_to_preparer", "ptin_to_ero"],
-      review_result: ["pending", "pass", "fail", "needs_clarification", "not_applicable"],
+      relationship_type: [
+        "service_bureau_to_ero",
+        "ero_to_preparer",
+        "ptin_to_ero",
+      ],
+      reminder_status: [
+        "scheduled",
+        "processing",
+        "sent",
+        "skipped",
+        "failed",
+        "cancelled",
+      ],
+      review_result: [
+        "pending",
+        "pass",
+        "fail",
+        "needs_clarification",
+        "not_applicable",
+      ],
       risk_level: ["low", "moderate", "high", "critical"],
-      tax_return_type: ["1040", "1040-X", "1065", "1120", "1120-S", "1041", "706", "709", "990", "941", "940", "state_individual", "state_business", "local", "other"],
-      template_kind: ["form", "workflow", "message", "document_request", "checklist", "engagement", "service_package", "sop"],
-      template_share_permission: ["view", "use", "duplicate", "edit", "reshare", "manage"],
+      signature_request_status: [
+        "draft",
+        "sent",
+        "viewed",
+        "partially_signed",
+        "completed",
+        "declined",
+        "expired",
+        "cancelled",
+      ],
+      signer_status: [
+        "pending",
+        "sent",
+        "viewed",
+        "signed",
+        "declined",
+        "expired",
+      ],
+      subscription_status: [
+        "trialing",
+        "active",
+        "past_due",
+        "paused",
+        "cancelled",
+        "expired",
+      ],
+      task_priority: ["low", "normal", "high", "urgent"],
+      task_status: [
+        "not_started",
+        "in_progress",
+        "waiting_on_client",
+        "waiting_on_staff",
+        "completed",
+        "cancelled",
+      ],
+      tax_return_type: [
+        "1040",
+        "1040-X",
+        "1065",
+        "1120",
+        "1120-S",
+        "1041",
+        "706",
+        "709",
+        "990",
+        "941",
+        "940",
+        "state_individual",
+        "state_business",
+        "local",
+        "other",
+      ],
+      template_kind: [
+        "form",
+        "workflow",
+        "message",
+        "document_request",
+        "checklist",
+        "engagement",
+        "service_package",
+        "sop",
+      ],
+      template_share_permission: [
+        "view",
+        "use",
+        "duplicate",
+        "edit",
+        "reshare",
+        "manage",
+      ],
       template_status: ["draft", "published", "archived"],
-      template_update_mode: ["independent_copy", "linked_manual", "linked_automatic"],
-      template_visibility: ["private", "workspace", "connected_users", "connected_offices", "organization_network", "marketplace"],
-      workflow_event_type: ["run_started", "step_started", "step_completed", "step_failed", "condition_evaluated", "approval_requested", "approval_resolved", "wait_started", "wait_released", "action_queued", "action_completed", "run_completed", "run_cancelled"],
-      workflow_node_type: ["start", "trigger", "condition", "task", "approval", "assignment", "wait", "email", "sms", "portal_notification", "document_request", "status_change", "form_assignment", "webhook", "parallel_split", "parallel_join", "end"],
-      workflow_run_status: ["queued", "running", "waiting", "completed", "failed", "cancelled"],
-      workflow_step_status: ["pending", "ready", "running", "waiting", "completed", "skipped", "failed", "cancelled"],
-      workflow_trigger_type: ["manual", "engagement_created", "engagement_status_changed", "form_assigned", "form_submitted", "document_uploaded", "document_request_completed", "invoice_paid", "signature_completed", "date_reached", "scheduled", "client_portal_activated", "relationship_created"],
+      template_update_mode: [
+        "independent_copy",
+        "linked_manual",
+        "linked_automatic",
+      ],
+      template_visibility: [
+        "private",
+        "workspace",
+        "connected_users",
+        "connected_offices",
+        "organization_network",
+        "marketplace",
+      ],
+      workflow_event_type: [
+        "run_started",
+        "step_started",
+        "step_completed",
+        "step_failed",
+        "condition_evaluated",
+        "approval_requested",
+        "approval_resolved",
+        "wait_started",
+        "wait_released",
+        "action_queued",
+        "action_completed",
+        "run_completed",
+        "run_cancelled",
+      ],
+      workflow_node_type: [
+        "start",
+        "trigger",
+        "condition",
+        "task",
+        "approval",
+        "assignment",
+        "wait",
+        "email",
+        "sms",
+        "portal_notification",
+        "document_request",
+        "status_change",
+        "form_assignment",
+        "webhook",
+        "parallel_split",
+        "parallel_join",
+        "end",
+      ],
+      workflow_run_status: [
+        "queued",
+        "running",
+        "waiting",
+        "completed",
+        "failed",
+        "cancelled",
+      ],
+      workflow_step_status: [
+        "pending",
+        "ready",
+        "running",
+        "waiting",
+        "completed",
+        "skipped",
+        "failed",
+        "cancelled",
+      ],
+      workflow_trigger_type: [
+        "manual",
+        "engagement_created",
+        "engagement_status_changed",
+        "form_assigned",
+        "form_submitted",
+        "document_uploaded",
+        "document_request_completed",
+        "invoice_paid",
+        "signature_completed",
+        "date_reached",
+        "scheduled",
+        "client_portal_activated",
+        "relationship_created",
+      ],
       workspace_status: ["pending", "active", "suspended", "archived"],
-      workspace_type: ["independent_ptin", "ero_office", "service_bureau", "platform_admin"],
-    }
-  }
+      workspace_type: [
+        "independent_ptin",
+        "ero_office",
+        "service_bureau",
+        "platform_admin",
+      ],
+    },
+  },
 } as const

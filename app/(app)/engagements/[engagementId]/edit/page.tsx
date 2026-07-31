@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getEngagementDetail } from "@/lib/data/engagements";
 import { STAFF_ROLES } from "@/lib/types";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { ForbiddenState } from "@/components/ui/ForbiddenState";
 import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
 import { EngagementEditForm } from "@/components/engagements/EngagementEditForm";

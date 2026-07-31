@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { CheckCircle2, MessageCircleQuestion } from "lucide-react";
-import { Card, CardBody } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
+import { Button } from "@/components/ui/LegacyButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { toast } from "@/lib/toast";
 import { respondToClarificationAction } from "@/lib/actions/portal-clarifications";

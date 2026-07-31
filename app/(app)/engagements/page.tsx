@@ -6,8 +6,8 @@ import { listEngagements, ENGAGEMENTS_PAGE_SIZE, type EngagementListItem } from 
 import { listWorkspaceStaff } from "@/lib/data/users";
 import { engagementListFiltersSchema } from "@/lib/validation/engagements";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/LegacyButton";
+import { Card } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Pagination } from "@/components/ui/Pagination";
 import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";

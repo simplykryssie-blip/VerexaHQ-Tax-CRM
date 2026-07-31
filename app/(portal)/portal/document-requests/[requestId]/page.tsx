@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPortalDocumentRequestDetail } from "@/lib/data/portal-document-requests";
 import { computeItemStats } from "@/lib/data/document-requests";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DocumentRequestProgress } from "@/components/intakes/DocumentRequestProgress";
 import { PortalRequestItemCard } from "@/components/portal/documents/PortalRequestItemCard";

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
+import { Button } from "@/components/ui/LegacyButton";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { toast } from "@/lib/toast";

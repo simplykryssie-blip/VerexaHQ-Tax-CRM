@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { requireWorkspace } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { IntakeReviewWorkspace } from "@/components/intakes/IntakeReviewWorkspace";
 import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
 

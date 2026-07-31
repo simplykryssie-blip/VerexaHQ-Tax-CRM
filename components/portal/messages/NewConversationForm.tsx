@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { startConversationAction } from "@/lib/actions/portal-messages";
 import { toast } from "@/lib/toast";
-import { Button } from "@/components/ui/Button";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Button } from "@/components/ui/LegacyButton";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 
 export function NewConversationForm() {
   const [subject, setSubject] = useState("");

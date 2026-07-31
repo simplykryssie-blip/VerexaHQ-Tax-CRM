@@ -16,7 +16,7 @@ import {
 import { updateEngagementAction } from "@/lib/actions/engagements";
 import { engagementTypeLabels, returnTypeLabels, engagementPriorityMeta } from "@/lib/status";
 import { FormField, inputClassName } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import type { TaxEngagement } from "@/lib/types";
 
 type EngagementEditFormInput = z.input<typeof updateEngagementSchema>;

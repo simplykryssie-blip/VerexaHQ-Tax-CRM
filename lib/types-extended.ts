@@ -1,7 +1,7 @@
 // Extended types for the comprehensive tax professional client schema
 // These types will be merged into lib/types.ts after Supabase types are regenerated
 
-import type { Database } from "@/lib/supabase/types";
+import type { Database } from "@/types/database";
 import type { Tables } from "@/lib/types";
 
 export type ClientSpouse = Tables<"client_spouses">;

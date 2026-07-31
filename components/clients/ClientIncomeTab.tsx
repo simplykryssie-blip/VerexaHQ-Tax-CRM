@@ -1,5 +1,5 @@
 import { DollarSign } from "lucide-react";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { titleCase } from "@/lib/utils";

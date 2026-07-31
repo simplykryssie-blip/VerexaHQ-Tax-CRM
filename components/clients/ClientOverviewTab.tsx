@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { clientStatusMeta } from "@/lib/status";
 import { formatDate, maskLast4, titleCase } from "@/lib/utils";

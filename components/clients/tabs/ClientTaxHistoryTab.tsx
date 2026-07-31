@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClientTaxHistory } from "@/lib/types-extended";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 interface ClientTaxHistoryTabProps {
   clientId: string;

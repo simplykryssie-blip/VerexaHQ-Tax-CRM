@@ -5,7 +5,7 @@ import { getClientDetail } from "@/lib/data/clients";
 import { listDocumentRequestsForClient } from "@/lib/data/document-requests";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Tabs, type TabDefinition } from "@/components/ui/Tabs";
+import { Tabs, type TabDefinition } from "@/components/ui/TabSwitcher";
 import { ClientOverviewTab } from "@/components/clients/ClientOverviewTab";
 import { ClientContactTab } from "@/components/clients/ClientContactTab";
 import { ClientIntakesTab } from "@/components/clients/ClientIntakesTab";

@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { Client } from "@/lib/types";
 import { personalInfoSchema, type PersonalInfoInput, filingStatusOptions } from "@/lib/validation/clients-extended";
 import { FormField, inputClassName } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { titleCase } from "@/lib/utils";
 
 interface ClientPersonalInfoTabProps {

@@ -3,7 +3,7 @@ import { requirePortalAccess } from "@/lib/auth/portal";
 import { createClient } from "@/lib/supabase/server";
 import { getPortalEngagementDetail } from "@/lib/data/portal-engagements";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { friendlyEngagementStatusMeta, friendlyEngagementNextAction, friendlyDocumentRequestStatusMeta, friendlyIntakeStatusMeta } from "@/lib/portal-copy";
 import { returnTypeLabels } from "@/lib/status";

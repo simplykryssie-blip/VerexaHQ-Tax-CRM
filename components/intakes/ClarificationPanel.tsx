@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { requestClarificationAction, resolveClarificationAction } from "@/lib/actions/intakes";
 import { toast } from "@/lib/toast";

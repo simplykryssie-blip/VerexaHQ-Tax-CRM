@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { updateMailingAddressAction } from "@/lib/actions/portal-profile";
 import { toast } from "@/lib/toast";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import type { ClientAddress } from "@/lib/types";
 

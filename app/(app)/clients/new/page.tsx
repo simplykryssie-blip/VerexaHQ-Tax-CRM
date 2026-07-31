@@ -1,7 +1,7 @@
 import { requireWorkspaceRole } from "@/lib/auth/workspace";
 import { STAFF_ROLES } from "@/lib/types";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { ForbiddenState } from "@/components/ui/ForbiddenState";
 import { ClientForm } from "@/components/clients/ClientForm";
 

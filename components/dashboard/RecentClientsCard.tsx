@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Users } from "lucide-react";
-import { Card, CardHeader, CardBody } from "@/components/ui/Card";
+import { Card, CardHeader, CardBody } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { clientStatusMeta } from "@/lib/status";

@@ -123,31 +123,31 @@ BEGIN
   -- Spouses
   CREATE POLICY "spouses_select" ON public.client_spouses FOR SELECT USING (public.is_workspace_member(workspace_id));
   CREATE POLICY "spouses_insert" ON public.client_spouses FOR INSERT WITH CHECK (public.is_workspace_member(workspace_id));
-  CREATE POLICY "spouses_update" ON public.client_spouses FOR UPDATE USING (public.is_workspace_member(workspace_id));
+  CREATE POLICY "spouses_update" ON public.client_spouses FOR UPDATE USING (public.is_workspace_member(workspace_id)) WITH CHECK (public.is_workspace_member(workspace_id));
   CREATE POLICY "spouses_delete" ON public.client_spouses FOR DELETE USING (public.is_workspace_member(workspace_id));
 
   -- Dependents
   CREATE POLICY "dependents_select" ON public.client_dependents FOR SELECT USING (public.is_workspace_member(workspace_id));
   CREATE POLICY "dependents_insert" ON public.client_dependents FOR INSERT WITH CHECK (public.is_workspace_member(workspace_id));
-  CREATE POLICY "dependents_update" ON public.client_dependents FOR UPDATE USING (public.is_workspace_member(workspace_id));
+  CREATE POLICY "dependents_update" ON public.client_dependents FOR UPDATE USING (public.is_workspace_member(workspace_id)) WITH CHECK (public.is_workspace_member(workspace_id));
   CREATE POLICY "dependents_delete" ON public.client_dependents FOR DELETE USING (public.is_workspace_member(workspace_id));
 
   -- Banking
   CREATE POLICY "banking_select" ON public.client_banking FOR SELECT USING (public.is_workspace_member(workspace_id));
   CREATE POLICY "banking_insert" ON public.client_banking FOR INSERT WITH CHECK (public.is_workspace_member(workspace_id));
-  CREATE POLICY "banking_update" ON public.client_banking FOR UPDATE USING (public.is_workspace_member(workspace_id));
+  CREATE POLICY "banking_update" ON public.client_banking FOR UPDATE USING (public.is_workspace_member(workspace_id)) WITH CHECK (public.is_workspace_member(workspace_id));
   CREATE POLICY "banking_delete" ON public.client_banking FOR DELETE USING (public.is_workspace_member(workspace_id));
 
   -- Tax History
   CREATE POLICY "tax_history_select" ON public.client_tax_history FOR SELECT USING (public.is_workspace_member(workspace_id));
   CREATE POLICY "tax_history_insert" ON public.client_tax_history FOR INSERT WITH CHECK (public.is_workspace_member(workspace_id));
-  CREATE POLICY "tax_history_update" ON public.client_tax_history FOR UPDATE USING (public.is_workspace_member(workspace_id));
+  CREATE POLICY "tax_history_update" ON public.client_tax_history FOR UPDATE USING (public.is_workspace_member(workspace_id)) WITH CHECK (public.is_workspace_member(workspace_id));
   CREATE POLICY "tax_history_delete" ON public.client_tax_history FOR DELETE USING (public.is_workspace_member(workspace_id));
 
   -- Employment
   CREATE POLICY "employment_select" ON public.client_employment FOR SELECT USING (public.is_workspace_member(workspace_id));
   CREATE POLICY "employment_insert" ON public.client_employment FOR INSERT WITH CHECK (public.is_workspace_member(workspace_id));
-  CREATE POLICY "employment_update" ON public.client_employment FOR UPDATE USING (public.is_workspace_member(workspace_id));
+  CREATE POLICY "employment_update" ON public.client_employment FOR UPDATE USING (public.is_workspace_member(workspace_id)) WITH CHECK (public.is_workspace_member(workspace_id));
   CREATE POLICY "employment_delete" ON public.client_employment FOR DELETE USING (public.is_workspace_member(workspace_id));
 EXCEPTION
   WHEN duplicate_object THEN NULL;

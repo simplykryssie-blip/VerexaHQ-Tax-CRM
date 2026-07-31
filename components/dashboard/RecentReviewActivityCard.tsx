@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { History } from "lucide-react";
-import { Card, CardHeader, CardBody } from "@/components/ui/Card";
+import { Card, CardHeader, CardBody } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { clientDisplayName, formatRelativeTime, titleCase } from "@/lib/utils";
 import type { ReviewActivityItem } from "@/lib/data/dashboard";

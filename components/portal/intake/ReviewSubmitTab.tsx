@@ -1,8 +1,8 @@
 "use client";
 
 import { CheckCircle2, AlertCircle } from "lucide-react";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
+import { Button } from "@/components/ui/LegacyButton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/lib/toast";
 import { submitPortalIntakeAction } from "@/lib/actions/portal-intake";

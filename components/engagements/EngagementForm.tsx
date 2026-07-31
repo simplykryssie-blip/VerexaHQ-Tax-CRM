@@ -14,7 +14,7 @@ import {
 import { createEngagementAction } from "@/lib/actions/engagements";
 import { engagementTypeLabels, returnTypeLabels, engagementPriorityMeta } from "@/lib/status";
 import { FormField, inputClassName } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { clientDisplayName } from "@/lib/utils";
 import type { Client } from "@/lib/types";
 import type { UserSummary } from "@/lib/data/users";

@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Archive, CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { toast } from "@/lib/toast";
 import { setOrganizerTemplateStatusAction } from "@/lib/actions/organizer";
 

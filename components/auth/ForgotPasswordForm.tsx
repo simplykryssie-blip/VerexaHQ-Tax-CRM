@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordSchema, type ForgotPasswordInput } from "@/lib/validation/auth";
 import { forgotPasswordAction } from "@/lib/actions/auth";
 import { FormField, inputClassName } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 export function ForgotPasswordForm() {
   const [submitted, setSubmitted] = useState(false);

@@ -1,4 +1,4 @@
-import type { Database } from "@/lib/supabase/types";
+import type { Database } from "@/types/database";
 
 export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];

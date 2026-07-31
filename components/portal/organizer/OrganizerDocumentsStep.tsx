@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { FileCheck, FileX, Clock3 } from "lucide-react";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DocumentUploadButton } from "@/components/portal/documents/DocumentUploadButton";
 import { markDocumentRuleStatusAction } from "@/lib/actions/organizer";

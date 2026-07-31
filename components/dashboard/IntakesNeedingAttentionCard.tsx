@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ClipboardCheck } from "lucide-react";
-import { Card, CardHeader, CardBody } from "@/components/ui/Card";
+import { Card, CardHeader, CardBody } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { intakeSubmissionStatusMeta } from "@/lib/status";

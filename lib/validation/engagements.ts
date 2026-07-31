@@ -80,6 +80,33 @@ export const engagementPaymentStatusOptions = [
 
 export const dueDateStateOptions = ["overdue", "due_soon_7", "due_soon_30", "no_due_date"] as const;
 
+// Compatibility exports used by the newer engagement screens. Keep these
+// aliases tied to the validated vocabularies above so forms and database
+// writes cannot drift onto unsupported enum values.
+export const RETURN_TYPES = returnTypeOptions;
+export const ENGAGEMENT_TYPE_OPTIONS = engagementTypeOptions;
+export const ENGAGEMENT_PRIORITIES = engagementPriorityOptions;
+export const ENGAGEMENT_TYPE_LABELS: Record<EngagementTypeOption, string> = {
+  individual: "Individual return",
+  business: "Business return",
+  nonprofit: "Nonprofit return",
+  amended_return: "Amended return",
+  extension_only: "Extension only",
+  tax_planning: "Tax planning",
+  notice_resolution: "Notice resolution",
+  other: "Other",
+};
+export const ENGAGEMENT_STATUS_LABELS = Object.fromEntries(
+  engagementStatusOptions.map((status) => [
+    status,
+    status.replaceAll("_", " ").replace(/^./, (character) => character.toUpperCase()),
+  ]),
+) as Record<(typeof engagementStatusOptions)[number], string>;
+
+export function engagementStatusLabel(status: string) {
+  return ENGAGEMENT_STATUS_LABELS[status as keyof typeof ENGAGEMENT_STATUS_LABELS] ?? status.replaceAll("_", " ");
+}
+
 const currentYear = new Date().getFullYear();
 
 const moneyField = z

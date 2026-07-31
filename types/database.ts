@@ -507,6 +507,67 @@ export type Database = {
           },
         ]
       }
+      client_banking: {
+        Row: {
+          account_number: string | null
+          account_type: string | null
+          bank_name: string
+          client_id: string
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          routing_number: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          account_number?: string | null
+          account_type?: string | null
+          bank_name: string
+          client_id: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          routing_number?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          account_number?: string | null
+          account_type?: string | null
+          bank_name?: string
+          client_id?: string
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          routing_number?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_banking_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_banking_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_banking_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_communication_preferences: {
         Row: {
           client_id: string
@@ -701,6 +762,146 @@ export type Database = {
           },
         ]
       }
+      client_dependents: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          date_of_birth: string | null
+          first_name: string
+          id: string
+          is_disabled: boolean | null
+          is_student: boolean | null
+          last_name: string
+          months_lived_with: number | null
+          relationship: string | null
+          ssn_encrypted: string | null
+          support_percent: number | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          first_name: string
+          id?: string
+          is_disabled?: boolean | null
+          is_student?: boolean | null
+          last_name: string
+          months_lived_with?: number | null
+          relationship?: string | null
+          ssn_encrypted?: string | null
+          support_percent?: number | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          first_name?: string
+          id?: string
+          is_disabled?: boolean | null
+          is_student?: boolean | null
+          last_name?: string
+          months_lived_with?: number | null
+          relationship?: string | null
+          ssn_encrypted?: string | null
+          support_percent?: number | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_dependents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_dependents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_dependents_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_employment: {
+        Row: {
+          business_entity_type: string | null
+          client_id: string
+          created_at: string | null
+          employer_address: string | null
+          employer_ein: string | null
+          employer_name: string | null
+          id: string
+          income_type: string | null
+          is_self_employed: boolean | null
+          naics_code: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          business_entity_type?: string | null
+          client_id: string
+          created_at?: string | null
+          employer_address?: string | null
+          employer_ein?: string | null
+          employer_name?: string | null
+          id?: string
+          income_type?: string | null
+          is_self_employed?: boolean | null
+          naics_code?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          business_entity_type?: string | null
+          client_id?: string
+          created_at?: string | null
+          employer_address?: string | null
+          employer_ein?: string | null
+          employer_name?: string | null
+          id?: string
+          income_type?: string | null
+          is_self_employed?: boolean | null
+          naics_code?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_employment_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_employment_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_employment_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_form_assignments: {
         Row: {
           assigned_at: string | null
@@ -854,23 +1055,237 @@ export type Database = {
           },
         ]
       }
+      client_spouses: {
+        Row: {
+          client_id: string
+          created_at: string | null
+          date_of_birth: string | null
+          email: string | null
+          first_name: string
+          id: string
+          id_expiration: string | null
+          id_number: string | null
+          id_state: string | null
+          last_name: string
+          middle_name: string | null
+          occupation: string | null
+          phone: string | null
+          ssn_encrypted: string | null
+          suffix: string | null
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          id_expiration?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          last_name: string
+          middle_name?: string | null
+          occupation?: string | null
+          phone?: string | null
+          ssn_encrypted?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string | null
+          date_of_birth?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          id_expiration?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          last_name?: string
+          middle_name?: string | null
+          occupation?: string | null
+          phone?: string | null
+          ssn_encrypted?: string | null
+          suffix?: string | null
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_spouses_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: true
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_spouses_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_spouses_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tags: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          client_id: string
+          tag_id: string
+          workspace_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          client_id: string
+          tag_id: string
+          workspace_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          client_id?: string
+          tag_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tags_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tags_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "tags"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_tax_history: {
+        Row: {
+          agi: number | null
+          carryforward_credits: number | null
+          carryforward_loss: number | null
+          client_id: string
+          created_at: string | null
+          has_irs_notices: boolean | null
+          id: string
+          refund_amount: number | null
+          tax_year: number
+          updated_at: string | null
+          workspace_id: string
+        }
+        Insert: {
+          agi?: number | null
+          carryforward_credits?: number | null
+          carryforward_loss?: number | null
+          client_id: string
+          created_at?: string | null
+          has_irs_notices?: boolean | null
+          id?: string
+          refund_amount?: number | null
+          tax_year: number
+          updated_at?: string | null
+          workspace_id: string
+        }
+        Update: {
+          agi?: number | null
+          carryforward_credits?: number | null
+          carryforward_loss?: number | null
+          client_id?: string
+          created_at?: string | null
+          has_irs_notices?: boolean | null
+          id?: string
+          refund_amount?: number | null
+          tax_year?: number
+          updated_at?: string | null
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_tax_history_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_tax_history_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "client_tax_history_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clients: {
         Row: {
           archived_at: string | null
+          assigned_ero_workspace_id: string | null
+          assigned_reviewer_user_id: string | null
           assigned_user_id: string | null
+          category: string | null
+          client_since: string | null
           client_type: Database["public"]["Enums"]["client_type"]
           company: string | null
           created_at: string | null
           created_by: string | null
+          current_tax_year: number | null
           date_of_birth: string | null
           display_name: string | null
           ein_last4: string | null
           email: string | null
+          ero_user_id: string | null
+          filing_status: string | null
           first_name: string
           id: string
+          id_expiration: string | null
+          id_issue_date: string | null
+          id_number: string | null
+          id_state: string | null
+          itin_last4: string | null
           last_name: string
+          mailing_address_id: string | null
           metadata: Json
+          middle_name: string | null
           notes: string | null
+          occupation: string | null
           owner_user_id: string | null
           owner_workspace_id: string | null
           phone: string | null
@@ -881,29 +1296,48 @@ export type Database = {
             | null
           preferred_language: string
           preferred_name: string | null
+          referral_source: string | null
+          service_package: string | null
           source: string | null
           ssn_last4: string | null
           status: string
+          suffix: string | null
           timezone: string
           updated_at: string | null
+          updated_by_user_id: string | null
           workspace_id: string
         }
         Insert: {
           archived_at?: string | null
+          assigned_ero_workspace_id?: string | null
+          assigned_reviewer_user_id?: string | null
           assigned_user_id?: string | null
+          category?: string | null
+          client_since?: string | null
           client_type?: Database["public"]["Enums"]["client_type"]
           company?: string | null
           created_at?: string | null
           created_by?: string | null
+          current_tax_year?: number | null
           date_of_birth?: string | null
           display_name?: string | null
           ein_last4?: string | null
           email?: string | null
+          ero_user_id?: string | null
+          filing_status?: string | null
           first_name: string
           id?: string
+          id_expiration?: string | null
+          id_issue_date?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          itin_last4?: string | null
           last_name: string
+          mailing_address_id?: string | null
           metadata?: Json
+          middle_name?: string | null
           notes?: string | null
+          occupation?: string | null
           owner_user_id?: string | null
           owner_workspace_id?: string | null
           phone?: string | null
@@ -914,29 +1348,48 @@ export type Database = {
             | null
           preferred_language?: string
           preferred_name?: string | null
+          referral_source?: string | null
+          service_package?: string | null
           source?: string | null
           ssn_last4?: string | null
           status?: string
+          suffix?: string | null
           timezone?: string
           updated_at?: string | null
+          updated_by_user_id?: string | null
           workspace_id: string
         }
         Update: {
           archived_at?: string | null
+          assigned_ero_workspace_id?: string | null
+          assigned_reviewer_user_id?: string | null
           assigned_user_id?: string | null
+          category?: string | null
+          client_since?: string | null
           client_type?: Database["public"]["Enums"]["client_type"]
           company?: string | null
           created_at?: string | null
           created_by?: string | null
+          current_tax_year?: number | null
           date_of_birth?: string | null
           display_name?: string | null
           ein_last4?: string | null
           email?: string | null
+          ero_user_id?: string | null
+          filing_status?: string | null
           first_name?: string
           id?: string
+          id_expiration?: string | null
+          id_issue_date?: string | null
+          id_number?: string | null
+          id_state?: string | null
+          itin_last4?: string | null
           last_name?: string
+          mailing_address_id?: string | null
           metadata?: Json
+          middle_name?: string | null
           notes?: string | null
+          occupation?: string | null
           owner_user_id?: string | null
           owner_workspace_id?: string | null
           phone?: string | null
@@ -947,14 +1400,39 @@ export type Database = {
             | null
           preferred_language?: string
           preferred_name?: string | null
+          referral_source?: string | null
+          service_package?: string | null
           source?: string | null
           ssn_last4?: string | null
           status?: string
+          suffix?: string | null
           timezone?: string
           updated_at?: string | null
+          updated_by_user_id?: string | null
           workspace_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "clients_assigned_ero_workspace_id_fkey"
+            columns: ["assigned_ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "clients_assigned_ero_workspace_id_fkey"
+            columns: ["assigned_ero_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_mailing_address_id_fkey"
+            columns: ["mailing_address_id"]
+            isOneToOne: false
+            referencedRelation: "client_addresses"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clients_owner_workspace_id_fkey"
             columns: ["owner_workspace_id"]
@@ -1750,6 +2228,97 @@ export type Database = {
           },
         ]
       }
+      document_folders: {
+        Row: {
+          client_id: string
+          client_visible: boolean
+          created_at: string
+          created_by: string | null
+          engagement_id: string | null
+          id: string
+          metadata: Json
+          name: string
+          parent_folder_id: string | null
+          sort_order: number
+          tax_year: number | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          client_id: string
+          client_visible?: boolean
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string | null
+          id?: string
+          metadata?: Json
+          name: string
+          parent_folder_id?: string | null
+          sort_order?: number
+          tax_year?: number | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          client_id?: string
+          client_visible?: boolean
+          created_at?: string
+          created_by?: string | null
+          engagement_id?: string | null
+          id?: string
+          metadata?: Json
+          name?: string
+          parent_folder_id?: string | null
+          sort_order?: number
+          tax_year?: number | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_folders_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: false
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_parent_folder_id_fkey"
+            columns: ["parent_folder_id"]
+            isOneToOne: false
+            referencedRelation: "document_folders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_folders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "document_folders_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_links: {
         Row: {
           created_at: string
@@ -2245,32 +2814,41 @@ export type Database = {
       }
       documents: {
         Row: {
+          ai_metadata: Json
           archived_at: string | null
           bucket_id: string
           category_id: string | null
           checksum_sha256: string | null
           client_id: string | null
           created_at: string
+          created_by_user_id: string | null
           deleted_at: string | null
           display_name: string
           document_date: string | null
           engagement_id: string | null
+          expires_at: string | null
           file_extension: string | null
           file_size_bytes: number | null
+          folder_id: string | null
           household_member_id: string | null
           id: string
           is_latest_version: boolean
+          is_missing: boolean
           metadata: Json
           mime_type: string | null
           notes: string | null
+          ocr_metadata: Json
           original_filename: string
+          preview_metadata: Json
           replaces_document_id: string | null
           request_item_id: string | null
+          signature_status: string | null
           source: Database["public"]["Enums"]["document_source"]
           status: Database["public"]["Enums"]["document_status"]
           storage_path: string
           tax_year: number | null
           updated_at: string
+          updated_by_user_id: string | null
           uploaded_at: string
           uploaded_by_client_contact_id: string | null
           uploaded_by_user_id: string | null
@@ -2279,32 +2857,41 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          ai_metadata?: Json
           archived_at?: string | null
           bucket_id: string
           category_id?: string | null
           checksum_sha256?: string | null
           client_id?: string | null
           created_at?: string
+          created_by_user_id?: string | null
           deleted_at?: string | null
           display_name: string
           document_date?: string | null
           engagement_id?: string | null
+          expires_at?: string | null
           file_extension?: string | null
           file_size_bytes?: number | null
+          folder_id?: string | null
           household_member_id?: string | null
           id?: string
           is_latest_version?: boolean
+          is_missing?: boolean
           metadata?: Json
           mime_type?: string | null
           notes?: string | null
+          ocr_metadata?: Json
           original_filename: string
+          preview_metadata?: Json
           replaces_document_id?: string | null
           request_item_id?: string | null
+          signature_status?: string | null
           source?: Database["public"]["Enums"]["document_source"]
           status?: Database["public"]["Enums"]["document_status"]
           storage_path: string
           tax_year?: number | null
           updated_at?: string
+          updated_by_user_id?: string | null
           uploaded_at?: string
           uploaded_by_client_contact_id?: string | null
           uploaded_by_user_id?: string | null
@@ -2313,32 +2900,41 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          ai_metadata?: Json
           archived_at?: string | null
           bucket_id?: string
           category_id?: string | null
           checksum_sha256?: string | null
           client_id?: string | null
           created_at?: string
+          created_by_user_id?: string | null
           deleted_at?: string | null
           display_name?: string
           document_date?: string | null
           engagement_id?: string | null
+          expires_at?: string | null
           file_extension?: string | null
           file_size_bytes?: number | null
+          folder_id?: string | null
           household_member_id?: string | null
           id?: string
           is_latest_version?: boolean
+          is_missing?: boolean
           metadata?: Json
           mime_type?: string | null
           notes?: string | null
+          ocr_metadata?: Json
           original_filename?: string
+          preview_metadata?: Json
           replaces_document_id?: string | null
           request_item_id?: string | null
+          signature_status?: string | null
           source?: Database["public"]["Enums"]["document_source"]
           status?: Database["public"]["Enums"]["document_status"]
           storage_path?: string
           tax_year?: number | null
           updated_at?: string
+          updated_by_user_id?: string | null
           uploaded_at?: string
           uploaded_by_client_contact_id?: string | null
           uploaded_by_user_id?: string | null
@@ -2373,6 +2969,13 @@ export type Database = {
             columns: ["engagement_id"]
             isOneToOne: false
             referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "document_folders"
             referencedColumns: ["id"]
           },
           {
@@ -5053,6 +5656,7 @@ export type Database = {
           tax_total: number
           total: number
           updated_at: string
+          updated_by_user_id: string | null
           viewed_at: string | null
           voided_at: string | null
           workspace_id: string
@@ -5083,6 +5687,7 @@ export type Database = {
           tax_total?: number
           total?: number
           updated_at?: string
+          updated_by_user_id?: string | null
           viewed_at?: string | null
           voided_at?: string | null
           workspace_id: string
@@ -5113,6 +5718,7 @@ export type Database = {
           tax_total?: number
           total?: number
           updated_at?: string
+          updated_by_user_id?: string | null
           viewed_at?: string | null
           voided_at?: string | null
           workspace_id?: string
@@ -5380,6 +5986,7 @@ export type Database = {
           amount: number
           client_id: string
           created_at: string
+          created_by_user_id: string | null
           currency: string
           engagement_id: string | null
           failure_reason: string | null
@@ -5396,12 +6003,14 @@ export type Database = {
           refunded_amount: number
           status: Database["public"]["Enums"]["payment_record_status"]
           updated_at: string
+          updated_by_user_id: string | null
           workspace_id: string
         }
         Insert: {
           amount: number
           client_id: string
           created_at?: string
+          created_by_user_id?: string | null
           currency?: string
           engagement_id?: string | null
           failure_reason?: string | null
@@ -5418,12 +6027,14 @@ export type Database = {
           refunded_amount?: number
           status?: Database["public"]["Enums"]["payment_record_status"]
           updated_at?: string
+          updated_by_user_id?: string | null
           workspace_id: string
         }
         Update: {
           amount?: number
           client_id?: string
           created_at?: string
+          created_by_user_id?: string | null
           currency?: string
           engagement_id?: string | null
           failure_reason?: string | null
@@ -5440,6 +6051,7 @@ export type Database = {
           refunded_amount?: number
           status?: Database["public"]["Enums"]["payment_record_status"]
           updated_at?: string
+          updated_by_user_id?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -6637,6 +7249,57 @@ export type Database = {
         }
         Relationships: []
       }
+      tags: {
+        Row: {
+          color: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "tags_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_comments: {
         Row: {
           author_user_id: string | null
@@ -6714,6 +7377,7 @@ export type Database = {
           task_type: string | null
           title: string
           updated_at: string
+          updated_by_user_id: string | null
           workspace_id: string
         }
         Insert: {
@@ -6737,6 +7401,7 @@ export type Database = {
           task_type?: string | null
           title: string
           updated_at?: string
+          updated_by_user_id?: string | null
           workspace_id: string
         }
         Update: {
@@ -6760,6 +7425,7 @@ export type Database = {
           task_type?: string | null
           title?: string
           updated_at?: string
+          updated_by_user_id?: string | null
           workspace_id?: string
         }
         Relationships: [
@@ -8678,6 +9344,63 @@ export type Database = {
           },
         ]
       }
+      workspace_role_definitions: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          permissions: Json
+          role_key: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          permissions?: Json
+          role_key: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          permissions?: Json
+          role_key?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workspace_role_definitions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "workspace_role_definitions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       workspace_subscriptions: {
         Row: {
           cancel_at_period_end: boolean
@@ -9536,6 +10259,10 @@ export type Database = {
       }
       has_oversight_access: {
         Args: { p_target_workspace_id: string }
+        Returns: boolean
+      }
+      has_relationship_with_workspace: {
+        Args: { p_other_workspace_id: string }
         Returns: boolean
       }
       has_workspace_role: {

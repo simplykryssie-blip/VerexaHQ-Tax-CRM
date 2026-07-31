@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ClientDetailExtended } from "@/lib/types-extended";
-import { Tabs } from "@/components/ui/Tabs";
+import { Tabs } from "@/components/ui/TabSwitcher";
 import { ClientPersonalInfoTab } from "./tabs/ClientPersonalInfoTab";
 import { ClientSpouseTab } from "./tabs/ClientSpouseTab";
 import { ClientDependentsTab } from "./tabs/ClientDependentsTab";

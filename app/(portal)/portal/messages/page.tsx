@@ -6,7 +6,7 @@ import { listPortalConversations } from "@/lib/data/portal-messages";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
 import { PortalEmptyState } from "@/components/portal/PortalEmptyState";
 import { NewConversationForm } from "@/components/portal/messages/NewConversationForm";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { formatRelativeTime } from "@/lib/utils";
 import { PortalNotLinkedState } from "@/components/ui/PortalNotLinkedState";

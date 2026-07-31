@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { Contact } from "lucide-react";
 import { titleCase } from "@/lib/utils";

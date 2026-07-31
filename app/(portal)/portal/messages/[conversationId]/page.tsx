@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPortalConversationDetail } from "@/lib/data/portal-messages";
 import { markConversationReadAction } from "@/lib/actions/portal-messages";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { MessageThread } from "@/components/portal/messages/MessageThread";
 import { PortalNotLinkedState } from "@/components/ui/PortalNotLinkedState";
 

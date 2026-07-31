@@ -11,7 +11,7 @@ import {
 } from "@/lib/validation/clients";
 import { createClientAction } from "@/lib/actions/clients";
 import { FormField, inputClassName } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { titleCase } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 

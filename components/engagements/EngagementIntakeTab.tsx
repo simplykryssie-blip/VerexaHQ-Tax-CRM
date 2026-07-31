@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { intakeSubmissionStatusMeta } from "@/lib/status";
 import { formatDate } from "@/lib/utils";

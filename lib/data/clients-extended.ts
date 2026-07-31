@@ -145,7 +145,7 @@ export async function upsertClientSpouse(
   supabase: SupabaseServerClient,
   workspaceId: string,
   clientId: string,
-  data: Partial<ClientSpouse>,
+  data: Pick<ClientSpouse, "first_name" | "last_name"> & Partial<ClientSpouse>,
 ) {
   const { data: result, error } = await supabase
     .from("client_spouses")

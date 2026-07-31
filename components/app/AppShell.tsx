@@ -4,7 +4,7 @@ import { useState } from "react";
 import { X } from "lucide-react";
 import { AppSidebar } from "@/components/app/AppSidebar";
 import { AppHeader } from "@/components/app/AppHeader";
-import { Toaster } from "@/components/ui/Toaster";
+import { Toaster } from "@/components/ui/LegacyToaster";
 import type { WorkspaceContext } from "@/lib/auth/workspace";
 
 export function AppShell({
@@ -23,7 +23,11 @@ export function AppShell({
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <aside className="hidden w-64 shrink-0 border-r border-border lg:block">
-        <AppSidebar workspaceName={workspace.workspace.name} />
+        <AppSidebar
+          workspaceName={workspace.workspace.name}
+          workspaceType={workspace.workspace.workspace_type}
+          role={workspace.role}
+        />
       </aside>
 
       {drawerOpen && (
@@ -42,6 +46,8 @@ export function AppShell({
             </button>
             <AppSidebar
               workspaceName={workspace.workspace.name}
+              workspaceType={workspace.workspace.workspace_type}
+              role={workspace.role}
               onNavigate={() => setDrawerOpen(false)}
             />
           </div>

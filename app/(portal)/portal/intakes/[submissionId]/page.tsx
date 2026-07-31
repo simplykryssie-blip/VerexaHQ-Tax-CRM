@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getPortalIntakeDetail, isIntakeEditable, isSectionVisible } from "@/lib/data/portal-intakes";
 import { REPEATABLE_SECTION_ENTITY_TYPE, HOUSEHOLD_SECTION_KEY } from "@/lib/intake-entity-map";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
-import { Tabs, type TabDefinition } from "@/components/ui/Tabs";
+import { Tabs, type TabDefinition } from "@/components/ui/TabSwitcher";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { IntakeProgress } from "@/components/intakes/IntakeProgress";
 import { GenericSectionFields } from "@/components/portal/intake/GenericSectionFields";

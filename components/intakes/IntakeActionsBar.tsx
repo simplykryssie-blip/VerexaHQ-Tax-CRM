@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { PlayCircle, CheckCircle2, ShieldCheck, FolderPlus, Lock, RotateCcw } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { toast } from "@/lib/toast";
 import {

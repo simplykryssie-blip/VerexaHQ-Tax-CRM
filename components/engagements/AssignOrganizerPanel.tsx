@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import { toast } from "@/lib/toast";
 import { assignOrganizerAction, rolloverOrganizerAction } from "@/lib/actions/organizer";

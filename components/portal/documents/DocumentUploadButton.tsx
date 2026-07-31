@@ -12,7 +12,7 @@ import {
   sanitizeFilename,
 } from "@/lib/validation/portal-documents";
 import { toast } from "@/lib/toast";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 export function DocumentUploadButton({
   workspaceId,

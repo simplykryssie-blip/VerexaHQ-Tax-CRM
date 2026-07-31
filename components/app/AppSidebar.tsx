@@ -3,17 +3,24 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShieldCheck } from "lucide-react";
-import { NAV_ITEMS } from "@/components/app/nav";
+import { navItemsForWorkspace } from "@/components/app/nav";
 import { cn } from "@/lib/utils";
+import { PracticeViewSwitcher } from "@/components/app/PracticeViewSwitcher";
+import type { MembershipRole, Workspace } from "@/lib/types";
 
 export function AppSidebar({
   workspaceName,
+  workspaceType,
+  role,
   onNavigate,
 }: {
   workspaceName: string;
+  workspaceType: Workspace["workspace_type"];
+  role: MembershipRole;
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
+  const navItems = navItemsForWorkspace(workspaceType, role);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -29,8 +36,10 @@ export function AppSidebar({
         </div>
       </div>
 
+      <PracticeViewSwitcher workspaceType={workspaceType} role={role} onNavigate={onNavigate} />
+
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-        {NAV_ITEMS.map((item) => {
+        {navItems.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;

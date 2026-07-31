@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 type ConfirmDialogProps = {
   trigger: React.ReactNode;

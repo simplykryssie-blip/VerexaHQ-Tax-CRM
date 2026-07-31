@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import type { PortalNextAction } from "@/lib/data/portal-dashboard";
 
 export function PortalNextActionCard({ action }: { action: PortalNextAction | null }) {

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { ExternalLink } from "lucide-react";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { IntakeProgress } from "@/components/intakes/IntakeProgress";
 import { AssignOrganizerPanel } from "@/components/engagements/AssignOrganizerPanel";
 import { SendReminderDialog } from "@/components/engagements/SendReminderDialog";

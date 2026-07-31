@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { sendMessageAction } from "@/lib/actions/portal-messages";
 import { toast } from "@/lib/toast";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { cn, formatDateTime } from "@/lib/utils";
 import type { Message } from "@/lib/types";
 

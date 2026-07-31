@@ -1,7 +1,7 @@
 "use client";
 
 import type { ClientDependent } from "@/lib/types-extended";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 interface ClientDependentsTabProps {
   clientId: string;

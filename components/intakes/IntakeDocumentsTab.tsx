@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { FolderOpen, ArrowRight } from "lucide-react";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { DocumentRequestProgress } from "@/components/intakes/DocumentRequestProgress";

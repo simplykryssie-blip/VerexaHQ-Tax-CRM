@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listPortalIntakes } from "@/lib/data/portal-intakes";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
 import { PortalEmptyState } from "@/components/portal/PortalEmptyState";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { friendlyIntakeStatusMeta } from "@/lib/portal-copy";
 import { PortalNotLinkedState } from "@/components/ui/PortalNotLinkedState";

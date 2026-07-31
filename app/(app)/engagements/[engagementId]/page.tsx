@@ -9,9 +9,9 @@ import { getEngagementOrganizerSummary, listPriorYearOrganizers } from "@/lib/da
 import { listOrganizerTemplateOptions, recommendTemplate } from "@/lib/actions/organizer";
 import { REVIEW_ROLES, MANAGE_ROLES, STAFF_ROLES } from "@/lib/types";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Button } from "@/components/ui/Button";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Tabs, type TabDefinition } from "@/components/ui/Tabs";
+import { Button } from "@/components/ui/LegacyButton";
+import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
+import { Tabs, type TabDefinition } from "@/components/ui/TabSwitcher";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { EngagementOverviewTab } from "@/components/engagements/EngagementOverviewTab";
 import { EngagementWorkflowTab } from "@/components/engagements/EngagementWorkflowTab";

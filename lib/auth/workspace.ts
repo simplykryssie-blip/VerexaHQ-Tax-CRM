@@ -12,6 +12,10 @@ export type WorkspaceContext = {
   membershipId: string;
 };
 
+// Older workspace chooser screens use this name for the same resolved
+// membership shape.
+export type WorkspaceMembership = WorkspaceContext;
+
 /**
  * All workspaces the current user belongs to as an active member. This is the
  * only source of truth for "which workspaces can this user see" — never a

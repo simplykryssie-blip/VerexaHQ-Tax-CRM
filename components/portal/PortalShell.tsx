@@ -5,7 +5,7 @@ import { X } from "lucide-react";
 import { PortalSidebar } from "@/components/portal/PortalSidebar";
 import { PortalHeader } from "@/components/portal/PortalHeader";
 import { PortalBottomNav } from "@/components/portal/PortalBottomNav";
-import { Toaster } from "@/components/ui/Toaster";
+import { Toaster } from "@/components/ui/LegacyToaster";
 import type { ClientLink } from "@/lib/auth/portal";
 
 export function PortalShell({

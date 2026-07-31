@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { resetPasswordSchema, type ResetPasswordInput } from "@/lib/validation/auth";
 import { resetPasswordAction } from "@/lib/actions/auth";
 import { FormField, inputClassName } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 export function ResetPasswordForm() {
   const [formError, setFormError] = useState<string | null>(null);

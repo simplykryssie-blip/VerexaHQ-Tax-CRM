@@ -1,5 +1,5 @@
 import { Users } from "lucide-react";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { titleCase } from "@/lib/utils";
 import type { IntakeHouseholdPerson } from "@/lib/types";

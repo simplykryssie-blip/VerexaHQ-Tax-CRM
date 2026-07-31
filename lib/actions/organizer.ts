@@ -20,7 +20,7 @@ import {
   type SendReminderInput,
   type CreateOrganizerTemplateInput,
 } from "@/lib/validation/organizer";
-import type { Json } from "@/lib/supabase/types";
+import type { Json } from "@/types/database";
 
 type ActionResult = { error?: string; success?: true; submissionId?: string; templateId?: string };
 

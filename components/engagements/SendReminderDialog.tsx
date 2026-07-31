@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Bell } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { toast } from "@/lib/toast";
 import { sendOrganizerReminderAction } from "@/lib/actions/organizer";
 

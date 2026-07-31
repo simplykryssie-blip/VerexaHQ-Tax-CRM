@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, ListChecks, CheckCircle2, Circle } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { IntakeProgress } from "@/components/intakes/IntakeProgress";
 import { GenericSectionFields } from "@/components/portal/intake/GenericSectionFields";

@@ -7,7 +7,7 @@ import { PortalOrganizerCard } from "@/components/portal/dashboard/PortalOrganiz
 import { PortalNextActionCard } from "@/components/portal/dashboard/PortalNextActionCard";
 import { PortalActionCardsGrid } from "@/components/portal/dashboard/PortalActionCardsGrid";
 import { PortalActivityTimeline } from "@/components/portal/PortalActivityTimeline";
-import { Card, CardHeader, CardBody } from "@/components/ui/Card";
+import { Card, CardHeader, CardBody } from "@/components/ui/LegacyCard";
 import { PortalNotLinkedState } from "@/components/ui/PortalNotLinkedState";
 import { clientDisplayName } from "@/lib/utils";
 

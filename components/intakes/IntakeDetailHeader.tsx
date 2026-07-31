@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { IntakeProgress } from "@/components/intakes/IntakeProgress";
 import { intakeSubmissionStatusMeta } from "@/lib/status";

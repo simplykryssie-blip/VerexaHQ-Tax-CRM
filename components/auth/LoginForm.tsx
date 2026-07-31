@@ -7,7 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 import { signInAction } from "@/lib/actions/auth";
 import { FormField, inputClassName } from "@/components/ui/FormField";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 
 export function LoginForm({ redirectTo }: { redirectTo?: string }) {
   const [formError, setFormError] = useState<string | null>(null);

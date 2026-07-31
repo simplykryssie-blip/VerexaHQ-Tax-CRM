@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ClipboardList } from "lucide-react";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { IntakeProgress } from "@/components/intakes/IntakeProgress";
 import type { IntakeSubmission } from "@/lib/types";
 

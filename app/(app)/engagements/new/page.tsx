@@ -4,7 +4,7 @@ import { STAFF_ROLES } from "@/lib/types";
 import { listClientsForPicker } from "@/lib/data/engagements";
 import { listWorkspaceStaff } from "@/lib/data/users";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { ForbiddenState } from "@/components/ui/ForbiddenState";
 import { EngagementForm } from "@/components/engagements/EngagementForm";
 

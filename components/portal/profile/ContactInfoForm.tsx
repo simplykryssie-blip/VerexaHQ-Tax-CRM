@@ -4,7 +4,7 @@ import { useState } from "react";
 import { updateContactInfoAction } from "@/lib/actions/portal-profile";
 import { contactMethodOptions } from "@/lib/validation/portal-profile";
 import { toast } from "@/lib/toast";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/LegacyButton";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import { titleCase } from "@/lib/utils";
 import type { Client } from "@/lib/types";

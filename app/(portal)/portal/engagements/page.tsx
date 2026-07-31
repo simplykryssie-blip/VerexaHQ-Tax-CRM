@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listPortalEngagements } from "@/lib/data/portal-engagements";
 import { PortalPageHeader } from "@/components/portal/PortalPageHeader";
 import { PortalEmptyState } from "@/components/portal/PortalEmptyState";
-import { Card, CardBody } from "@/components/ui/Card";
+import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { friendlyEngagementStatusMeta } from "@/lib/portal-copy";
 import { returnTypeLabels } from "@/lib/status";
