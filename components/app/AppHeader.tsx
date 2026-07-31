@@ -4,6 +4,9 @@ import { Menu } from "lucide-react";
 import { WorkspaceSwitcher } from "@/components/app/WorkspaceSwitcher";
 import { SignOutButton } from "@/components/app/SignOutButton";
 import { initials, titleCase } from "@/lib/utils";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import type { WorkspaceContext } from "@/lib/auth/workspace";
 
 export function AppHeader({
@@ -17,6 +20,16 @@ export function AppHeader({
   userEmail: string;
   onMenuClick: () => void;
 }) {
+  const [q, setQ] = useState("");
+  const router = useRouter();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (q.trim()) {
+      router.push(`/search?q=${encodeURIComponent(q.trim())}`);
+    }
+  };
+
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-surface px-4 sm:px-6">
       <div className="flex items-center gap-3">
@@ -32,6 +45,15 @@ export function AppHeader({
           <p className="text-xs text-muted">{titleCase(workspace.role)}</p>
         </div>
       </div>
+
+      <form onSubmit={handleSearch} className="hidden max-w-md flex-1 px-4 md:block">
+        <SearchInput
+          value={q}
+          onChange={setQ}
+          placeholder="Search clients, engagements, docs…"
+          className="w-full"
+        />
+      </form>
 
       <div className="flex items-center gap-3">
         <WorkspaceSwitcher
