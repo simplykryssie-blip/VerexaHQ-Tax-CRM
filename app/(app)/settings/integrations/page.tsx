@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { PhoneOff, MailX, VideoOff, CreditCard } from "lucide-react";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,7 @@ const INTEGRATIONS = [
 ];
 
 export default async function IntegrationsPage() {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (!roleHasCapability(active.role, "manage_integrations")) redirect("/unauthorized");
 

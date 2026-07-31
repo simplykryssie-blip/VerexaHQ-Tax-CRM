@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { NewInvoiceForm } from "@/features/billing/new-invoice-form";
 import type { PickerOption } from "@/features/engagements/client-picker";
 
 export default async function NewInvoicePage() {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (!roleHasCapability(active.role, "manage_billing")) redirect("/unauthorized");
   const workspaceId = active.workspace.id;

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -17,7 +17,7 @@ const SUBSCRIPTION_STATUS_LABELS: Record<string, string> = {
 };
 
 export default async function SubscriptionPage() {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (!roleHasCapability(active.role, "manage_workspace")) redirect("/unauthorized");
 

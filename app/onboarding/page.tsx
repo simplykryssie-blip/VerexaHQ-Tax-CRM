@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getUserMemberships } from "@/lib/auth/workspace";
+import { listMyWorkspaces } from "@/lib/auth/workspace";
 import { OnboardingWizard } from "@/features/onboarding/onboarding-wizard";
 
 export default async function OnboardingPage() {
@@ -10,7 +10,7 @@ export default async function OnboardingPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in");
 
-  const memberships = await getUserMemberships();
+  const memberships = await listMyWorkspaces();
   if (memberships.length > 0) redirect("/");
 
   return <OnboardingWizard />;

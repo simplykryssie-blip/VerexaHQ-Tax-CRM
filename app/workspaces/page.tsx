@@ -1,11 +1,11 @@
 import { redirect } from "next/navigation";
-import { getUserMemberships } from "@/lib/auth/workspace";
+import { listMyWorkspaces } from "@/lib/auth/workspace";
 import { Logo } from "@/components/logo";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { WorkspaceChooserList } from "@/features/auth/workspace-chooser-list";
 
 export default async function WorkspaceChooserPage() {
-  const memberships = await getUserMemberships();
+  const memberships = await listMyWorkspaces();
   if (memberships.length === 0) redirect("/onboarding");
   if (memberships.length === 1) redirect("/dashboard");
 

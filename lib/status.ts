@@ -242,3 +242,6 @@ export const rolloverStateLabels: Record<string, string> = {
   needs_confirmation: "Needs your confirmation",
   confirmed: "Confirmed",
 };
+export function engagementStatusLabel(status: string): string {
+  return engagementStatusMeta(status).label;
+}

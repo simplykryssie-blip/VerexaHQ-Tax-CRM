@@ -2,14 +2,14 @@ import { redirect } from "next/navigation";
 import { ClipboardCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/empty-state";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { EroReviewInbox, type EroInboxRow } from "@/features/engagements/ero-review-inbox";
 
 const ERO_UPDATE_ROLES = ["owner", "admin", "ero"] as const;
 
 export default async function EroReviewPage() {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (!roleHasCapability(active.role, "review_returns")) redirect("/unauthorized");
 

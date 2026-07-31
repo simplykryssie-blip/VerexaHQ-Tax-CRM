@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { getInvoices, getOutstandingBalance } from "@/features/billing/queries";
 import { INVOICE_STATUS_LABELS, invoiceStatusLabel } from "@/lib/validation/billing";
@@ -13,7 +13,7 @@ import { formatCurrency, formatDate } from "@/lib/formatters";
 
 export default async function InvoicesPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { status } = await searchParams;
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (!roleHasCapability(active.role, "manage_billing")) redirect("/unauthorized");
   const workspaceId = active.workspace.id;

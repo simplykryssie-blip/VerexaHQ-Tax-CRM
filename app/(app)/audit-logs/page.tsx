@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 import { ScrollText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { EmptyState } from "@/components/empty-state";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
 import { formatDateTime } from "@/lib/formatters";
 
 export default async function AuditLogsPage() {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (active.role !== "owner" && active.role !== "admin" && active.role !== "auditor") redirect("/unauthorized");
 

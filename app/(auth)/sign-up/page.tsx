@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/client";
-import { signUpSchema, type SignUpInput } from "@/lib/validation/auth";
+import { signupSchema, type SignupInput } from "@/lib/validation/auth";
 import { friendlyAuthError } from "@/lib/errors";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
@@ -23,9 +23,9 @@ export default function SignUpPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpInput>({ resolver: zodResolver(signUpSchema) });
+  } = useForm<SignupInput>({ resolver: zodResolver(signupSchema) });
 
-  async function onSubmit(values: SignUpInput) {
+  async function onSubmit(values: SignupInput) {
     setLoading(true);
     setServerError(null);
     const supabase = createClient();
