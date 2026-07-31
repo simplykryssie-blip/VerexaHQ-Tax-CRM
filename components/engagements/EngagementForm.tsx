@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/Button";
 import { clientDisplayName } from "@/lib/utils";
 import type { Client } from "@/lib/types";
 import type { UserSummary } from "@/lib/data/users";
+import { useRouter } from "next/navigation";
 
 type ClientOption = Pick<Client, "id" | "first_name" | "last_name" | "display_name" | "preferred_name" | "company">;
 
@@ -26,6 +27,7 @@ const currentYear = new Date().getFullYear();
 type EngagementFormInput = z.input<typeof createEngagementSchema>;
 
 export function EngagementForm({ clients, staff }: { clients: ClientOption[]; staff: UserSummary[] }) {
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
@@ -47,7 +49,13 @@ export function EngagementForm({ clients, staff }: { clients: ClientOption[]; st
   const onSubmit = async (data: CreateEngagementInput) => {
     setFormError(null);
     const result = await createEngagementAction(data);
-    if (result?.error) setFormError(result.error);
+    if (result?.error) {
+      setFormError(result.error);
+    } else if (result?.engagementId) {
+      router.push(`/engagements/${result.engagementId}`);
+    } else {
+      router.push("/engagements");
+    }
   };
 
   return (

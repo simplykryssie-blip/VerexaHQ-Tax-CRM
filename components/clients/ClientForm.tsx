@@ -13,8 +13,10 @@ import { createClientAction } from "@/lib/actions/clients";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/Button";
 import { titleCase } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export function ClientForm() {
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
@@ -30,6 +32,8 @@ export function ClientForm() {
     const result = await createClientAction(data);
     if (result?.error) {
       setFormError(result.error);
+    } else {
+      router.refresh();
     }
   };
 
