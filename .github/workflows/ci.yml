@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: true
+  # Safe, non-secret build-time values. The app never validates these at
+  # build time (Server/Client Supabase clients are only exercised at
+  # request time), so no repository secrets are required here. Do not add
+  # SUPABASE_SERVICE_ROLE_KEY — the build does not need it.
+  NEXT_PUBLIC_SUPABASE_URL: https://aewqbffscdrziiwfomyf.supabase.co
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-build-placeholder-key
+  NEXT_PUBLIC_APP_URL: http://localhost:3000
+
+jobs:
+  build:
+    name: Lint, type-check, build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        id: lint
+        run: npm run lint
+
+      - name: Type-check
+        id: type_check
+        run: npm run type-check
+
+      - name: Build
+        id: build
+        run: npm run build
+
+      - name: Audit (informational, non-blocking)
+        id: audit
+        if: always()
+        continue-on-error: true
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "### CI results" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Lint: ${{ steps.lint.outcome || 'skipped' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Type-check: ${{ steps.type_check.outcome || 'skipped' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Build: ${{ steps.build.outcome || 'skipped' }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Audit (informational): ${{ steps.audit.outcome || 'skipped' }}" >> "$GITHUB_STEP_SUMMARY"

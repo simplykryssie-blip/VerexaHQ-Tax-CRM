@@ -1,4 +1,5 @@
 import { requireWorkspace } from "@/lib/auth/workspace";
+import { listMyClientLinks } from "@/lib/auth/portal";
 import { AppShell } from "@/components/app/AppShell";
 import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
 
@@ -10,7 +11,8 @@ export default async function AppLayout({
   const { user, workspace, memberships } = await requireWorkspace();
 
   if (!workspace) {
-    return <NoWorkspaceState />;
+    const clientLinks = await listMyClientLinks();
+    return <NoWorkspaceState hasClientAccess={clientLinks.length > 0} />;
   }
 
   return (

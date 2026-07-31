@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { resolveHomePath } from "@/lib/auth/portal";
 import {
   forgotPasswordSchema,
   loginSchema,
@@ -52,7 +53,7 @@ export async function signInAction(
     return { error: friendlyAuthError(error.message) };
   }
 
-  redirect(isSafeRedirect(redirectTo) ? redirectTo! : "/dashboard");
+  redirect(isSafeRedirect(redirectTo) ? redirectTo! : await resolveHomePath());
 }
 
 export async function signUpAction(input: SignupInput): Promise<ActionResult> {
@@ -112,7 +113,7 @@ export async function resetPasswordAction(
     return { error: friendlyAuthError(error.message) };
   }
 
-  redirect("/dashboard");
+  redirect(await resolveHomePath());
 }
 
 function isSafeRedirect(path: string | undefined): path is string {

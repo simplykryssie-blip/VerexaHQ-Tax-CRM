@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { requireWorkspace } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { getUserSummaryMap } from "@/lib/data/users";
@@ -52,6 +54,25 @@ export default async function SettingsPage() {
               <dd className="mt-1 text-sm text-foreground">{memberships.length}</dd>
             </div>
           </dl>
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-sm font-semibold text-foreground">Organizer templates</h2>
+        </CardHeader>
+        <CardBody>
+          <div className="flex items-center justify-between gap-3">
+            <p className="text-sm text-muted">
+              Manage the tax organizer templates clients and staff use across engagements.
+            </p>
+            <Link
+              href="/settings/organizers"
+              className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-700 hover:underline"
+            >
+              Manage templates <ArrowRight className="size-3.5" />
+            </Link>
+          </div>
         </CardBody>
       </Card>
 

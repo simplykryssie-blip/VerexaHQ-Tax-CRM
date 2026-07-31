@@ -1,7 +1,8 @@
+import Link from "next/link";
 import { Building2 } from "lucide-react";
 import { SignOutButton } from "@/components/app/SignOutButton";
 
-export function NoWorkspaceState() {
+export function NoWorkspaceState({ hasClientAccess = false }: { hasClientAccess?: boolean }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="flex max-w-md flex-col items-center gap-4 rounded-xl border border-border bg-white p-8 text-center shadow-sm">
@@ -18,6 +19,14 @@ export function NoWorkspaceState() {
             back in.
           </p>
         </div>
+        {hasClientAccess && (
+          <Link
+            href="/portal/dashboard"
+            className="text-sm font-medium text-accent-700 hover:underline"
+          >
+            Go to your client portal instead
+          </Link>
+        )}
         <SignOutButton />
       </div>
     </div>
