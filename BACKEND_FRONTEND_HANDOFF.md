@@ -50,6 +50,23 @@ The three generated lead-form records remain `draft`. The frontend must require 
 
 ## RPCs the frontend/server should use
 
+### `activate_tax_engagement`
+
+Signed-in staff activation endpoint. Inputs:
+
+- `p_engagement_id`
+- `p_activation_mode`: `activate_without_sending` or `activate_and_send`
+
+This is the authoritative activation path. It safely materializes the configured organizer, engagement letter, document request, default tasks, optional invoice, release controls, workflow stage changes, and a queued portal/package-delivery job in one transaction. It is idempotent: repeating the call returns/reuses the existing artifacts instead of creating duplicates. Replace the older frontend-only `activateAndAssignOrganizer` sequence with this RPC.
+
+The response includes the activation ID, status, artifact IDs, and warnings such as a missing client email or a package component that is not configured.
+
+### `evaluate_return_release` and `release_completed_return`
+
+Use `evaluate_return_release` to display exact blockers before completed-return delivery. It distinguishes a missing invoice from a paid invoice and checks configured payment, signature, review, and optional filing-acceptance requirements.
+
+Use `release_completed_return` for the final staff action. It re-evaluates every requirement inside the transaction, is idempotent after release, and writes engagement activity plus an audit record.
+
 ### `submit_public_lead_form`
 
 Anonymous form endpoint. Inputs:
@@ -131,6 +148,8 @@ Tax disaster relief, fiscal years, short years, combat-zone relief, non-calendar
 - `supabase/migrations/20260801010200_fix_generic_actor_trigger.sql`
 - `supabase/migrations/20260801010300_seed_statutory_deadline_rules.sql`
 - `supabase/migrations/20260801010400_backend_advisor_hardening.sql`
+- `supabase/migrations/20260801010500_engagement_activation_and_release_gate.sql`
+- `supabase/migrations/20260801010600_activation_advisor_hardening.sql`
 - `types/database.ts`
 
 The live database already contains these migrations. Do not manually re-run their SQL. Commit them so local/GitHub migration history stays aligned with Supabase.

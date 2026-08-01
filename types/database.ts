@@ -3231,6 +3231,150 @@ export type Database = {
           },
         ]
       }
+      engagement_activation_runs: {
+        Row: {
+          activated_at: string
+          activated_by: string | null
+          activation_mode: string
+          artifacts: Json
+          created_at: string
+          delivery_queued_at: string | null
+          document_request_id: string | null
+          engagement_id: string
+          engagement_letter_id: string | null
+          engagement_type_setting_id: string | null
+          id: string
+          invoice_id: string | null
+          organizer_submission_id: string | null
+          portal_delivery_job_id: string | null
+          sent_at: string | null
+          status: string
+          updated_at: string
+          warnings: Json
+          workspace_id: string
+        }
+        Insert: {
+          activated_at?: string
+          activated_by?: string | null
+          activation_mode: string
+          artifacts?: Json
+          created_at?: string
+          delivery_queued_at?: string | null
+          document_request_id?: string | null
+          engagement_id: string
+          engagement_letter_id?: string | null
+          engagement_type_setting_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          organizer_submission_id?: string | null
+          portal_delivery_job_id?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          warnings?: Json
+          workspace_id: string
+        }
+        Update: {
+          activated_at?: string
+          activated_by?: string | null
+          activation_mode?: string
+          artifacts?: Json
+          created_at?: string
+          delivery_queued_at?: string | null
+          document_request_id?: string | null
+          engagement_id?: string
+          engagement_letter_id?: string | null
+          engagement_type_setting_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          organizer_submission_id?: string | null
+          portal_delivery_job_id?: string | null
+          sent_at?: string | null
+          status?: string
+          updated_at?: string
+          warnings?: Json
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "engagement_activation_runs_document_request_id_fkey"
+            columns: ["document_request_id"]
+            isOneToOne: false
+            referencedRelation: "document_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_document_request_id_fkey"
+            columns: ["document_request_id"]
+            isOneToOne: false
+            referencedRelation: "v_missing_document_aging"
+            referencedColumns: ["document_request_id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: true
+            referencedRelation: "tax_engagements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_engagement_id_fkey"
+            columns: ["engagement_id"]
+            isOneToOne: true
+            referencedRelation: "v_engagement_work_queue"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_engagement_letter_id_fkey"
+            columns: ["engagement_letter_id"]
+            isOneToOne: false
+            referencedRelation: "engagement_letters"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_engagement_type_setting_id_fkey"
+            columns: ["engagement_type_setting_id"]
+            isOneToOne: false
+            referencedRelation: "engagement_type_settings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_organizer_submission_id_fkey"
+            columns: ["organizer_submission_id"]
+            isOneToOne: false
+            referencedRelation: "intake_submissions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_portal_delivery_job_id_fkey"
+            columns: ["portal_delivery_job_id"]
+            isOneToOne: false
+            referencedRelation: "automation_jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "v_tax_office_dashboard"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "engagement_activation_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       engagement_assignments: {
         Row: {
           assigned_at: string
@@ -3847,19 +3991,25 @@ export type Database = {
           created_at: string
           created_by: string | null
           deadline_settings: Json
+          default_messages: Json
+          default_tasks: Json
           document_checklist_template_id: string | null
           document_checklist_template_version_id: string | null
           engagement_letter_template_id: string | null
           engagement_letter_template_version_id: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
           id: string
+          invoice_settings: Json
           is_active: boolean
           name: string
           organizer_template_id: string | null
           organizer_template_version_id: string | null
+          portal_settings: Json
           pricing_config: Json
           pricing_method: string
           primary_workflow_definition_id: string | null
+          release_settings: Json
+          reminder_settings: Json
           return_type: Database["public"]["Enums"]["tax_return_type"] | null
           reviewer_policy: string
           updated_at: string
@@ -3870,19 +4020,25 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deadline_settings?: Json
+          default_messages?: Json
+          default_tasks?: Json
           document_checklist_template_id?: string | null
           document_checklist_template_version_id?: string | null
           engagement_letter_template_id?: string | null
           engagement_letter_template_version_id?: string | null
           engagement_type: Database["public"]["Enums"]["engagement_type"]
           id?: string
+          invoice_settings?: Json
           is_active?: boolean
           name: string
           organizer_template_id?: string | null
           organizer_template_version_id?: string | null
+          portal_settings?: Json
           pricing_config?: Json
           pricing_method?: string
           primary_workflow_definition_id?: string | null
+          release_settings?: Json
+          reminder_settings?: Json
           return_type?: Database["public"]["Enums"]["tax_return_type"] | null
           reviewer_policy?: string
           updated_at?: string
@@ -3893,19 +4049,25 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           deadline_settings?: Json
+          default_messages?: Json
+          default_tasks?: Json
           document_checklist_template_id?: string | null
           document_checklist_template_version_id?: string | null
           engagement_letter_template_id?: string | null
           engagement_letter_template_version_id?: string | null
           engagement_type?: Database["public"]["Enums"]["engagement_type"]
           id?: string
+          invoice_settings?: Json
           is_active?: boolean
           name?: string
           organizer_template_id?: string | null
           organizer_template_version_id?: string | null
+          portal_settings?: Json
           pricing_config?: Json
           pricing_method?: string
           primary_workflow_definition_id?: string | null
+          release_settings?: Json
+          reminder_settings?: Json
           return_type?: Database["public"]["Enums"]["tax_return_type"] | null
           reviewer_policy?: string
           updated_at?: string
@@ -7485,13 +7647,17 @@ export type Database = {
       }
       return_release_controls: {
         Row: {
+          blockers: Json
           created_at: string
           engagement_id: string
+          evaluated_at: string | null
+          filing_satisfied_at: string | null
           id: string
           payment_satisfied_at: string | null
           release_notes: string | null
           released_at: string | null
           released_by: string | null
+          require_filing_acceptance: boolean
           require_payment: boolean
           require_review_approval: boolean
           require_signature: boolean
@@ -7501,13 +7667,17 @@ export type Database = {
           workspace_id: string
         }
         Insert: {
+          blockers?: Json
           created_at?: string
           engagement_id: string
+          evaluated_at?: string | null
+          filing_satisfied_at?: string | null
           id?: string
           payment_satisfied_at?: string | null
           release_notes?: string | null
           released_at?: string | null
           released_by?: string | null
+          require_filing_acceptance?: boolean
           require_payment?: boolean
           require_review_approval?: boolean
           require_signature?: boolean
@@ -7517,13 +7687,17 @@ export type Database = {
           workspace_id: string
         }
         Update: {
+          blockers?: Json
           created_at?: string
           engagement_id?: string
+          evaluated_at?: string | null
+          filing_satisfied_at?: string | null
           id?: string
           payment_satisfied_at?: string | null
           release_notes?: string | null
           released_at?: string | null
           released_by?: string | null
+          require_filing_acceptance?: boolean
           require_payment?: boolean
           require_review_approval?: boolean
           require_signature?: boolean
@@ -11193,6 +11367,10 @@ export type Database = {
       }
     }
     Functions: {
+      activate_tax_engagement: {
+        Args: { p_activation_mode?: string; p_engagement_id: string }
+        Returns: Json
+      }
       activate_workflow_definition: {
         Args: { p_definition_id: string }
         Returns: undefined
@@ -11572,7 +11750,7 @@ export type Database = {
       }
       release_completed_return: {
         Args: { p_engagement_id: string; p_notes?: string }
-        Returns: undefined
+        Returns: Json
       }
       reopen_intake: {
         Args: { p_reason: string; p_submission_id: string }
