@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { resolveHomePath } from "@/lib/auth/portal";
@@ -30,6 +31,16 @@ function friendlyAuthError(message: string) {
     return "Password does not meet the minimum requirements.";
   }
   return "Something went wrong. Please try again.";
+}
+
+function friendlyPasswordUpdateError(message: string) {
+  if (/auth session missing|session not found|jwt expired|refresh token/i.test(message)) {
+    return "This password-reset link has expired. Please request a new email and try again.";
+  }
+  if (/password should be at least/i.test(message)) {
+    return "Password does not meet the minimum requirements.";
+  }
+  return "We could not update your password. Please try again.";
 }
 
 export async function signOutAction() {
@@ -87,12 +98,22 @@ export async function forgotPasswordAction(
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
+  const origin = getRequestOrigin(await headers());
+  if (!origin) {
+    return { error: "We could not send a recovery email. Please try again." };
+  }
+
+  const redirectTo = new URL("/auth/confirm", origin);
+  redirectTo.searchParams.set("next", "/reset-password");
   const supabase = await createClient();
   // Deliberately ignore whether the email exists — never reveal account
   // existence through this form's response.
-  await supabase.auth.resetPasswordForEmail(parsed.data.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=/reset-password`,
+  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, {
+    redirectTo: redirectTo.toString(),
   });
+  if (error) {
+    return { error: "We could not send a recovery email. Please try again." };
+  }
 
   return {};
 }
@@ -110,10 +131,33 @@ export async function resetPasswordAction(
     password: parsed.data.password,
   });
   if (error) {
-    return { error: friendlyAuthError(error.message) };
+    return { error: friendlyPasswordUpdateError(error.message) };
   }
 
-  redirect(await resolveHomePath());
+  redirect("/login?passwordUpdated=1");
+}
+
+function getRequestOrigin(requestHeaders: Headers) {
+  const origin = requestHeaders.get("origin");
+  if (origin) {
+    try {
+      return new URL(origin).origin;
+    } catch {
+      return null;
+    }
+  }
+
+  const host = (requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host"))
+    ?.split(",")[0]
+    ?.trim();
+  const protocol = requestHeaders.get("x-forwarded-proto")?.split(",")[0]?.trim() ?? "https";
+  if (!host) return null;
+
+  try {
+    return new URL(`${protocol}://${host}`).origin;
+  } catch {
+    return null;
+  }
 }
 
 function isSafeRedirect(path: string | undefined): path is string {
