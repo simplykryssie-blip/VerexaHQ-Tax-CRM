@@ -34,7 +34,7 @@ export function NewEngagementForm({
   const [householdId, setHouseholdId] = useState<string | null>(null);
   const [taxYear, setTaxYear] = useState(new Date().getFullYear() - 1);
   const [returnType, setReturnType] = useState<(typeof RETURN_TYPES)[number]>("1040");
-  const [engagementType, setEngagementType] = useState<(typeof ENGAGEMENT_TYPE_OPTIONS)[number]>("individual_return");
+  const [engagementType, setEngagementType] = useState<(typeof ENGAGEMENT_TYPE_OPTIONS)[number]>("individual");
   const [jurisdiction, setJurisdiction] = useState("federal");
   const [preparerId, setPreparerId] = useState<string | null>(null);
   const [priority, setPriority] = useState<(typeof ENGAGEMENT_PRIORITIES)[number]>("normal");

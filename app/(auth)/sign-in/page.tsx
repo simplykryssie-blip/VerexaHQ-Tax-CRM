@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/client";
-import { signInSchema, type SignInInput } from "@/lib/validation/auth";
+import { loginSchema, type LoginInput } from "@/lib/validation/auth";
 import { friendlyAuthError } from "@/lib/errors";
 import { Loader2 } from "lucide-react";
 
@@ -33,9 +33,9 @@ function SignInForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInInput>({ resolver: zodResolver(signInSchema) });
+  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
 
-  async function onSubmit(values: SignInInput) {
+  async function onSubmit(values: LoginInput) {
     setLoading(true);
     setServerError(null);
     const supabase = createClient();

@@ -1,36 +1,43 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# Dependencies
+node_modules/
+.pnp
 .pnp.js
-.yarn/install-state.gz
 
-# testing
-/coverage
+# Next.js
+.next/
+out/
+build/
+dist/
 
-# next.js
-/.next/
-/out/
+# Production
+*.tsbuildinfo
 
-# production
-/build
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
 
-# misc
-.DS_Store
-*.pem
+# Vercel
+.vercel
 
-# debug
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+*.log
 
-# local env files
-.env*.local
+# Editor / OS
+.DS_Store
+*.pem
+.idea/
+.vscode/*
+!.vscode/extensions.json
 
-# vercel
-.vercel
+# TypeScript
+next-env.d.ts.bak
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# Testing / coverage
+coverage/

@@ -1,31 +1,29 @@
 "use client";
 
 import { useEffect } from "react";
-import { AlertTriangle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/logo";
+import { ErrorState } from "@/components/ui/ErrorState";
 
-export default function GlobalErrorBoundary({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) {
   useEffect(() => {
-    // Log technical detail server-side (picked up by the hosting
-    // platform's log pipeline) — never shown to the user directly.
-    console.error("[verexa-tax-office] unhandled error", error);
+    // Log server-side details for operators without leaking them to the UI.
+    console.error("Unhandled application error:", error.digest ?? error.message);
   }, [error]);
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 text-center bg-secondary/40">
-      <div className="mb-8">
-        <Logo />
+    <div className="flex min-h-screen items-center justify-center bg-background p-6">
+      <div className="w-full max-w-md">
+        <ErrorState
+          title="Something went wrong"
+          description="An unexpected error occurred. Please try again."
+          onRetry={reset}
+        />
       </div>
-      <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
-      <h1 className="text-lg font-semibold mb-2">Something went wrong</h1>
-      <p className="text-sm text-muted-foreground max-w-sm mb-6">
-        We hit an unexpected error. Nothing you entered was lost — try again, and contact support if it
-        keeps happening.
-      </p>
-      <Button variant="brand" onClick={reset}>
-        Try again
-      </Button>
     </div>
   );
 }

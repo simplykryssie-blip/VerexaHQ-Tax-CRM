@@ -1,72 +1,54 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-/*
-  Verexa Tax Office brand palette — deep teal / green, no purple or bright
-  blue per the design brief. HSL triples (no hsl() wrapper) so Tailwind's
-  hsl(var(--x)) color tokens in tailwind.config.ts can apply opacity.
-*/
 :root {
-  --background: 150 20% 98%;
-  --foreground: 174 30% 12%;
+  --background: #f7faf9;
+  --surface: #ffffff;
+  --foreground: #10231e;
+  --muted: #5b6b66;
+  --border: #e2e8e5;
 
-  --card: 0 0% 100%;
-  --card-foreground: 174 30% 12%;
+  --accent-50: #ecfdf5;
+  --accent-100: #d1fae5;
+  --accent-200: #a7f3d0;
+  --accent-500: #14b88a;
+  --accent-600: #0d9270;
+  --accent-700: #0a7259;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 174 30% 12%;
+  --success: #0d9270;
+  --warning: #b45309;
+  --danger: #b91c1c;
+  --info: #0369a1;
+}
 
-  --primary: 174 84% 24%;
-  --primary-foreground: 0 0% 100%;
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
 
-  --secondary: 152 30% 94%;
-  --secondary-foreground: 174 60% 16%;
+  --color-accent-50: var(--accent-50);
+  --color-accent-100: var(--accent-100);
+  --color-accent-200: var(--accent-200);
+  --color-accent-500: var(--accent-500);
+  --color-accent-600: var(--accent-600);
+  --color-accent-700: var(--accent-700);
 
-  --muted: 160 20% 95%;
-  --muted-foreground: 174 10% 40%;
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  --color-info: var(--info);
 
-  --accent: 152 55% 92%;
-  --accent-foreground: 174 60% 16%;
-
-  --destructive: 4 72% 46%;
-  --destructive-foreground: 0 0% 100%;
-
-  --success: 152 60% 32%;
-  --success-foreground: 0 0% 100%;
-
-  --warning: 38 92% 45%;
-  --warning-foreground: 0 0% 100%;
-
-  --border: 160 20% 89%;
-  --input: 160 20% 89%;
-  --ring: 174 84% 24%;
-
-  --sidebar: 174 45% 13%;
-  --sidebar-foreground: 150 25% 92%;
-  --sidebar-accent: 174 35% 20%;
-  --sidebar-border: 174 35% 22%;
-
-  --radius: 0.625rem;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
-  color: hsl(var(--foreground));
-  background: hsl(var(--background));
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background: var(--background);
+  color: var(--foreground);
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-  .brand-gradient-text {
-    @apply bg-brand-gradient bg-clip-text text-transparent;
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border;
-  }
+::selection {
+  background: var(--accent-100);
+  color: var(--accent-700);
 }

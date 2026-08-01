@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/client";
-import { signUpSchema, type SignUpInput } from "@/lib/validation/auth";
+import { signupSchema, type SignupInput } from "@/lib/validation/auth";
 import { friendlyAuthError } from "@/lib/errors";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
@@ -23,9 +23,9 @@ export default function SignUpPage() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpInput>({ resolver: zodResolver(signUpSchema) });
+  } = useForm<SignupInput>({ resolver: zodResolver(signupSchema) });
 
-  async function onSubmit(values: SignUpInput) {
+  async function onSubmit(values: SignupInput) {
     setLoading(true);
     setServerError(null);
     const supabase = createClient();
@@ -33,7 +33,11 @@ export default function SignUpPage() {
       email: values.email,
       password: values.password,
       options: {
-        data: { full_name: values.fullName },
+        data: {
+          first_name: values.firstName,
+          last_name: values.lastName,
+          full_name: `${values.firstName} ${values.lastName}`.trim(),
+        },
         emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
       },
     });
@@ -78,10 +82,17 @@ export default function SignUpPage() {
               <AlertDescription>{serverError}</AlertDescription>
             </Alert>
           )}
-          <div className="space-y-1.5">
-            <Label htmlFor="fullName">Full name</Label>
-            <Input id="fullName" autoComplete="name" {...register("fullName")} aria-invalid={!!errors.fullName} />
-            {errors.fullName && <p className="text-xs text-destructive">{errors.fullName.message}</p>}
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="firstName">First name</Label>
+              <Input id="firstName" autoComplete="given-name" {...register("firstName")} aria-invalid={!!errors.firstName} />
+              {errors.firstName && <p className="text-xs text-destructive">{errors.firstName.message}</p>}
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="lastName">Last name</Label>
+              <Input id="lastName" autoComplete="family-name" {...register("lastName")} aria-invalid={!!errors.lastName} />
+              {errors.lastName && <p className="text-xs text-destructive">{errors.lastName.message}</p>}
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="email">Email</Label>

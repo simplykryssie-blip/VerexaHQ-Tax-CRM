@@ -1,13 +1,13 @@
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { getInvoiceDetail } from "@/features/billing/queries";
 import { InvoicePanel } from "@/features/billing/invoice-panel";
 
 export default async function InvoiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (!roleHasCapability(active.role, "manage_billing")) redirect("/unauthorized");
 

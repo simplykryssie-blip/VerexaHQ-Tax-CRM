@@ -1,82 +1,111 @@
-import "server-only";
+import { cache } from "react";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
-import type { Tables } from "@/types/database";
+import { getAuthUser, requireAuthUser } from "@/lib/auth/session";
+import { listMyWorkspaces } from "@/lib/auth/workspace";
+import type { Client } from "@/lib/types";
 
-// Internal-notes columns that must never be selected on behalf of a portal
-// user (clients.notes is staff-only; there is no client-facing RLS path for
-// it, but we also never want to accidentally fetch/leak it into a portal page).
-export const PORTAL_SAFE_CLIENT_COLUMNS =
-  "id, workspace_id, first_name, last_name, preferred_name, display_name, email, phone, company, client_type, status, portal_status, preferred_contact_method, preferred_language, timezone";
+export const CLIENT_COOKIE = "verexa-client-id";
 
-export type PortalClient = Pick<
-  Tables<"clients">,
-  | "id"
-  | "workspace_id"
-  | "first_name"
-  | "last_name"
-  | "preferred_name"
-  | "display_name"
-  | "email"
-  | "phone"
-  | "company"
-  | "client_type"
-  | "status"
-  | "portal_status"
-  | "preferred_contact_method"
-  | "preferred_language"
-  | "timezone"
->;
-
-export type PortalContext = {
-  userId: string;
-  client: PortalClient;
-  /** Set when the signed-in user is a secondary contact (e.g. spouse) rather
-   * than the primary client record itself. */
+export type ClientLink = {
+  client: Client;
+  linkType: "primary" | "contact";
   contactId: string | null;
-  contactName: string | null;
 };
 
-/** Resolves the signed-in auth user to the client record they're allowed to
- * act as in the portal — either the primary client (clients.portal_user_id)
- * or an active, portal-enabled secondary contact (client_contacts). Both
- * paths mirror the live RLS linkage (can_access_client_record /
- * can_access_intake_submission / etc.) exactly, so a null result here means
- * RLS would reject every portal read for this user too. */
-export async function getPortalContext(): Promise<PortalContext | null> {
+/**
+ * Every client record the current user can act as, resolved strictly from
+ * clients.portal_user_id (primary taxpayer) and client_contacts.auth_user_id
+ * (an additional contact explicitly granted can_access_portal) — never from
+ * a client-supplied ID. A single user can be linked to more than one client
+ * (e.g. an authorized contact on a household member's return, or the
+ * taxpayer on both an individual and a business client record).
+ */
+export const listMyClientLinks = cache(async (): Promise<ClientLink[]> => {
+  const user = await getAuthUser();
+  if (!user) return [];
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
 
-  const { data: ownClient } = await supabase
-    .from("clients")
-    .select(PORTAL_SAFE_CLIENT_COLUMNS)
-    .eq("portal_user_id", user.id)
-    .is("archived_at", null)
-    .maybeSingle();
+  const [primaryResult, contactResult] = await Promise.all([
+    supabase.from("clients").select("*").eq("portal_user_id", user.id),
+    supabase
+      .from("client_contacts")
+      .select("id, client:clients(*)")
+      .eq("auth_user_id", user.id)
+      .eq("can_access_portal", true)
+      .eq("is_active", true),
+  ]);
 
-  if (ownClient) {
-    return { userId: user.id, client: ownClient as PortalClient, contactId: null, contactName: null };
+  const links = new Map<string, ClientLink>();
+
+  for (const client of primaryResult.data ?? []) {
+    links.set(client.id, { client, linkType: "primary", contactId: null });
   }
 
-  const { data: contact } = await supabase
-    .from("client_contacts")
-    .select(`id, first_name, last_name, client:clients(${PORTAL_SAFE_CLIENT_COLUMNS})`)
-    .eq("auth_user_id", user.id)
-    .eq("can_access_portal", true)
-    .eq("is_active", true)
-    .maybeSingle();
-
-  const contactClient = contact?.client as PortalClient | null;
-  if (contact && contactClient) {
-    return {
-      userId: user.id,
-      client: contactClient,
-      contactId: contact.id,
-      contactName: `${contact.first_name ?? ""} ${contact.last_name ?? ""}`.trim() || null,
-    };
+  for (const row of contactResult.data ?? []) {
+    const client = (row as unknown as { client: Client | null }).client;
+    if (client && !links.has(client.id)) {
+      links.set(client.id, { client, linkType: "contact", contactId: row.id });
+    }
   }
 
-  return null;
+  return Array.from(links.values());
+});
+
+/**
+ * Resolves the "current" client for this request: the client named by the
+ * verexa-client-id cookie IF the user is still linked to it, otherwise the
+ * user's first linked client.
+ */
+export const getCurrentClientLink = cache(async (): Promise<ClientLink | null> => {
+  const links = await listMyClientLinks();
+  if (links.length === 0) return null;
+
+  const cookieStore = await cookies();
+  const preferredId = cookieStore.get(CLIENT_COOKIE)?.value;
+
+  const preferred = preferredId ? links.find((l) => l.client.id === preferredId) : undefined;
+  return preferred ?? links[0];
+});
+
+export type RequirePortalResult = {
+  user: NonNullable<Awaited<ReturnType<typeof requireAuthUser>>>;
+  client: ClientLink | null;
+  links: ClientLink[];
+};
+
+export async function requirePortalAccess(): Promise<RequirePortalResult> {
+  const user = await requireAuthUser();
+  const [client, links] = await Promise.all([getCurrentClientLink(), listMyClientLinks()]);
+  return { user, client, links };
+}
+
+export type AccountType = "staff" | "client" | "none";
+
+/**
+ * Determines where an authenticated user should land. A user who is both an
+ * active workspace staff member AND a linked portal client is treated as
+ * staff by default (documented priority) — the staff dashboard is the safer
+ * default surface, and staff can be given a client-context link explicitly
+ * if they need to view the portal. This never trusts anything from the
+ * request other than the authenticated user id.
+ */
+export async function resolveAccountType(): Promise<AccountType> {
+  const memberships = await listMyWorkspaces();
+  if (memberships.length > 0) return "staff";
+
+  const links = await listMyClientLinks();
+  if (links.length > 0) return "client";
+
+  return "none";
+}
+
+export async function resolveHomePath(): Promise<string> {
+  const type = await resolveAccountType();
+  if (type === "client") return "/portal/dashboard";
+  // "staff" and "none" both land on /dashboard — a user with neither a
+  // workspace membership nor a client link sees NoWorkspaceState there
+  // rather than a separate dead-end route.
+  return "/dashboard";
 }

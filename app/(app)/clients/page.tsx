@@ -1,66 +1,149 @@
-import { Users } from "lucide-react";
+import Link from "next/link";
+import { UserPlus, Users, ArrowRight } from "lucide-react";
+import { requireWorkspace } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
-import { EmptyState } from "@/components/empty-state";
-import { ClientFormDialog } from "@/features/clients/client-form-dialog";
-import { ClientsTable } from "@/features/clients/clients-table";
-import { ClientsFilters } from "@/features/clients/clients-filters";
-import { CLIENT_STATUSES, CLIENT_TYPES } from "@/lib/validation/clients";
+import { listClients, CLIENTS_PAGE_SIZE, type ClientListItem } from "@/lib/data/clients";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Button } from "@/components/ui/LegacyButton";
+import { Card } from "@/components/ui/LegacyCard";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Pagination } from "@/components/ui/Pagination";
+import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { ClientsFilterBar } from "@/components/clients/ClientsFilterBar";
+import { clientStatusMeta, intakeSubmissionStatusMeta } from "@/lib/status";
+import { clientDisplayName, formatRelativeTime, titleCase } from "@/lib/utils";
+import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
 
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; type?: string; status?: string }>;
+  searchParams: Promise<{ q?: string; status?: string; page?: string }>;
 }) {
-  const { q, type, status } = await searchParams;
+  const { workspace } = await requireWorkspace();
+  if (!workspace) return <NoWorkspaceState />;
+
+  const params = await searchParams;
+  const page = Number(params.page) > 0 ? Number(params.page) : 1;
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
+  const { clients, total } = await listClients(supabase, workspace.workspace.id, {
+    q: params.q,
+    status: params.status,
+    page,
+  });
 
-  let query = supabase.from("clients").select("*").eq("workspace_id", workspaceId).is("archived_at", null);
-  if (type) query = query.eq("client_type", type as (typeof CLIENT_TYPES)[number]);
-  if (status) query = query.eq("status", status);
-  if (q) {
-    // Comma is PostgREST's field separator inside .or(), and parentheses are
-    // its grouping syntax — a completely normal search like "Smith, John"
-    // would otherwise break the filter string and fail the whole query.
-    const safeQ = q.replace(/[,()]/g, " ").trim();
-    if (safeQ) query = query.or(`first_name.ilike.%${safeQ}%,last_name.ilike.%${safeQ}%,company.ilike.%${safeQ}%,email.ilike.%${safeQ}%`);
-  }
-
-  const { data: clients, error } = await query.order("created_at", { ascending: false });
+  const columns: DataTableColumn<ClientListItem>[] = [
+    {
+      key: "name",
+      header: "Client",
+      render: (client) => (
+        <div>
+          <p className="font-medium text-foreground">{clientDisplayName(client)}</p>
+          <p className="text-xs text-muted">{titleCase(client.client_type)}</p>
+        </div>
+      ),
+    },
+    {
+      key: "email",
+      header: "Email",
+      render: (client) => client.email || "—",
+    },
+    {
+      key: "phone",
+      header: "Phone",
+      render: (client) => client.phone || "—",
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (client) => {
+        const meta = clientStatusMeta(client.status);
+        return <StatusBadge label={meta.label} tone={meta.tone} />;
+      },
+    },
+    {
+      key: "intake",
+      header: "Tax intake status",
+      render: (client) => {
+        if (!client.latestIntake) return <span className="text-muted">No intake</span>;
+        const meta = intakeSubmissionStatusMeta(client.latestIntake.status);
+        return <StatusBadge label={meta.label} tone={meta.tone} />;
+      },
+    },
+    {
+      key: "activity",
+      header: "Last activity",
+      render: (client) => (
+        <span className="text-muted">
+          {formatRelativeTime(client.latestIntake?.updatedAt ?? client.updated_at)}
+        </span>
+      ),
+    },
+    {
+      key: "action",
+      header: "",
+      className: "text-right",
+      render: (client) => (
+        <Link
+          href={`/clients/${client.id}`}
+          className="inline-flex items-center gap-1 text-sm font-medium text-accent-700 hover:underline"
+        >
+          Open <ArrowRight className="size-3.5" />
+        </Link>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Clients</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage your client relationships.</p>
-        </div>
-        <ClientFormDialog workspaceId={workspaceId} />
-      </div>
+    <div className="space-y-6">
+      <PageHeader
+        title="Clients"
+        description="Manage every client engaged with your firm."
+        actions={
+          <Link href="/clients/new">
+            <Button size="sm">
+              <UserPlus className="size-4" />
+              Add client
+            </Button>
+          </Link>
+        }
+      />
 
-      <ClientsFilters types={CLIENT_TYPES} statuses={CLIENT_STATUSES} />
+      <ClientsFilterBar initialQ={params.q ?? ""} initialStatus={params.status ?? ""} />
 
-      {error && <p className="text-sm text-destructive">Couldn&apos;t load clients. Please refresh.</p>}
-
-      {!clients || clients.length === 0 ? (
-        <EmptyState
-          icon={Users}
-          title={q || type || status ? "No clients match your filters" : "No clients yet"}
-          description={q || type || status ? "Try adjusting your search or filters." : "Add your first client to get started."}
-        />
-      ) : (
-        <ClientsTable clients={clients} />
-      )}
+      <Card>
+        {clients.length === 0 ? (
+          <div className="p-6">
+            <EmptyState
+              icon={Users}
+              title="No clients found"
+              description="Try adjusting your search or filters, or add a new client."
+              action={
+                <Link href="/clients/new">
+                  <Button size="sm">Add client</Button>
+                </Link>
+              }
+            />
+          </div>
+        ) : (
+          <>
+            <DataTable columns={columns} rows={clients} rowKey={(c) => c.id} />
+            <Pagination
+              page={page}
+              pageSize={CLIENTS_PAGE_SIZE}
+              total={total}
+              buildHref={(p) => {
+                const sp = new URLSearchParams();
+                if (params.q) sp.set("q", params.q);
+                if (params.status) sp.set("status", params.status);
+                sp.set("page", String(p));
+                return `/clients?${sp.toString()}`;
+              }}
+            />
+          </>
+        )}
+      </Card>
     </div>
   );
 }

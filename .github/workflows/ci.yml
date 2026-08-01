@@ -20,7 +20,7 @@ env:
   # request time), so no repository secrets are required here. Do not add
   # SUPABASE_SERVICE_ROLE_KEY — the build does not need it.
   NEXT_PUBLIC_SUPABASE_URL: https://aewqbffscdrziiwfomyf.supabase.co
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-build-placeholder-key
+  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ci-build-placeholder-key
   NEXT_PUBLIC_APP_URL: http://localhost:3000
 
 jobs:
@@ -47,7 +47,7 @@ jobs:
 
       - name: Type-check
         id: type_check
-        run: npm run typecheck
+        run: npm run type-check
 
       - name: Build
         id: build

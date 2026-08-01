@@ -1,24 +1,45 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { Database } from "@/types/database";
 
-// Refreshes the Supabase session cookie on every request. This is the only
-// place session refresh happens — Server Components can't write cookies,
-// so without this, sessions would silently expire mid-navigation.
+const PUBLIC_PATHS = [
+  "/login",
+  "/signup",
+  "/forgot-password",
+  "/reset-password",
+  "/auth/callback",
+];
+
+function isPublicPath(pathname: string) {
+  return PUBLIC_PATHS.some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`),
+  );
+}
+
+/**
+ * Refreshes the Supabase session on every request and redirects unauthenticated
+ * users away from protected routes. Must run in middleware.ts for every route
+ * that renders authenticated data — see https://supabase.com/docs/guides/auth/server-side/nextjs.
+ */
 export async function updateSession(request: NextRequest) {
-  let response = NextResponse.next({ request });
+  let supabaseResponse = NextResponse.next({ request });
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-          response = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+          for (const { name, value } of cookiesToSet) {
+            request.cookies.set(name, value);
+          }
+          supabaseResponse = NextResponse.next({ request });
+          for (const { name, value, options } of cookiesToSet) {
+            supabaseResponse.cookies.set(name, value, options);
+          }
         },
       },
     },
@@ -28,30 +49,62 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { pathname } = request.nextUrl;
-  const isAuthRoute =
-    pathname.startsWith("/sign-in") ||
-    pathname.startsWith("/sign-up") ||
-    pathname.startsWith("/forgot-password") ||
-    pathname.startsWith("/reset-password") ||
-    pathname.startsWith("/auth");
-  const isPortalRoute = pathname.startsWith("/portal");
-  const isPortalAuthRoute =
-    pathname.startsWith("/portal/sign-in") ||
-    pathname.startsWith("/portal/forgot-password") ||
-    pathname.startsWith("/portal/reset-password");
-  // Magic-link signing never requires a portal login — the single-use token
-  // itself is the credential, matching the redeem_signature_token RPC.
-  const isPortalPublicRoute = pathname.startsWith("/portal/sign/");
-  const isPublicRoute = pathname === "/" || pathname.startsWith("/api") || isPortalPublicRoute;
+  const { pathname, search } = request.nextUrl;
 
-  if (!user && !isAuthRoute && !isPortalAuthRoute && !isPublicRoute) {
-    const redirectTo = isPortalRoute ? "/portal/sign-in" : "/sign-in";
-    const url = request.nextUrl.clone();
-    url.pathname = redirectTo;
-    url.searchParams.set("next", pathname);
-    return NextResponse.redirect(url);
+  if (!user && !isPublicPath(pathname)) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    redirectUrl.search = "";
+    if (pathname !== "/") {
+      redirectUrl.searchParams.set("redirectTo", `${pathname}${search}`);
+    }
+    return NextResponse.redirect(redirectUrl);
   }
 
-  return response;
+  if (user && (pathname === "/login" || pathname === "/signup")) {
+    // Staff land on /dashboard, portal-only clients on /portal/dashboard; a
+    // user with neither also goes to /dashboard, which renders
+    // NoWorkspaceState rather than a dead-end route. See
+    // lib/auth/portal.ts#resolveHomePath for the full (server-only) logic —
+    // duplicated minimally here since middleware can't reuse React `cache()`.
+    const { data: membership } = await supabase
+      .from("workspace_members")
+      .select("id")
+      .eq("user_id", user.id)
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+
+    let destination = "/dashboard";
+    if (!membership) {
+      const { data: primaryClient } = await supabase
+        .from("clients")
+        .select("id")
+        .eq("portal_user_id", user.id)
+        .limit(1)
+        .maybeSingle();
+
+      if (primaryClient) {
+        destination = "/portal/dashboard";
+      } else {
+        const { data: contactClient } = await supabase
+          .from("client_contacts")
+          .select("id")
+          .eq("auth_user_id", user.id)
+          .eq("can_access_portal", true)
+          .eq("is_active", true)
+          .limit(1)
+          .maybeSingle();
+        if (contactClient) destination = "/portal/dashboard";
+      }
+    }
+
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = destination;
+    redirectUrl.search = "";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // IMPORTANT: return supabaseResponse as-is so refreshed auth cookies persist.
+  return supabaseResponse;
 }

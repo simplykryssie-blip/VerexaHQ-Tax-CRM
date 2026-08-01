@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { Building2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { NewRelationshipDialog, RelationshipStatusActions } from "@/features/relationships/relationship-actions";
@@ -9,7 +9,7 @@ import { relationshipTypeLabel, relationshipStatusLabel } from "@/lib/validation
 import { formatDate } from "@/lib/formatters";
 
 export default async function RelationshipsPage() {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (active.role !== "owner" && active.role !== "admin") redirect("/unauthorized");
 

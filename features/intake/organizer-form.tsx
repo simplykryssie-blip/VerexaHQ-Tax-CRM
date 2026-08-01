@@ -271,7 +271,7 @@ export function OrganizerForm({
   // section are evaluated per-instance below instead.
   const globalValues = answers;
 
-  let visibleRequiredKeys: string[] = [];
+  const visibleRequiredKeys: string[] = [];
   const answeredKeys = new Set(Object.keys(answers).filter((k) => answers[k] !== null && answers[k] !== undefined && answers[k] !== ""));
 
   return (

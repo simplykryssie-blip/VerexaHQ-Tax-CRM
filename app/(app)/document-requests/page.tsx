@@ -1,86 +1,142 @@
 import Link from "next/link";
-import { ClipboardList, Plus } from "lucide-react";
+import { ArrowRight, FolderOpen } from "lucide-react";
+import { requireWorkspace } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
-import { EmptyState } from "@/components/empty-state";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { getDocumentRequests } from "@/features/document-requests/queries";
-import { requestStatusLabel } from "@/lib/validation/document-requests";
-import { formatDate } from "@/lib/formatters";
+import {
+  listDocumentRequests,
+  DOCUMENT_REQUESTS_PAGE_SIZE,
+  type DocumentRequestListItem,
+} from "@/lib/data/document-requests";
+import { PageHeader } from "@/components/ui/PageHeader";
+import { Card } from "@/components/ui/LegacyCard";
+import { EmptyState } from "@/components/ui/EmptyState";
+import { Pagination } from "@/components/ui/Pagination";
+import { DataTable, type DataTableColumn } from "@/components/ui/DataTable";
+import { StatusBadge } from "@/components/ui/StatusBadge";
+import { DocumentRequestsFilterBar } from "@/components/document-requests/DocumentRequestsFilterBar";
+import { documentRequestStatusMeta } from "@/lib/status";
+import { clientDisplayName, formatDate, formatRelativeTime } from "@/lib/utils";
+import type { DocumentRequestStatus } from "@/lib/types";
+import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
 
-export default async function DocumentRequestsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
-  const { status } = await searchParams;
+const VALID_STATUSES: DocumentRequestStatus[] = [
+  "draft",
+  "sent",
+  "viewed",
+  "in_progress",
+  "partially_complete",
+  "completed",
+  "cancelled",
+  "expired",
+];
+
+export default async function DocumentRequestsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; missingDocuments?: string; page?: string }>;
+}) {
+  const { workspace } = await requireWorkspace();
+  if (!workspace) return <NoWorkspaceState />;
+
+  const params = await searchParams;
+  const page = Number(params.page) > 0 ? Number(params.page) : 1;
+  const status = VALID_STATUSES.includes(params.status as DocumentRequestStatus)
+    ? (params.status as DocumentRequestStatus)
+    : undefined;
+
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
+  const { requests, total } = await listDocumentRequests(supabase, workspace.workspace.id, {
+    page,
+    status,
+    missingDocuments: params.missingDocuments === "1",
+  });
 
-  const requests = await getDocumentRequests(workspaceId, { status });
+  const columns: DataTableColumn<DocumentRequestListItem>[] = [
+    {
+      key: "title",
+      header: "Request",
+      render: (request) => <span className="font-medium text-foreground">{request.title}</span>,
+    },
+    {
+      key: "client",
+      header: "Client",
+      render: (request) => (request.client ? clientDisplayName(request.client) : "Unknown client"),
+    },
+    {
+      key: "engagement",
+      header: "Tax year",
+      render: (request) => request.engagement?.tax_year ?? "—",
+    },
+    {
+      key: "status",
+      header: "Status",
+      render: (request) => {
+        const meta = documentRequestStatusMeta(request.status);
+        return <StatusBadge label={meta.label} tone={meta.tone} />;
+      },
+    },
+    { key: "total", header: "Total requested", render: (request) => request.itemStats.total },
+    { key: "received", header: "Received", render: (request) => request.itemStats.received },
+    {
+      key: "outstanding",
+      header: "Outstanding",
+      render: (request) =>
+        request.itemStats.outstanding > 0 ? (
+          <StatusBadge label={String(request.itemStats.outstanding)} tone="warning" />
+        ) : (
+          <span className="text-muted">0</span>
+        ),
+    },
+    { key: "due", header: "Due date", render: (request) => formatDate(request.due_date) },
+    {
+      key: "activity",
+      header: "Last activity",
+      render: (request) => formatRelativeTime(request.lastActivityAt),
+    },
+    {
+      key: "action",
+      header: "",
+      className: "text-right",
+      render: (request) => (
+        <Link
+          href={`/document-requests/${request.id}`}
+          className="inline-flex items-center gap-1 text-sm font-medium text-accent-700 hover:underline"
+        >
+          Open <ArrowRight className="size-3.5" />
+        </Link>
+      ),
+    },
+  ];
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Document Requests</h1>
-          <p className="text-sm text-muted-foreground mt-1">Ask clients for the documents you need, and track what comes back.</p>
-        </div>
-        <Button asChild variant="brand" size="sm">
-          <Link href="/document-requests/new">
-            <Plus className="h-4 w-4" /> New request
-          </Link>
-        </Button>
-      </div>
+    <div className="space-y-6">
+      <PageHeader title="Document requests" description="Track outstanding client document collection." />
 
-      {requests.length === 0 ? (
-        <EmptyState icon={ClipboardList} title="No document requests yet" description="Create a request to ask a client for specific documents." />
-      ) : (
-        <div className="rounded-lg border border-border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Request</TableHead>
-                <TableHead>Client</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Items</TableHead>
-                <TableHead>Due date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {requests.map((r) => {
-                const client = r.client as { first_name?: string; last_name?: string; company?: string } | null;
-                const items = (r.items as { status: string }[]) ?? [];
-                const complete = items.filter((i) => ["accepted", "waived", "not_applicable"].includes(i.status)).length;
-                return (
-                  <TableRow key={r.id}>
-                    <TableCell>
-                      <Link href={`/document-requests/${r.id}`} className="font-medium hover:underline">
-                        {r.title}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{client?.company || `${client?.first_name ?? ""} ${client?.last_name ?? ""}`.trim() || "—"}</TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{requestStatusLabel(r.status)}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      {complete}/{items.length}
-                    </TableCell>
-                    <TableCell>{formatDate(r.due_date)}</TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+      <DocumentRequestsFilterBar status={params.status ?? ""} missingDocuments={params.missingDocuments ?? ""} />
+
+      <Card>
+        {requests.length === 0 ? (
+          <div className="p-6">
+            <EmptyState icon={FolderOpen} title="No document requests found" description="Try adjusting your filters." />
+          </div>
+        ) : (
+          <>
+            <DataTable columns={columns} rows={requests} rowKey={(r) => r.id} />
+            <Pagination
+              page={page}
+              pageSize={DOCUMENT_REQUESTS_PAGE_SIZE}
+              total={total}
+              buildHref={(p) => {
+                const sp = new URLSearchParams();
+                if (params.status) sp.set("status", params.status);
+                if (params.missingDocuments) sp.set("missingDocuments", params.missingDocuments);
+                sp.set("page", String(p));
+                return `/document-requests?${sp.toString()}`;
+              }}
+            />
+          </>
+        )}
+      </Card>
     </div>
   );
 }

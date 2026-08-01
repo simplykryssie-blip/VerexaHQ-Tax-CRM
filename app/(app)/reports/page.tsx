@@ -1,16 +1,16 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getActiveWorkspace } from "@/lib/auth/workspace";
+import { getCurrentWorkspace } from "@/lib/auth/workspace";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StatCard } from "@/components/stat-card";
-import { engagementStatusLabel } from "@/lib/validation/engagements";
+import { engagementStatusLabel } from "@/lib/status";
 import { formatCurrency } from "@/lib/formatters";
 import { DollarSign, Users, Briefcase, CheckSquare } from "lucide-react";
 import { startOfMonth } from "date-fns";
 
 export default async function ReportsPage() {
-  const active = await getActiveWorkspace();
+  const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
   if (!roleHasCapability(active.role, "view_reports")) redirect("/unauthorized");
 

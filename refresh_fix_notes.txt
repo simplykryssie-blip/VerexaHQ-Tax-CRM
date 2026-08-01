@@ -1,0 +1,19 @@
+Auto-refresh and redirection fixes progress:
+
+1. Client Addition Refresh:
+- Found: ClientForm.tsx was calling createClientAction but not refreshing the router on success.
+- Fix: Added router.refresh() in ClientForm.tsx onSubmit success handler.
+
+2. Intake Organizer Refresh:
+- Found: AssignOrganizerPanel.tsx already had router.refresh(), but I verified it and also checked ReopenOrganizerButton.tsx.
+- Analysis: The issue might be related to the merge state of branches. I merged feature/guided-tax-organizer into feature/initial-tax-crm to ensure all components are present.
+
+3. Engagement Creation Redirection:
+- Found: EngagementForm.tsx was calling createEngagementAction but not redirecting.
+- Fix: Updated EngagementForm.tsx to redirect to the new engagement's detail page if engagementId is returned, or to the list page otherwise.
+- Verified: createEngagementAction in lib/actions/engagements.ts returns { engagementId: row.id }.
+
+Next steps:
+- Verify the build.
+- Push changes to feature/initial-tax-crm.
+- Note: I merged feature/guided-tax-organizer into feature/initial-tax-crm because the user asked to fix issues that were only present in the organizer/engagement branches, but they wanted the fix on feature/initial-tax-crm.

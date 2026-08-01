@@ -5,7 +5,7 @@ import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { engagementStatusLabel } from "@/lib/validation/engagements";
+import { engagementStatusLabel } from "@/lib/status";
 import { formatCurrency, formatDate } from "@/lib/formatters";
 
 export default async function WorkQueuePage({

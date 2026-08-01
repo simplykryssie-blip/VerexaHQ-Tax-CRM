@@ -2,15 +2,18 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import type { Database } from "@/types/database";
 
-// Server Component / Server Action / Route Handler client. Still uses the
-// signed-in user's session (via the request's cookies) — RLS stays active.
-// Never use this to bypass authorization; it is not a service-role client.
+export type SupabaseServerClient = ReturnType<typeof createServerClient<Database>>;
+
+/**
+ * Server Component / Server Action / Route Handler Supabase client.
+ * Runs with the caller's session — all queries are still subject to RLS.
+ */
 export async function createClient() {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
     {
       cookies: {
         getAll() {
@@ -18,11 +21,12 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+            for (const { name, value, options } of cookiesToSet) {
+              cookieStore.set(name, value, options);
+            }
           } catch {
-            // Called from a Server Component that can't set cookies (no
-            // active response). Session refresh still happens in
-            // middleware, so this is safe to ignore here.
+            // Called from a Server Component with no response to attach cookies to.
+            // Session refresh is handled by middleware, so this is safe to ignore.
           }
         },
       },
