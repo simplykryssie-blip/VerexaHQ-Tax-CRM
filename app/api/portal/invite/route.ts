@@ -46,8 +46,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Portal invites aren't available in this environment (service role not configured)." }, { status: 503 });
   }
 
+  const appUrl = (process.env.NEXT_PUBLIC_APP_URL ?? new URL(request.url).origin).replace(/\/+$/, "");
   const { data: invited, error: inviteError } = await admin.auth.admin.inviteUserByEmail(client.email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_APP_URL ?? ""}/portal/reset-password`,
+    redirectTo: `${appUrl}/portal/reset-password`,
   });
 
   if (inviteError || !invited.user) {

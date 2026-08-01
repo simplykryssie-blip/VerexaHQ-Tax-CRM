@@ -78,6 +78,7 @@ export default async function EngagementDetailPage({
           staff={staff}
           canManage={canManage}
           canArchive={canArchive}
+          canAssignReviewer={MANAGE_ROLES.includes(workspace.role)}
         />
       ),
     },

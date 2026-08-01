@@ -1,6 +1,7 @@
 import type { SupabaseServerClient } from "@/lib/supabase/server";
+import type { MembershipRole } from "@/lib/types";
 
-export type UserSummary = { userId: string; name: string };
+export type UserSummary = { userId: string; name: string; role?: MembershipRole };
 
 /**
  * intake_submissions / document_requests / review tables store raw
@@ -40,7 +41,7 @@ export async function listWorkspaceStaff(
 ): Promise<UserSummary[]> {
   const { data, error } = await supabase
     .from("workspace_members")
-    .select("user_id")
+    .select("user_id, role")
     .eq("workspace_id", workspaceId)
     .eq("status", "active");
 
@@ -48,5 +49,28 @@ export async function listWorkspaceStaff(
 
   const userIds = data.map((m) => m.user_id);
   const map = await getUserSummaryMap(supabase, userIds);
-  return userIds.map((id) => map.get(id) ?? { userId: id, name: "Staff member" });
+  return data.map((member) => ({
+    ...(map.get(member.user_id) ?? { userId: member.user_id, name: "Staff member" }),
+    role: member.role,
+  }));
+}
+
+export function defaultReviewerFor(
+  staff: UserSummary[],
+  currentUserId: string,
+  currentRole: MembershipRole,
+) {
+  if (currentRole === "preparer") {
+    return staff.find((member) => member.role === "ero")?.userId
+      ?? staff.find((member) => member.role === "owner")?.userId
+      ?? null;
+  }
+
+  if (["owner", "admin", "ero", "reviewer"].includes(currentRole)) {
+    return staff.find((member) => member.userId === currentUserId)?.userId ?? null;
+  }
+
+  return staff.find((member) => member.role === "ero")?.userId
+    ?? staff.find((member) => member.role === "owner")?.userId
+    ?? null;
 }

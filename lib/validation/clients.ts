@@ -46,7 +46,7 @@ export const createClientSchema = z.object({
   firstName: z.string().trim().min(1, "First name is required").max(120),
   lastName: z.string().trim().min(1, "Last name is required").max(120),
   clientType: z.enum(clientTypeOptions),
-  status: z.enum(clientStatusOptions),
+  setupMode: z.enum(["lead", "active_with_engagement"]),
   email: z.union([z.string().trim().email("Enter a valid email address"), z.literal("")]).optional(),
   phone: z.string().trim().max(40).optional(),
   company: z.string().trim().max(200).optional(),

@@ -128,7 +128,40 @@ export default async function ClientsPage({
           </div>
         ) : (
           <>
-            <DataTable columns={columns} rows={clients} rowKey={(c) => c.id} />
+            <div className="hidden sm:block">
+              <DataTable columns={columns} rows={clients} rowKey={(c) => c.id} />
+            </div>
+            <div className="divide-y divide-border sm:hidden">
+              {clients.map((client) => {
+                const status = clientStatusMeta(client.status);
+                const intake = client.latestIntake
+                  ? intakeSubmissionStatusMeta(client.latestIntake.status)
+                  : null;
+                return (
+                  <Link
+                    key={client.id}
+                    href={`/clients/${client.id}`}
+                    className="block min-h-24 p-4 transition-colors hover:bg-accent-50 focus-visible:bg-accent-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent-600"
+                    aria-label={`Open ${clientDisplayName(client)}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-foreground">{clientDisplayName(client)}</p>
+                        <p className="mt-0.5 text-xs text-muted">{titleCase(client.client_type)}</p>
+                      </div>
+                      <ArrowRight className="mt-1 size-4 shrink-0 text-accent-700" />
+                    </div>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <StatusBadge label={status.label} tone={status.tone} />
+                      {intake ? <StatusBadge label={intake.label} tone={intake.tone} /> : <span className="text-xs text-muted">No intake</span>}
+                    </div>
+                    {(client.email || client.phone) && (
+                      <p className="mt-3 truncate text-xs text-muted">{client.email || client.phone}</p>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
             <Pagination
               page={page}
               pageSize={CLIENTS_PAGE_SIZE}

@@ -6,7 +6,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createClientSchema,
   clientTypeOptions,
-  clientStatusOptions,
   type CreateClientInput,
 } from "@/lib/validation/clients";
 import { createClientAction } from "@/lib/actions/clients";
@@ -24,7 +23,7 @@ export function ClientForm() {
     formState: { errors, isSubmitting },
   } = useForm<CreateClientInput>({
     resolver: zodResolver(createClientSchema),
-    defaultValues: { clientType: "individual", status: "lead" },
+    defaultValues: { clientType: "individual", setupMode: "lead" },
   });
 
   const onSubmit = async (data: CreateClientInput) => {
@@ -32,8 +31,12 @@ export function ClientForm() {
     const result = await createClientAction(data);
     if (result?.error) {
       setFormError(result.error);
-    } else {
-      router.refresh();
+    } else if (result?.clientId) {
+      router.push(
+        result.next === "engagement"
+          ? `/engagements/new?clientId=${result.clientId}`
+          : `/clients/${result.clientId}`,
+      );
     }
   };
 
@@ -62,15 +65,7 @@ export function ClientForm() {
             ))}
           </select>
         </FormField>
-        <FormField label="Status" htmlFor="status" error={errors.status?.message} required>
-          <select id="status" className={inputClassName} {...register("status")}>
-            {clientStatusOptions.map((option) => (
-              <option key={option} value={option}>
-                {titleCase(option)}
-              </option>
-            ))}
-          </select>
-        </FormField>
+        <div />
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -89,6 +84,24 @@ export function ClientForm() {
       <FormField label="Notes" htmlFor="notes" error={errors.notes?.message}>
         <textarea id="notes" rows={4} className={inputClassName} {...register("notes")} />
       </FormField>
+
+      <fieldset className="space-y-3 rounded-xl border border-border bg-slate-50/60 p-4">
+        <legend className="px-1 text-sm font-semibold text-foreground">What happens next?</legend>
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-white p-3">
+          <input className="mt-1 accent-[var(--accent-600)]" type="radio" value="lead" {...register("setupMode")} />
+          <span>
+            <span className="block text-sm font-medium text-foreground">Save as lead</span>
+            <span className="block text-xs text-muted">No portal invitation or tax organizer is sent.</span>
+          </span>
+        </label>
+        <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-white p-3">
+          <input className="mt-1 accent-[var(--accent-600)]" type="radio" value="active_with_engagement" {...register("setupMode")} />
+          <span>
+            <span className="block text-sm font-medium text-foreground">Create active client</span>
+            <span className="block text-xs text-muted">Continue to service, reviewer, deadline, and intake setup.</span>
+          </span>
+        </label>
+      </fieldset>
 
       <div className="flex justify-end gap-2">
         <Button type="submit" loading={isSubmitting}>
