@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/client";
 import { signupSchema, type SignupInput } from "@/lib/validation/auth";
 import { friendlyAuthError } from "@/lib/errors";
+import { getAppOrigin } from "@/lib/auth/portal";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 export default function SignUpPage() {
@@ -38,7 +39,7 @@ export default function SignUpPage() {
           last_name: values.lastName,
           full_name: `${values.firstName} ${values.lastName}`.trim(),
         },
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/confirm`,
+        emailRedirectTo: `${getAppOrigin()}/auth/confirm`,
       },
     });
     setLoading(false);
