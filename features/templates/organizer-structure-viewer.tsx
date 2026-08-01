@@ -38,7 +38,6 @@ export function OrganizerStructureViewer({
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
     const supabase = createClient();
     Promise.all([
       supabase.from("form_sections").select("*").eq("template_version_id", templateVersionId).order("sort_order"),

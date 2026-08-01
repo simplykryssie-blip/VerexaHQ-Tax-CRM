@@ -72,8 +72,8 @@ export async function globalSearch(
 
   return {
     clients: (clientsRes.data as Client[]) ?? [],
-    engagements: (engagementsRes.data as any[]) ?? [],
-    intakes: (intakesRes.data as any[]) ?? [],
-    documents: (documentsRes.data as any[]) ?? [],
+    engagements: (engagementsRes.data as GlobalSearchResult["engagements"]) ?? [],
+    intakes: (intakesRes.data as GlobalSearchResult["intakes"]) ?? [],
+    documents: (documentsRes.data as GlobalSearchResult["documents"]) ?? [],
   };
 }

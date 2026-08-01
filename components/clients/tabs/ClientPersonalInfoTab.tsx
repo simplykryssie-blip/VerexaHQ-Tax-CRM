@@ -32,7 +32,7 @@ export function ClientPersonalInfoTab({ client, workspaceId, onUpdate }: ClientP
       lastName: client.last_name,
       suffix: client.suffix || "",
       dateOfBirth: client.date_of_birth || "",
-      filingStatus: (client.filing_status as any) || "",
+      filingStatus: (client.filing_status as PersonalInfoInput["filingStatus"]) || undefined,
       email: client.email || "",
       occupation: client.occupation || "",
       drivingLicenseNumber: client.id_number || "",

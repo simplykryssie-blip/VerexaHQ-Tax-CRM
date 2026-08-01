@@ -154,7 +154,7 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
       <Card>
         <CardHeader>
           <CardTitle className="text-base">Nodes</CardTitle>
-          <CardDescription>Each node is a step. Give every node a unique key (e.g. "send_welcome_email").</CardDescription>
+          <CardDescription>Each node is a step. Give every node a unique key (e.g. &quot;send_welcome_email&quot;).</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
           {nodes.map((n) => (

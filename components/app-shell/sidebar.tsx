@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useSyncExternalStore } from "react";
 import Link from "next/link";
 import { ChevronsLeft, ChevronsRight } from "lucide-react";
 import { LogoMark } from "@/components/logo";
@@ -8,21 +8,27 @@ import { NavList } from "@/components/app-shell/nav-list";
 import { cn } from "@/lib/utils";
 
 const COLLAPSE_KEY = "verexa-tax-office-sidebar-collapsed";
+const COLLAPSE_EVENT = "verexa-tax-office-sidebar-change";
+
+function subscribeToCollapsePreference(onStoreChange: () => void) {
+  window.addEventListener("storage", onStoreChange);
+  window.addEventListener(COLLAPSE_EVENT, onStoreChange);
+  return () => {
+    window.removeEventListener("storage", onStoreChange);
+    window.removeEventListener(COLLAPSE_EVENT, onStoreChange);
+  };
+}
+
+function getCollapsePreference() {
+  return window.localStorage.getItem(COLLAPSE_KEY) === "1";
+}
 
 export function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem(COLLAPSE_KEY);
-    if (stored === "1") setCollapsed(true);
-  }, []);
+  const collapsed = useSyncExternalStore(subscribeToCollapsePreference, getCollapsePreference, () => false);
 
   function toggle() {
-    setCollapsed((prev) => {
-      const next = !prev;
-      window.localStorage.setItem(COLLAPSE_KEY, next ? "1" : "0");
-      return next;
-    });
+    window.localStorage.setItem(COLLAPSE_KEY, collapsed ? "0" : "1");
+    window.dispatchEvent(new Event(COLLAPSE_EVENT));
   }
 
   return (
