@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/LegacyButton";
 
 export function ForgotPasswordForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
     handleSubmit,
@@ -32,19 +33,26 @@ export function ForgotPasswordForm() {
   }
 
   const onSubmit = async (data: ForgotPasswordInput) => {
-    await forgotPasswordAction(data);
+    setFormError(null);
+    const result = await forgotPasswordAction(data);
+    if (result?.error) {
+      setFormError(result.error);
+      return;
+    }
     setSubmitted(true);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
+            <div>
         <h1 className="text-lg font-semibold text-foreground">Reset your password</h1>
         <p className="mt-1 text-sm text-muted">
           We&apos;ll email you a link to set a new password.
         </p>
       </div>
-
+      {formError && (
+        <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{formError}</p>
+      )}
       <FormField label="Email" htmlFor="email" error={errors.email?.message} required>
         <input id="email" type="email" autoComplete="email" className={inputClassName} {...register("email")} />
       </FormField>
