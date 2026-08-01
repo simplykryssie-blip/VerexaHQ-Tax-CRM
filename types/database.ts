@@ -281,12 +281,14 @@ export type Database = {
           created_at: string
           failed_at: string | null
           id: string
+          idempotency_key: string | null
           job_type: string
           last_error: string | null
           locked_at: string | null
           locked_by: string | null
           max_attempts: number
           payload: Json
+          result: Json
           scheduled_for: string
           status: Database["public"]["Enums"]["automation_job_status"]
           updated_at: string
@@ -300,12 +302,14 @@ export type Database = {
           created_at?: string
           failed_at?: string | null
           id?: string
+          idempotency_key?: string | null
           job_type: string
           last_error?: string | null
           locked_at?: string | null
           locked_by?: string | null
           max_attempts?: number
           payload?: Json
+          result?: Json
           scheduled_for?: string
           status?: Database["public"]["Enums"]["automation_job_status"]
           updated_at?: string
@@ -319,12 +323,14 @@ export type Database = {
           created_at?: string
           failed_at?: string | null
           id?: string
+          idempotency_key?: string | null
           job_type?: string
           last_error?: string | null
           locked_at?: string | null
           locked_by?: string | null
           max_attempts?: number
           payload?: Json
+          result?: Json
           scheduled_for?: string
           status?: Database["public"]["Enums"]["automation_job_status"]
           updated_at?: string
@@ -7496,6 +7502,7 @@ export type Database = {
           engagement_id: string | null
           error_message: string | null
           id: string
+          idempotency_key: string | null
           invoice_id: string | null
           outbox_id: string | null
           payload: Json
@@ -7520,6 +7527,7 @@ export type Database = {
           engagement_id?: string | null
           error_message?: string | null
           id?: string
+          idempotency_key?: string | null
           invoice_id?: string | null
           outbox_id?: string | null
           payload?: Json
@@ -7544,6 +7552,7 @@ export type Database = {
           engagement_id?: string | null
           error_message?: string | null
           id?: string
+          idempotency_key?: string | null
           invoice_id?: string | null
           outbox_id?: string | null
           payload?: Json
@@ -11440,6 +11449,36 @@ export type Database = {
         Args: { p_definition_id: string }
         Returns: boolean
       }
+      claim_due_automation_jobs: {
+        Args: { p_limit?: number; p_worker_id: string }
+        Returns: {
+          attempt_count: number
+          completed_at: string | null
+          created_at: string
+          failed_at: string | null
+          id: string
+          idempotency_key: string | null
+          job_type: string
+          last_error: string | null
+          locked_at: string | null
+          locked_by: string | null
+          max_attempts: number
+          payload: Json
+          result: Json
+          scheduled_for: string
+          status: Database["public"]["Enums"]["automation_job_status"]
+          updated_at: string
+          workflow_run_id: string | null
+          workflow_run_step_id: string | null
+          workspace_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "automation_jobs"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       claim_due_outbox: {
         Args: { p_limit?: number }
         Returns: {
@@ -11492,6 +11531,7 @@ export type Database = {
           engagement_id: string | null
           error_message: string | null
           id: string
+          idempotency_key: string | null
           invoice_id: string | null
           outbox_id: string | null
           payload: Json
@@ -11512,6 +11552,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      complete_automation_job: {
+        Args: { p_job_id: string; p_result?: Json; p_worker_id: string }
+        Returns: boolean
       }
       complete_intake_review: {
         Args: { p_submission_id: string }
@@ -11618,6 +11662,10 @@ export type Database = {
       evaluate_return_release: {
         Args: { p_engagement_id: string }
         Returns: Json
+      }
+      fail_automation_job: {
+        Args: { p_error: string; p_job_id: string; p_worker_id: string }
+        Returns: string
       }
       find_possible_duplicate_clients: {
         Args: {

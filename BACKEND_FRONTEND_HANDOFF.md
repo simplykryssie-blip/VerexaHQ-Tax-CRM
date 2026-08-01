@@ -61,6 +61,8 @@ This is the authoritative activation path. It safely materializes the configured
 
 The response includes the activation ID, status, artifact IDs, and warnings such as a missing client email or a package component that is not configured.
 
+The `process-backend-queues` Edge Function now claims the queued activation job, creates/links portal access, queues one secure package notification, schedules idempotent intake reminders, and marks the activation sent after provider delivery. Queue invocation is restricted to the service-role credential; an ordinary signed-in JWT cannot process every firm's queues.
+
 ### `evaluate_return_release` and `release_completed_return`
 
 Use `evaluate_return_release` to display exact blockers before completed-return delivery. It distinguishes a missing invoice from a paid invoice and checks configured payment, signature, review, and optional filing-acceptance requirements.
@@ -150,6 +152,8 @@ Tax disaster relief, fiscal years, short years, combat-zone relief, non-calendar
 - `supabase/migrations/20260801010400_backend_advisor_hardening.sql`
 - `supabase/migrations/20260801010500_engagement_activation_and_release_gate.sql`
 - `supabase/migrations/20260801010600_activation_advisor_hardening.sql`
+- `supabase/migrations/20260801010700_automation_job_processing.sql`
+- `supabase/functions/process-backend-queues/index.ts`
 - `types/database.ts`
 
 The live database already contains these migrations. Do not manually re-run their SQL. Commit them so local/GitHub migration history stays aligned with Supabase.
