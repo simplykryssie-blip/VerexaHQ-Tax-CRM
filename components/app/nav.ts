@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   ListChecks,
   Settings,
+  WalletCards,
   Users,
 } from "lucide-react";
 import type { MembershipRole, Workspace } from "@/lib/types";
@@ -17,24 +18,25 @@ export type NavItem = {
   href: string;
   label: string;
   icon: LucideIcon;
+  permissionKey?: string;
 };
 
 const CORE_NAV_ITEMS: NavItem[] = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/clients", label: "Clients", icon: Users },
-  { href: "/engagements", label: "Engagements", icon: ClipboardList },
-  { href: "/intakes", label: "Intakes", icon: FileText },
-  { href: "/document-requests", label: "Document Requests", icon: FolderOpen },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permissionKey: "dashboard.view" },
+  { href: "/clients", label: "Clients", icon: Users, permissionKey: "clients.view" },
+  { href: "/engagements", label: "Engagements", icon: ClipboardList, permissionKey: "engagements.view" },
+  { href: "/intakes", label: "Intakes", icon: FileText, permissionKey: "intakes.view" },
+  { href: "/document-requests", label: "Document Requests", icon: FolderOpen, permissionKey: "documents.view" },
 ];
 
 export function navItemsForWorkspace(
   workspaceType: Workspace["workspace_type"],
   role: MembershipRole,
 ): NavItem[] {
-  const items = [...CORE_NAV_ITEMS, { href: "/work-queue", label: "Work Queue", icon: ListChecks }];
+  const items: NavItem[] = [...CORE_NAV_ITEMS, { href: "/work-queue", label: "Work Queue", icon: ListChecks, permissionKey: "tasks.view" }];
 
   if (roleHasCapability(role, "review_returns")) {
-    items.push({ href: "/ero-review", label: "ERO Review", icon: ClipboardCheck });
+    items.push({ href: "/ero-review", label: "ERO Review", icon: ClipboardCheck, permissionKey: "reviews.view" });
   }
 
   if (["owner", "admin"].includes(role) && workspaceType !== "independent_ptin") {
@@ -42,7 +44,8 @@ export function navItemsForWorkspace(
   }
 
   if (["owner", "admin", "ero"].includes(role)) {
-    items.push({ href: "/settings", label: "Settings", icon: Settings });
+    items.push({ href: "/services", label: "Services & Engagement Types", icon: WalletCards, permissionKey: "service_packages.view" });
+    items.push({ href: "/settings", label: "Settings", icon: Settings, permissionKey: "settings.manage" });
   }
 
   return items;

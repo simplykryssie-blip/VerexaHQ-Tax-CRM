@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 import { requireWorkspace } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { getUserSummaryMap } from "@/lib/data/users";
@@ -9,6 +9,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import { membershipRoleLabels, membershipStatusMeta } from "@/lib/status";
 import { formatDate, titleCase } from "@/lib/utils";
 import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
+import { requirePermission } from "@/lib/permissions/granular";
 
 export default async function SettingsPage() {
   const { workspace, memberships } = await requireWorkspace();
@@ -22,6 +23,7 @@ export default async function SettingsPage() {
     .order("created_at", { ascending: true });
 
   const userMap = await getUserSummaryMap(supabase, (members ?? []).map((m) => m.user_id));
+  const permissionAccess = await requirePermission(workspace.workspace.id, "permissions.manage");
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -56,6 +58,11 @@ export default async function SettingsPage() {
           </dl>
         </CardBody>
       </Card>
+
+      {permissionAccess.allowed && <Card>
+        <CardHeader><h2 className="flex items-center gap-2 text-sm font-semibold text-foreground"><ShieldCheck className="size-4 text-accent-700" /> Roles & permissions</h2></CardHeader>
+        <CardBody><div className="flex items-center justify-between gap-3"><p className="text-sm text-muted">Review the server-enforced permission keys and effective scope for this workspace.</p><Link href="/settings/permissions" className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-700 hover:underline">View permissions <ArrowRight className="size-3.5" /></Link></div></CardBody>
+      </Card>}
 
       <Card>
         <CardHeader>

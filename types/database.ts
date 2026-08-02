@@ -11376,6 +11376,31 @@ export type Database = {
       }
     }
     Functions: {
+      check_permission: {
+        Args: {
+          p_permission_key: string
+          p_record_context?: Json
+          p_workspace_id: string
+        }
+        Returns: Json
+      }
+      get_my_permissions: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          allowed: boolean
+          denial_reason: string | null
+          permission_key: string
+          permission_scope: string
+        }[]
+      }
+      has_permission: {
+        Args: {
+          p_permission_key: string
+          p_record_context?: Json
+          p_workspace_id: string
+        }
+        Returns: boolean
+      }
       activate_tax_engagement: {
         Args: { p_activation_mode?: string; p_engagement_id: string }
         Returns: Json

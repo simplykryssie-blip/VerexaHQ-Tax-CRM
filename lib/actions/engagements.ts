@@ -22,7 +22,7 @@ import {
   type UpdateEngagementInput,
 } from "@/lib/validation/engagements";
 import { checkStatusTransition, checkTransitionPrerequisites, timestampsForStatusChange } from "@/lib/engagements/transitions";
-import { activateAndAssignOrganizer } from "@/lib/engagements/activation";
+import { requirePermission } from "@/lib/permissions/granular";
 import {
   calculateEngagementDeadlines,
   deadlineScheduleAsJson,
@@ -37,6 +37,7 @@ type ActionResult = {
   engagementId?: string;
   sendPortalInvite?: boolean;
   clientId?: string;
+  activation?: Record<string, unknown>;
 };
 
 /**
@@ -84,9 +85,16 @@ export async function createEngagementAction(input: CreateEngagementInput): Prom
   const { workspace, error: authError } = await requireStaff();
   if (!workspace) return { error: authError };
 
+  const createPermission = await requirePermission(workspace.workspace.id, "engagements.create");
+  if (!createPermission.allowed) return { error: createPermission.reason };
+
   const parsed = createEngagementSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   const data = parsed.data;
+  if (data.activationMode !== "save_draft") {
+    const activatePermission = await requirePermission(workspace.workspace.id, "engagements.activate");
+    if (!activatePermission.allowed) return { error: activatePermission.reason };
+  }
 
   const supabase = await createClient();
   const {
@@ -208,22 +216,18 @@ export async function createEngagementAction(input: CreateEngagementInput): Prom
     .eq("workspace_id", workspace.workspace.id);
 
   let warning = schedule.warnings.length ? schedule.warnings.join(" ") : undefined;
-  if (data.activationMode === "activate_and_send") {
-    if (!clientRecord.email) {
-      warning = "Engagement activated, but the client has no email address. Add an email before sending portal access.";
-    } else {
-      const activation = await activateAndAssignOrganizer({
-        supabase,
-        workspaceId: workspace.workspace.id,
-        engagementId: row.id,
-        clientId: data.clientId,
-        taxYear: data.taxYear,
-        returnType: data.returnType || null,
-        engagementType: data.engagementType,
-        dueDate: automatic.filingDate,
-        assignedBy: user?.id ?? null,
-      });
-      if (activation.error) warning = activation.error;
+  let activation: Record<string, unknown> | undefined;
+  if (data.activationMode !== "save_draft") {
+    const activationMode = data.activationMode === "activate_and_send" ? "activate_and_send" : "activate_without_sending";
+    const { data: activationResult, error: activationError } = await supabase.rpc("activate_tax_engagement", {
+      p_engagement_id: row.id,
+      p_activation_mode: activationMode,
+    });
+    if (activationError) return { error: `The draft was created, but activation failed: ${activationError.message}` };
+    if (activationResult && typeof activationResult === "object" && !Array.isArray(activationResult)) {
+      activation = activationResult as Record<string, unknown>;
+      const rpcWarnings = Array.isArray(activation.warnings) ? activation.warnings.filter((value): value is string => typeof value === "string") : [];
+      warning = [warning, ...rpcWarnings].filter(Boolean).join(" ") || undefined;
     }
   }
 
@@ -231,8 +235,9 @@ export async function createEngagementAction(input: CreateEngagementInput): Prom
   return {
     engagementId: row.id,
     clientId: data.clientId,
-    sendPortalInvite: data.activationMode === "activate_and_send" && Boolean(clientRecord.email) && !clientRecord.portal_user_id,
+    sendPortalInvite: false,
     warning,
+    activation,
   };
 }
 

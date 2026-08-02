@@ -21,9 +21,13 @@ import type { Client } from "@/lib/types";
 import type { UserSummary } from "@/lib/data/users";
 import { calculateEngagementDeadlines, type JurisdictionCode } from "@/lib/tax/deadlines";
 import { useRouter } from "next/navigation";
+import { CheckCircle2, PackageCheck } from "lucide-react";
+import type { Database } from "@/types/database";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type ClientOption = Pick<Client, "id" | "first_name" | "last_name" | "display_name" | "preferred_name" | "company">;
 type EngagementFormInput = z.input<typeof createEngagementSchema>;
+type ServicePackageOption = Pick<Database["public"]["Tables"]["engagement_type_settings"]["Row"], "id" | "name" | "engagement_type" | "return_type" | "pricing_method" | "reviewer_policy" | "activation_default" | "is_active" | "primary_workflow_definition_id" | "organizer_template_id" | "engagement_letter_template_id" | "document_checklist_template_id">;
 const currentYear = new Date().getFullYear();
 
 export function EngagementForm({
@@ -32,15 +36,18 @@ export function EngagementForm({
   initialClientId,
   defaultReviewerId,
   reviewerLocked,
+  servicePackages,
 }: {
   clients: ClientOption[];
   staff: UserSummary[];
   initialClientId?: string;
   defaultReviewerId: string | null;
   reviewerLocked: boolean;
+  servicePackages: ServicePackageOption[];
 }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const [activationSummary, setActivationSummary] = useState<{ engagementId: string; data: Record<string, unknown>; warning?: string } | null>(null);
   const {
     register,
     control,
@@ -65,10 +72,13 @@ export function EngagementForm({
     },
   });
 
-  const [watchedTaxYear, watchedReturnType, watchedFiscalYearEnd, watchedFederalRequired, watchedJurisdictions] = useWatch({
+  const [watchedTaxYear, watchedReturnType, watchedFiscalYearEnd, watchedFederalRequired, watchedJurisdictions, watchedEngagementType] = useWatch({
     control,
-    name: ["taxYear", "returnType", "fiscalYearEnd", "federalReturnRequired", "jurisdictions"],
+    name: ["taxYear", "returnType", "fiscalYearEnd", "federalReturnRequired", "jurisdictions", "engagementType"],
   });
+  const selectedPackage = servicePackages.find((item) => item.return_type === watchedReturnType && [item.engagement_type, item.engagement_type.replace("_return", "")].includes(watchedEngagementType ?? ""))
+    ?? servicePackages.find((item) => item.return_type === watchedReturnType)
+    ?? servicePackages.find((item) => [item.engagement_type, item.engagement_type.replace("_return", "")].includes(watchedEngagementType ?? ""));
   const schedule = calculateEngagementDeadlines({
     taxYear: Number(watchedTaxYear || currentYear),
     returnType: watchedReturnType || null,
@@ -99,6 +109,10 @@ export function EngagementForm({
         const body = (await response.json().catch(() => null)) as { error?: string } | null;
         window.alert(body?.error ?? "The engagement and organizer were created, but the portal invitation could not be sent.");
       }
+    }
+    if (result.activation) {
+      setActivationSummary({ engagementId: result.engagementId, data: result.activation, warning: result.warning });
+      return;
     }
     if (result.warning) window.alert(result.warning);
     router.push(`/engagements/${result.engagementId}`);
@@ -145,7 +159,18 @@ export function EngagementForm({
 
       <section className="space-y-5 border-t border-border pt-6">
         <div>
-          <h2 className="text-base font-semibold text-foreground">2. Assignment</h2>
+          <h2 className="text-base font-semibold text-foreground">2. Service package</h2>
+          <p className="mt-1 text-sm text-muted">Verexa selects the active package for this engagement and return type. Its versioned components are frozen when activated.</p>
+        </div>
+        {selectedPackage ? <div className="rounded-xl border border-accent-200 bg-accent-50 p-4">
+          <div className="flex items-start gap-3"><PackageCheck className="mt-0.5 size-5 text-accent-700" /><div><p className="font-semibold text-foreground">{selectedPackage.name}</p><p className="mt-1 text-sm text-muted">{selectedPackage.pricing_method.replaceAll("_", " ")} pricing · {selectedPackage.reviewer_policy.replaceAll("_", " ")} reviewer policy</p></div></div>
+          <div className="mt-3 grid gap-2 text-xs sm:grid-cols-2">{[["Workflow",selectedPackage.primary_workflow_definition_id],["Organizer",selectedPackage.organizer_template_id],["Engagement letter",selectedPackage.engagement_letter_template_id],["Document checklist",selectedPackage.document_checklist_template_id]].map(([label,value]) => <span key={String(label)} className="flex items-center gap-1.5">{value ? <CheckCircle2 className="size-3.5 text-success" /> : <span className="size-3.5 rounded-full border border-warning" />} {label}: {value ? "Configured" : "Missing"}</span>)}</div>
+        </div> : <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">No active service package matches this selection. Configure one before activation, or save this engagement as a draft.</p>}
+      </section>
+
+      <section className="space-y-5 border-t border-border pt-6">
+        <div>
+          <h2 className="text-base font-semibold text-foreground">3. Assignment</h2>
           <p className="mt-1 text-sm text-muted">Connected PTIN preparers automatically use their ERO as reviewer. EROs can reassign review work.</p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -171,7 +196,7 @@ export function EngagementForm({
 
       <section className="space-y-5 border-t border-border pt-6">
         <div>
-          <h2 className="text-base font-semibold text-foreground">3. Jurisdictions and statutory deadlines</h2>
+          <h2 className="text-base font-semibold text-foreground">4. Jurisdictions and statutory deadlines</h2>
           <p className="mt-1 text-sm text-muted">Verexa calculates supported statutory filing, payment, and extension dates. It flags forms that require office review instead of guessing.</p>
         </div>
         <label className="flex min-h-11 items-center gap-2 text-sm text-foreground">
@@ -207,7 +232,7 @@ export function EngagementForm({
 
       <section className="space-y-5 border-t border-border pt-6">
         <div>
-          <h2 className="text-base font-semibold text-foreground">4. Staff-controlled deadlines</h2>
+          <h2 className="text-base font-semibold text-foreground">5. Staff-controlled deadlines</h2>
           <p className="mt-1 text-sm text-muted">These are office targets and client expectations—not statutory filing dates.</p>
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -232,7 +257,7 @@ export function EngagementForm({
       </section>
 
       <fieldset className="space-y-3 rounded-xl border border-border p-4">
-        <legend className="px-1 text-sm font-semibold text-foreground">5. Activate this engagement</legend>
+        <legend className="px-1 text-sm font-semibold text-foreground">6. Delivery and activation</legend>
         {[
           ["save_draft", "Save draft", "Nothing is sent to the client."],
           ["activate_only", "Activate without sending", "The engagement opens for staff; intake remains unsent."],
@@ -248,6 +273,19 @@ export function EngagementForm({
       <div className="flex justify-end">
         <Button type="submit" loading={isSubmitting}>Create engagement</Button>
       </div>
+      <Dialog open={Boolean(activationSummary)} onOpenChange={() => undefined}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader><DialogTitle>Engagement activated</DialogTitle></DialogHeader>
+          {activationSummary && <div className="space-y-4">
+            <p className="text-sm text-muted">Verexa applied the service package in one transaction. Repeating activation will reuse these records.</p>
+            {activationSummary.warning && <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">{activationSummary.warning}</p>}
+            <dl className="grid gap-2 rounded-xl border border-border p-4 text-sm sm:grid-cols-2">
+              {Object.entries(activationSummary.data).filter(([key,value]) => key.endsWith("_id") && typeof value === "string").map(([key,value]) => <div key={key}><dt className="text-xs text-muted">{key.replaceAll("_", " ")}</dt><dd className="truncate font-mono text-xs">{String(value)}</dd></div>)}
+            </dl>
+            <div className="flex justify-end"><Button type="button" onClick={() => router.push(`/engagements/${activationSummary.engagementId}`)}>Open engagement</Button></div>
+          </div>}
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }

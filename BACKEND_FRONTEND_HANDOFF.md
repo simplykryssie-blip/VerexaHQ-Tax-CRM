@@ -2,6 +2,15 @@
 
 Backend applied to Supabase project `VerexaHQ Tax Office` on 2026-08-01.
 
+## Frontend Section 1 completed
+
+- Granular permission definitions, system/custom roles, scoped grants, member assignments, sensitive-action approvals, and retention/legal-hold controls are live.
+- `get_my_permissions`, `check_permission`, and `has_permission` are the frontend permission contracts. They return allowed/denied, scope, and a denial reason and run with invoker security/RLS.
+- The staff shell now uses those grants for permission-aware navigation.
+- `/services` now manages `engagement_type_settings` service packages and clearly warns about missing workflow/template components.
+- `/engagements/new` previews the matched service package and uses `activate_tax_engagement` for both activation modes. The legacy browser-driven organizer activation path is no longer used.
+- Activation confirmation displays returned artifact identifiers and warnings before staff opens the engagement.
+
 ## Product rules already enforced by the database
 
 - A public lead form creates a lead only. It does not create a portal account, client, or engagement.

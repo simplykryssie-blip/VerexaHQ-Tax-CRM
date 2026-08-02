@@ -7,6 +7,7 @@ import { navItemsForWorkspace } from "@/components/app/nav";
 import { cn } from "@/lib/utils";
 import { PracticeViewSwitcher } from "@/components/app/PracticeViewSwitcher";
 import type { MembershipRole, Workspace } from "@/lib/types";
+import { usePermissions } from "@/components/providers/permission-provider";
 
 export function AppSidebar({
   workspaceName,
@@ -20,7 +21,8 @@ export function AppSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const navItems = navItemsForWorkspace(workspaceType, role);
+  const { can } = usePermissions();
+  const navItems = navItemsForWorkspace(workspaceType, role).filter((item) => !item.permissionKey || can(item.permissionKey));
 
   return (
     <div className="flex h-full flex-col bg-white">
