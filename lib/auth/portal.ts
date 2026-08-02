@@ -101,17 +101,6 @@ export async function resolveAccountType(): Promise<AccountType> {
   return "none";
 }
 
-export function getAppOrigin(): string {
-  // In production, NEXT_PUBLIC_APP_URL must be set to the deployed domain.
-  // For development, default to localhost:3000.
-  // This is used for constructing email redirect URLs in signup and password recovery.
-  if (process.env.NEXT_PUBLIC_APP_URL) {
-    return process.env.NEXT_PUBLIC_APP_URL;
-  }
-  // Fallback for development environments
-  return "http://localhost:3000";
-}
-
 export async function resolveHomePath(): Promise<string> {
   const type = await resolveAccountType();
   if (type === "client") return "/portal/dashboard";
