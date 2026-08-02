@@ -21,6 +21,7 @@ export function TeamMemberRow({
   status,
   title,
   canManage,
+  canAssignAdmin,
   isSelf,
 }: {
   memberId: string;
@@ -30,6 +31,7 @@ export function TeamMemberRow({
   status: Enums<"membership_status">;
   title: string | null;
   canManage: boolean;
+  canAssignAdmin: boolean;
   isSelf: boolean;
 }) {
   const router = useRouter();
@@ -87,13 +89,13 @@ export function TeamMemberRow({
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <Badge variant={status === "active" ? "success" : status === "suspended" || status === "removed" ? "destructive" : "secondary"}>{membershipStatusLabel(status)}</Badge>
-        {canManage && !isSelf && role !== "owner" ? (
+        {canManage && !isSelf && role !== "owner" && (canAssignAdmin || role !== "admin") ? (
           <Select value={role} onValueChange={(v) => updateRole(v as Enums<"membership_role">)} disabled={busy}>
             <SelectTrigger className="w-40 h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {ASSIGNABLE_STAFF_ROLES.map((r) => (
+              {ASSIGNABLE_STAFF_ROLES.filter((r) => canAssignAdmin || r !== "admin").map((r) => (
                 <SelectItem key={r} value={r}>
                   {MEMBERSHIP_ROLE_LABELS[r]}
                 </SelectItem>
@@ -103,7 +105,7 @@ export function TeamMemberRow({
         ) : (
           <Badge variant="outline">{MEMBERSHIP_ROLE_LABELS[role]}</Badge>
         )}
-        {canManage && !isSelf && role !== "owner" && status !== "removed" && (
+        {canManage && !isSelf && role !== "owner" && (canAssignAdmin || role !== "admin") && status !== "removed" && (
           <>
             <Button size="sm" variant="ghost" disabled={busy} onClick={toggleStatus}>
               {busy && <Loader2 className="h-3.5 w-3.5 animate-spin" />}

@@ -13,7 +13,7 @@ import { toast } from "@/components/ui/toaster";
 import { MEMBERSHIP_ROLE_LABELS, ASSIGNABLE_STAFF_ROLES } from "@/lib/validation/team";
 import type { Enums } from "@/types/database";
 
-export function InviteTeamMemberDialog({ workspaceId }: { workspaceId: string }) {
+export function InviteTeamMemberDialog({ workspaceId, canAssignAdmin }: { workspaceId: string; canAssignAdmin: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
@@ -74,7 +74,7 @@ export function InviteTeamMemberDialog({ workspaceId }: { workspaceId: string })
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {ASSIGNABLE_STAFF_ROLES.map((r) => (
+                {ASSIGNABLE_STAFF_ROLES.filter((r) => canAssignAdmin || r !== "admin").map((r) => (
                   <SelectItem key={r} value={r}>
                     {MEMBERSHIP_ROLE_LABELS[r]}
                   </SelectItem>

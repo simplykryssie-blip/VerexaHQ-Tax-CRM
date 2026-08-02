@@ -1,6 +1,6 @@
 # Verexa Tax Office Backend → Frontend Handoff
 
-Backend applied to Supabase project `VerexaHQ Tax Office` on 2026-08-01.
+Backend migrations are applied through 2026-08-02 to Supabase project `VerexaHQ Tax Office`.
 
 ## Frontend Sections 4–8 completed (2026-08-02)
 
@@ -11,7 +11,8 @@ Backend applied to Supabase project `VerexaHQ Tax Office` on 2026-08-01.
 - **Section 8 — Automation and Integrations:** the existing visual workflow builder, triggers, conditions, waits, actions, approvals, and run history are exposed as Automations. Failed workflow actions and backend automation jobs have permission-checked retry RPCs. Integration cards continue to show truthful Connected/Not Connected status for email, SMS, Zoom, and payments instead of simulating providers.
 - Client type remains only **Individual** or **Business**. A household is a relationship group linking separate client records; it is not a third client record type.
 - `verexahq@gmail.com` now has an active `ero` membership in the MKB ETechnologies ERO workspace. The existing owner membership was not replaced.
-- New live migrations: `sections_4_8_permissions`, `communications_scheduling_lifecycle`, and `automation_operator_retry`.
+- ERO administration is aligned end-to-end: `team.manage`, `settings.manage`, and `integrations.manage` now drive both the frontend/server checks and the live RLS policies. An ERO can manage operational staff and settings but cannot modify Owner/Admin memberships, assign Admin, or change workspace ownership/type/lifecycle state.
+- New live migrations: `sections_4_8_permissions`, `communications_scheduling_lifecycle`, `automation_operator_retry`, and `align_ero_operational_admin_rls`.
 - Sections 4–8 passed TypeScript, the production build, lint with zero errors, and live rollback lifecycle tests. The 48 lint warnings predate this section and remain non-blocking.
 
 ## Sales/client carryover section completed
@@ -210,6 +211,7 @@ Tax disaster relief, fiscal years, short years, combat-zone relief, non-calendar
 - `supabase/migrations/20260801011100_pricing_quote_lifecycle.sql`
 - `supabase/migrations/20260801011200_pricing_permission_hardening.sql`
 - `supabase/migrations/20260801011300_engagement_stage_permission.sql`
+- `supabase/migrations/20260802131343_align_ero_operational_admin_rls.sql`
 - `supabase/functions/process-backend-queues/index.ts`
 - `types/database.ts`
 

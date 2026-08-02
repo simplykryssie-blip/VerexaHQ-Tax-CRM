@@ -10,10 +10,14 @@ import { membershipRoleLabels, membershipStatusMeta } from "@/lib/status";
 import { formatDate, titleCase } from "@/lib/utils";
 import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
 import { requirePermission } from "@/lib/permissions/granular";
+import { redirect } from "next/navigation";
 
 export default async function SettingsPage() {
   const { workspace, memberships } = await requireWorkspace();
   if (!workspace) return <NoWorkspaceState />;
+
+  const settingsAccess = await requirePermission(workspace.workspace.id, "settings.manage");
+  if (!settingsAccess.allowed) redirect("/unauthorized");
 
   const supabase = await createClient();
   const { data: members } = await supabase
