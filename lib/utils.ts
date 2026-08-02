@@ -83,6 +83,16 @@ export function maskLast4(last4: string | null | undefined) {
   return `•••-••-${last4}`;
 }
 
+export function maskSsn(last4: string | null | undefined) {
+  if (!last4) return "—";
+  return `***-**-${last4}`;
+}
+
+export function maskEin(last4: string | null | undefined) {
+  if (!last4) return "—";
+  return `**-***${last4}`;
+}
+
 export function titleCase(value: string | null | undefined) {
   if (!value) return "—";
   return value

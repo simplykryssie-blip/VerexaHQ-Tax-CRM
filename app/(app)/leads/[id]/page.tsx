@@ -13,6 +13,14 @@ import { requireWorkspace } from "@/lib/auth/workspace";
 import { requirePermission } from "@/lib/permissions/granular";
 import { ForbiddenState } from "@/components/ui/ForbiddenState";
 import { LeadStageSelect } from "@/features/leads/lead-stage-select";
+import {
+  getLeadCatalogOptions,
+  getLeadServiceInterestIds,
+  getLeadServiceInterestNames,
+  getLeadFollowUpTask,
+  nextScheduledAction,
+} from "@/features/leads/queries";
+import type { PickerOption } from "@/features/engagements/client-picker";
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -27,6 +35,24 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
   const supabase = await createClient();
   const { data: lead } = await supabase.from("leads").select("*").eq("id", id).eq("workspace_id", workspace.workspace.id).maybeSingle();
   if (!lead) notFound();
+
+  const workspaceId = workspace.workspace.id;
+  const [{ leadSources, serviceOfferings }, serviceOfferingIds, serviceInterestNames, followUpTask, { data: staffMembers }] = await Promise.all([
+    getLeadCatalogOptions(workspaceId),
+    getLeadServiceInterestIds(lead.id),
+    getLeadServiceInterestNames(lead.id),
+    getLeadFollowUpTask(workspaceId, lead.id),
+    supabase
+      .from("workspace_members")
+      .select("user_id, profile:user_profiles(display_name, first_name, last_name)")
+      .eq("workspace_id", workspaceId)
+      .eq("status", "active"),
+  ]);
+  const staffOptions: PickerOption[] = (staffMembers ?? []).map((s) => {
+    const profile = s.profile as { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null;
+    return { id: s.user_id, label: profile?.display_name || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Team member" };
+  });
+  const nextAction = nextScheduledAction(lead.consultation_at, followUpTask?.due_at);
 
   return (
     <div className="space-y-4 max-w-3xl">
@@ -45,7 +71,18 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {editAccess.allowed && <LeadFormDialog workspaceId={lead.workspace_id} lead={lead} trigger={<Button variant="outline">Edit</Button>} />}
+          {editAccess.allowed && (
+            <LeadFormDialog
+              workspaceId={lead.workspace_id}
+              lead={lead}
+              leadSources={leadSources}
+              serviceOfferings={serviceOfferings}
+              staff={staffOptions}
+              initialServiceOfferingIds={serviceOfferingIds}
+              followUpTask={followUpTask}
+              trigger={<Button variant="outline">Edit</Button>}
+            />
+          )}
           {convertAccess.allowed && <ConvertLeadButton leadId={lead.id} alreadyConverted={!!lead.converted_client_id} />}
         </div>
       </div>
@@ -61,6 +98,14 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
         </Card>
       )}
 
+      {nextAction && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="p-4 text-sm">
+            <span className="font-medium">Next scheduled action:</span> {nextAction.label} — {formatDateTime(nextAction.at)}
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Details</CardTitle>
@@ -69,13 +114,26 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
           <Field label="Email" value={lead.email} />
           <Field label="Phone" value={lead.phone} />
           <Field label="Source" value={lead.source} />
-          <Field label="Services of interest" value={lead.service_interest} />
+          <Field label="Services of interest" value={serviceInterestNames.length > 0 ? serviceInterestNames.join(", ") : lead.service_interest} />
           <Field label="Estimated value" value={formatCurrency(lead.estimated_value)} />
-          <Field label="Follow-up / consultation" value={formatDateTime(lead.consultation_at)} />
+          <Field label="Consultation appointment" value={formatDateTime(lead.consultation_at)} />
+          <Field
+            label="Next follow-up"
+            value={followUpTask?.due_at ? `${formatDateTime(followUpTask.due_at)}${followUpTask.assigned_to_user_id ? ` — ${staffOptions.find((s) => s.id === followUpTask.assigned_to_user_id)?.label ?? ""}` : ""}` : null}
+          />
           <Field label="Created" value={formatDateTime(lead.created_at)} />
           {lead.lost_reason && <Field label="Lost reason" value={lead.lost_reason} />}
         </CardContent>
       </Card>
+
+      {followUpTask?.description && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Follow-up notes</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm whitespace-pre-wrap">{followUpTask.description}</CardContent>
+        </Card>
+      )}
 
       {lead.notes && (
         <Card>

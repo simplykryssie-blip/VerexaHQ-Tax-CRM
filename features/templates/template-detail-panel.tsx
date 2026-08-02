@@ -18,19 +18,53 @@ import { templateStatusLabel, TEMPLATE_VISIBILITY_LABELS } from "@/lib/validatio
 import { formatDateTime } from "@/lib/formatters";
 import { customizeSystemTemplate } from "@/features/templates/customize-template";
 import { OrganizerStructureViewer } from "@/features/templates/organizer-structure-viewer";
+import type { TemplateUsage } from "@/features/templates/queries";
 import type { Tables } from "@/types/database";
 
 type TemplateRow = Tables<"templates">;
 type VersionRow = Tables<"template_versions">;
 
+function friendlyLabel(key: string) {
+  return key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function friendlyValue(value: unknown): string {
+  if (value === null || value === undefined || value === "") return "—";
+  if (Array.isArray(value)) return value.map((v) => friendlyValue(v)).join(", ") || "—";
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+/** A readable key/value fallback for content shapes this panel doesn't have
+ * a dedicated renderer for yet — used instead of a raw JSON dump so staff
+ * never see an unexplained blank page or literal "{}"/JSON text. */
+function FriendlyContentPreview({ content }: { content: Record<string, unknown> }) {
+  const entries = Object.entries(content);
+  if (entries.length === 0) {
+    return <p className="text-sm text-muted-foreground">This template has no content yet.</p>;
+  }
+  return (
+    <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {entries.map(([key, value]) => (
+        <div key={key}>
+          <dt className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{friendlyLabel(key)}</dt>
+          <dd className="mt-0.5 text-sm text-foreground whitespace-pre-wrap">{friendlyValue(value)}</dd>
+        </div>
+      ))}
+    </dl>
+  );
+}
+
 export function TemplateDetailPanel({
   template,
   versions,
   workspaceId,
+  usage,
 }: {
   template: TemplateRow;
   versions: VersionRow[];
   workspaceId: string;
+  usage: TemplateUsage[];
 }) {
   const router = useRouter();
   const supabase = createClient();
@@ -42,8 +76,11 @@ export function TemplateDetailPanel({
   const content = (selectedVersion?.content as Record<string, unknown>) ?? {};
   const [subject, setSubject] = useState(typeof content.subject === "string" ? content.subject : "");
   const [bodyText, setBodyText] = useState(typeof content.body_text === "string" ? content.body_text : "");
+  const [bodyHtml, setBodyHtml] = useState(typeof content.body_html === "string" ? content.body_html : "");
   const [jsonContent, setJsonContent] = useState(JSON.stringify(content, null, 2));
   const [jsonError, setJsonError] = useState<string | null>(null);
+  const [showRawJson, setShowRawJson] = useState(false);
+  const hasBodyHtml = typeof content.body_html === "string";
 
   const canManage = template.is_system_template !== true;
   const isEditableVersion = canManage && selectedVersion?.status === "draft";
@@ -67,6 +104,8 @@ export function TemplateDetailPanel({
     let nextContent: Record<string, unknown>;
     if (template.kind === "message") {
       nextContent = { subject, body_text: bodyText };
+    } else if (hasBodyHtml && !showRawJson) {
+      nextContent = { ...content, body_html: bodyHtml };
     } else {
       try {
         nextContent = JSON.parse(jsonContent);
@@ -134,7 +173,10 @@ export function TemplateDetailPanel({
   }
 
   async function archiveTemplate() {
-    if (!confirm("Archive this template? It will no longer be assignable.")) return;
+    const usageWarning = usage.length > 0
+      ? ` It is currently used by ${usage.length} active ${usage.length === 1 ? "item" : "items"} (${usage.map((u) => u.name).join(", ")}) — those will keep their existing reference, but it will no longer be assignable to new work.`
+      : "";
+    if (!confirm(`Archive this template?${usageWarning} It will no longer be assignable.`)) return;
     setBusy(true);
     const { error } = await supabase.from("templates").update({ status: "archived", archived_at: new Date().toISOString() }).eq("id", template.id);
     setBusy(false);
@@ -197,6 +239,29 @@ export function TemplateDetailPanel({
           </CardContent>
         )}
       </Card>
+
+      {usage.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">Used by</CardTitle>
+            <CardDescription>Archiving or removing this template affects these — check before making changes.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {usage.map((item) => (
+              <div key={`${item.kind}-${item.id}`} className="flex items-center justify-between rounded-md border border-border p-2.5 text-sm">
+                <span className="font-medium">{item.name}</span>
+                {item.kind === "workflow" ? (
+                  <a href={`/workflows/${item.id}`} className="text-xs font-medium text-accent-700 underline underline-offset-2">
+                    View attached workflow
+                  </a>
+                ) : (
+                  <Badge variant="outline">Service package</Badge>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
@@ -276,6 +341,22 @@ export function TemplateDetailPanel({
                   <Textarea value={bodyText} onChange={(e) => setBodyText(e.target.value)} rows={8} disabled={!isEditableVersion} />
                 </div>
               </>
+            ) : hasBodyHtml && !showRawJson ? (
+              <>
+                <div className="space-y-1">
+                  <Label className="text-xs">Letter body (HTML)</Label>
+                  <Textarea value={bodyHtml} onChange={(e) => setBodyHtml(e.target.value)} rows={10} disabled={!isEditableVersion} className="font-mono text-xs" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Preview</Label>
+                  <div
+                    className="rounded-md border border-border p-4 text-sm leading-relaxed [&_h1]:text-lg [&_h1]:font-semibold [&_h2]:text-base [&_h2]:font-semibold [&_h1]:mb-2 [&_h2]:mt-4 [&_h2]:mb-1 [&_p]:mb-2"
+                    dangerouslySetInnerHTML={{ __html: bodyHtml || "<p class='text-muted-foreground'>No content yet.</p>" }}
+                  />
+                </div>
+              </>
+            ) : !showRawJson ? (
+              <FriendlyContentPreview content={content} />
             ) : (
               <div className="space-y-1">
                 <Label className="text-xs">Content (JSON)</Label>
@@ -283,7 +364,16 @@ export function TemplateDetailPanel({
                 {jsonError && <p className="text-xs text-destructive">{jsonError}</p>}
               </div>
             )}
-            {isEditableVersion && template.kind !== "form" && (
+            {template.kind !== "form" && template.kind !== "message" && (
+              <button
+                type="button"
+                onClick={() => setShowRawJson((v) => !v)}
+                className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+              >
+                {showRawJson ? "Back to friendly view" : "Edit as JSON (advanced)"}
+              </button>
+            )}
+            {isEditableVersion && template.kind !== "form" && (template.kind === "message" || hasBodyHtml || showRawJson) && (
               <Button size="sm" variant="outline" disabled={busy} onClick={saveContent}>
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                 Save content

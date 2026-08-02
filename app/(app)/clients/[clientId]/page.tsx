@@ -7,8 +7,10 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Tabs, type TabDefinition } from "@/components/ui/TabSwitcher";
 import { ClientOverviewTab } from "@/components/clients/ClientOverviewTab";
-import { ClientContactTab } from "@/components/clients/ClientContactTab";
 import { ClientIntakesTab } from "@/components/clients/ClientIntakesTab";
+import { ClientContactsTab } from "@/features/clients/client-contacts-tab";
+import { ClientAddressesTab } from "@/features/clients/client-addresses-tab";
+import { ClientCommunicationPreferences } from "@/features/clients/communication-preferences";
 import { ClientIncomeTab } from "@/components/clients/ClientIncomeTab";
 import { ClientDeductionsTab } from "@/components/clients/ClientDeductionsTab";
 import { ClientDocumentRequestsTab } from "@/components/clients/ClientDocumentRequestsTab";
@@ -30,7 +32,7 @@ export default async function ClientDetailPage({
 }) {
   const { workspace } = await requireWorkspace();
   if (!workspace) return <NoWorkspaceState />;
-  const [viewAccess,editAccess,engagementAccess,previewAccess]=await Promise.all([requirePermission(workspace.workspace.id,"clients.view"),requirePermission(workspace.workspace.id,"clients.edit"),requirePermission(workspace.workspace.id,"engagements.create"),requirePermission(workspace.workspace.id,"portal.preview")]);
+  const [viewAccess,editAccess,engagementAccess,previewAccess,identityRevealAccess,identityManageAccess]=await Promise.all([requirePermission(workspace.workspace.id,"clients.view"),requirePermission(workspace.workspace.id,"clients.edit"),requirePermission(workspace.workspace.id,"engagements.create"),requirePermission(workspace.workspace.id,"portal.preview"),requirePermission(workspace.workspace.id,"clients.identity_reveal"),requirePermission(workspace.workspace.id,"clients.identity_manage")]);
   if(!viewAccess.allowed)return <ForbiddenState description={viewAccess.reason}/>;
 
   const { clientId } = await params;
@@ -43,20 +45,38 @@ export default async function ClientDetailPage({
     workspace.workspace.id,
     clientId,
   );
-  const [engagementsResult,quotesResult,householdsResult]=await Promise.all([
+  const [engagementsResult,quotesResult,householdsResult,commPrefsResult]=await Promise.all([
     supabase.from("tax_engagements").select("id,engagement_number,title,tax_year,status,updated_at").eq("workspace_id",workspace.workspace.id).eq("client_id",clientId).order("updated_at",{ascending:false}),
     supabase.from("client_quotes").select("id,quote_number,quote_type,status,amount,amount_min,amount_max,created_at").eq("workspace_id",workspace.workspace.id).eq("client_id",clientId).order("created_at",{ascending:false}),
     supabase.from("household_members").select("id,household_id,relationship,household:tax_households(household_name)").eq("workspace_id",workspace.workspace.id).eq("client_id",clientId),
+    supabase.from("client_communication_preferences").select("*").eq("workspace_id",workspace.workspace.id).eq("client_id",clientId).maybeSingle(),
   ]);
 
   const status = clientStatusMeta(detail.client.status);
 
   const tabs: TabDefinition[] = [
-    { id: "overview", label: "Overview", content: <ClientOverviewTab client={detail.client} /> },
+    {
+      id: "overview",
+      label: "Overview",
+      content: (
+        <ClientOverviewTab
+          client={detail.client}
+          workspaceId={workspace.workspace.id}
+          canRevealIdentity={identityRevealAccess.allowed}
+          canManageIdentity={identityManageAccess.allowed}
+        />
+      ),
+    },
     {
       id: "contact",
       label: "Contact information",
-      content: <ClientContactTab contacts={detail.contacts} addresses={detail.addresses} />,
+      content: (
+        <div className="space-y-6">
+          <ClientContactsTab clientId={clientId} workspaceId={workspace.workspace.id} contacts={detail.contacts} />
+          <ClientAddressesTab clientId={clientId} workspaceId={workspace.workspace.id} addresses={detail.addresses} />
+          <ClientCommunicationPreferences workspaceId={workspace.workspace.id} clientId={clientId} preferences={commPrefsResult.data} />
+        </div>
+      ),
     },
     {
       id: "intakes",

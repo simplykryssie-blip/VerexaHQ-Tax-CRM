@@ -28,6 +28,7 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
   const [newNodeLabel, setNewNodeLabel] = useState("");
   const [connSource, setConnSource] = useState("");
   const [connTarget, setConnTarget] = useState("");
+  const [connCondition, setConnCondition] = useState("");
 
   async function toggleActive() {
     setBusy(true);
@@ -80,12 +81,14 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
       workflow_definition_id: definition.id,
       source_node_id: connSource,
       target_node_id: connTarget,
+      condition_expression: connCondition.trim() ? { note: connCondition.trim() } : null,
     });
     setBusy(false);
     if (error) {
       toast.error(friendlyDbError(error.message));
       return;
     }
+    setConnCondition("");
     router.refresh();
   }
 
@@ -153,10 +156,15 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Nodes</CardTitle>
-          <CardDescription>Each node is a step. Give every node a unique key (e.g. &quot;send_welcome_email&quot;).</CardDescription>
+          <CardTitle className="text-base">Steps</CardTitle>
+          <CardDescription>Give every step a unique key (e.g. &quot;send_welcome_email&quot;).</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
+          {nodes.length === 0 && (
+            <p className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+              No steps yet. Add the first step below to start building this workflow.
+            </p>
+          )}
           {nodes.map((n) => (
             <div key={n.id} className="flex items-center justify-between gap-2 rounded-md border border-border p-2.5">
               <div>
@@ -186,7 +194,7 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
               </SelectContent>
             </Select>
             <Button variant="outline" disabled={busy} onClick={addNode}>
-              <Plus className="h-4 w-4" /> Add node
+              <Plus className="h-4 w-4" /> Add step
             </Button>
           </div>
         </CardContent>
@@ -194,25 +202,41 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Connections</CardTitle>
-          <CardDescription>Draws the path from one node to the next.</CardDescription>
+          <CardTitle className="text-base">Connections &amp; conditions</CardTitle>
+          <CardDescription>Draws the path from one step to the next, with an optional condition for when it applies.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-3">
-          {connections.map((c) => (
-            <div key={c.id} className="flex items-center justify-between gap-2 rounded-md border border-border p-2.5 text-sm">
-              <span>
-                {nodeLabel(c.source_node_id)} → {nodeLabel(c.target_node_id)}
-              </span>
-              <Button size="sm" variant="ghost" disabled={busy} onClick={() => removeConnection(c.id)}>
-                <Trash2 className="h-4 w-4 text-destructive" />
-              </Button>
-            </div>
-          ))}
+          {connections.length === 0 && nodes.length >= 2 && (
+            <p className="rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
+              No connections yet. Connect two steps below to define the order they run in.
+            </p>
+          )}
+          {connections.map((c) => {
+            const conditionNote =
+              c.condition_expression && typeof c.condition_expression === "object" && !Array.isArray(c.condition_expression)
+                ? (c.condition_expression as Record<string, unknown>).note
+                : null;
+            return (
+              <div key={c.id} className="flex items-center justify-between gap-2 rounded-md border border-border p-2.5 text-sm">
+                <div>
+                  <span>
+                    {nodeLabel(c.source_node_id)} → {nodeLabel(c.target_node_id)}
+                  </span>
+                  {typeof conditionNote === "string" && conditionNote && (
+                    <p className="text-xs text-muted-foreground">Only when: {conditionNote}</p>
+                  )}
+                </div>
+                <Button size="sm" variant="ghost" disabled={busy} onClick={() => removeConnection(c.id)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </div>
+            );
+          })}
           {nodes.length >= 2 && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-2 pt-2">
               <Select value={connSource} onValueChange={setConnSource}>
                 <SelectTrigger>
-                  <SelectValue placeholder="From node" />
+                  <SelectValue placeholder="From step" />
                 </SelectTrigger>
                 <SelectContent>
                   {nodes.map((n) => (
@@ -224,7 +248,7 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
               </Select>
               <Select value={connTarget} onValueChange={setConnTarget}>
                 <SelectTrigger>
-                  <SelectValue placeholder="To node" />
+                  <SelectValue placeholder="To step" />
                 </SelectTrigger>
                 <SelectContent>
                   {nodes.map((n) => (
@@ -234,6 +258,11 @@ export function WorkflowBuilderPanel({ definition, nodes, connections }: { defin
                   ))}
                 </SelectContent>
               </Select>
+              <Input
+                placeholder="Condition (optional, e.g. amount > 500)"
+                value={connCondition}
+                onChange={(e) => setConnCondition(e.target.value)}
+              />
               <Button variant="outline" disabled={busy} onClick={addConnection}>
                 <Plus className="h-4 w-4" /> Connect
               </Button>

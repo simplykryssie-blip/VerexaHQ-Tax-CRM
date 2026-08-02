@@ -12,6 +12,8 @@ import { requireWorkspace } from "@/lib/auth/workspace";
 import { requirePermission } from "@/lib/permissions/granular";
 import { ForbiddenState } from "@/components/ui/ForbiddenState";
 import { LeadStageSelect } from "@/features/leads/lead-stage-select";
+import { getLeadCatalogOptions } from "@/features/leads/queries";
+import type { PickerOption } from "@/features/engagements/client-picker";
 
 export default async function LeadsPage({
   searchParams,
@@ -39,6 +41,19 @@ export default async function LeadsPage({
 
   const { data: leads, error } = await query;
 
+  const [{ leadSources, serviceOfferings }, { data: staffMembers }] = await Promise.all([
+    getLeadCatalogOptions(workspaceId),
+    supabase
+      .from("workspace_members")
+      .select("user_id, profile:user_profiles(display_name, first_name, last_name)")
+      .eq("workspace_id", workspaceId)
+      .eq("status", "active"),
+  ]);
+  const staffOptions: PickerOption[] = (staffMembers ?? []).map((s) => {
+    const profile = s.profile as { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null;
+    return { id: s.user_id, label: profile?.display_name || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Team member" };
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -46,7 +61,9 @@ export default async function LeadsPage({
           <h1 className="text-2xl font-semibold tracking-tight">Leads</h1>
           <p className="text-sm text-muted-foreground mt-1">Track prospective clients through your pipeline.</p>
         </div>
-        {createAccess.allowed && <LeadFormDialog workspaceId={workspaceId} />}
+        {createAccess.allowed && (
+          <LeadFormDialog workspaceId={workspaceId} leadSources={leadSources} serviceOfferings={serviceOfferings} staff={staffOptions} />
+        )}
       </div>
 
       <div className="flex items-center gap-2">

@@ -48,11 +48,12 @@ export function EngagementForm({
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [activationSummary, setActivationSummary] = useState<{ engagementId: string; data: Record<string, unknown>; warning?: string } | null>(null);
+  const [clientRequestId] = useState(() => crypto.randomUUID());
   const {
     register,
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<EngagementFormInput, unknown, CreateEngagementInput>({
     resolver: zodResolver(createEngagementSchema),
     defaultValues: {
@@ -71,6 +72,14 @@ export function EngagementForm({
       activationMode: "save_draft",
     },
   });
+
+  const cancelHref = initialClientId ? `/clients/${initialClientId}` : "/engagements";
+  function handleCancel() {
+    if (isDirty && !window.confirm("Discard this unsaved engagement? Nothing entered here will be saved.")) {
+      return;
+    }
+    router.push(cancelHref);
+  }
 
   const [watchedTaxYear, watchedReturnType, watchedFiscalYearEnd, watchedFederalRequired, watchedJurisdictions, watchedEngagementType] = useWatch({
     control,
@@ -92,6 +101,7 @@ export function EngagementForm({
     const result = await createEngagementAction({
       ...data,
       stateReturnRequired: data.jurisdictions.length > 0,
+      clientRequestId,
     });
     if (result?.error) {
       setFormError(result.error);
@@ -270,7 +280,10 @@ export function EngagementForm({
         ))}
       </fieldset>
 
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="secondary" onClick={handleCancel} disabled={isSubmitting}>
+          {initialClientId ? "Back to client" : "Cancel"}
+        </Button>
         <Button type="submit" loading={isSubmitting}>Create engagement</Button>
       </div>
       <Dialog open={Boolean(activationSummary)} onOpenChange={() => undefined}>

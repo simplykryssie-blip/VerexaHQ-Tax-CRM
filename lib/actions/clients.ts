@@ -42,7 +42,30 @@ export async function createClientAction(input: CreateClientInput): Promise<Acti
     return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   }
 
-  const { firstName, lastName, clientType, setupMode, email, phone, company, notes, duplicateOverrideReason } = parsed.data;
+  const {
+    firstName,
+    lastName,
+    clientType,
+    setupMode,
+    email,
+    phone,
+    company,
+    notes,
+    duplicateOverrideReason,
+    addressLine1,
+    addressLine2,
+    city,
+    state,
+    postalCode,
+    country,
+    mailingSameAsPhysical,
+    mailingLine1,
+    mailingLine2,
+    mailingCity,
+    mailingState,
+    mailingPostalCode,
+    mailingCountry,
+  } = parsed.data;
   const supabase = await createClient();
   const { data: duplicateRows, error: duplicateError } = await supabase.rpc("find_possible_duplicate_clients", {
     p_workspace_id: workspace.workspace.id,
@@ -101,6 +124,39 @@ export async function createClientAction(input: CreateClientInput): Promise<Acti
       entity_id: data.id,
       new_values: { reason: duplicateOverrideReason, possible_duplicate_client_ids: duplicates.map((item) => item.clientId) },
     });
+  }
+
+  const hasPhysicalAddress = Boolean(addressLine1 || city || state || postalCode);
+  if (hasPhysicalAddress) {
+    await supabase.from("client_addresses").insert({
+      workspace_id: workspace.workspace.id,
+      client_id: data.id,
+      address_type: "physical",
+      is_primary: true,
+      line1: addressLine1 || null,
+      line2: addressLine2 || null,
+      city: city || null,
+      state: state || null,
+      postal_code: postalCode || null,
+      country: country || "US",
+    });
+  }
+  if (hasPhysicalAddress && mailingSameAsPhysical === false) {
+    const hasMailingAddress = Boolean(mailingLine1 || mailingCity || mailingState || mailingPostalCode);
+    if (hasMailingAddress) {
+      await supabase.from("client_addresses").insert({
+        workspace_id: workspace.workspace.id,
+        client_id: data.id,
+        address_type: "mailing",
+        is_primary: false,
+        line1: mailingLine1 || null,
+        line2: mailingLine2 || null,
+        city: mailingCity || null,
+        state: mailingState || null,
+        postal_code: mailingPostalCode || null,
+        country: mailingCountry || "US",
+      });
+    }
   }
 
   return {

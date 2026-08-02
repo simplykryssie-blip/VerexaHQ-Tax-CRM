@@ -28,6 +28,8 @@ export default async function SettingsPage() {
 
   const userMap = await getUserSummaryMap(supabase, (members ?? []).map((m) => m.user_id));
   const permissionAccess = await requirePermission(workspace.workspace.id, "permissions.manage");
+  const leadSourcesAccess = await requirePermission(workspace.workspace.id, "lead_sources.manage");
+  const serviceOfferingsAccess = await requirePermission(workspace.workspace.id, "service_offerings.manage");
 
   return (
     <div className="max-w-4xl space-y-6">
@@ -68,20 +70,30 @@ export default async function SettingsPage() {
         <CardBody><div className="flex items-center justify-between gap-3"><p className="text-sm text-muted">Review the server-enforced permission keys and effective scope for this workspace.</p><Link href="/settings/permissions" className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-700 hover:underline">View permissions <ArrowRight className="size-3.5" /></Link></div></CardBody>
       </Card>}
 
+      {leadSourcesAccess.allowed && <Card>
+        <CardHeader><h2 className="text-sm font-semibold text-foreground">Lead sources</h2></CardHeader>
+        <CardBody><div className="flex items-center justify-between gap-3"><p className="text-sm text-muted">Manage the source options shown when staff add a lead.</p><Link href="/settings/lead-sources" className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-700 hover:underline">Manage lead sources <ArrowRight className="size-3.5" /></Link></div></CardBody>
+      </Card>}
+
+      {serviceOfferingsAccess.allowed && <Card>
+        <CardHeader><h2 className="text-sm font-semibold text-foreground">Service catalog</h2></CardHeader>
+        <CardBody><div className="flex items-center justify-between gap-3"><p className="text-sm text-muted">Manage the firm&apos;s services, engagement types, and packages.</p><Link href="/services" className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-700 hover:underline">Manage Services &amp; Packages <ArrowRight className="size-3.5" /></Link></div></CardBody>
+      </Card>}
+
       <Card>
         <CardHeader>
-          <h2 className="text-sm font-semibold text-foreground">Organizer templates</h2>
+          <h2 className="text-sm font-semibold text-foreground">Templates &amp; forms</h2>
         </CardHeader>
         <CardBody>
           <div className="flex items-center justify-between gap-3">
             <p className="text-sm text-muted">
-              Manage the tax organizer templates clients and staff use across engagements.
+              Organizer templates, engagement letters, and other client-facing content all live in one place.
             </p>
             <Link
-              href="/settings/organizers"
+              href="/templates"
               className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-accent-700 hover:underline"
             >
-              Manage templates <ArrowRight className="size-3.5" />
+              Manage Templates &amp; Forms <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </CardBody>

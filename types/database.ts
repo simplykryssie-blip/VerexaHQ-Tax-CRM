@@ -3994,6 +3994,7 @@ export type Database = {
       engagement_type_settings: {
         Row: {
           activation_default: string
+          archived_at: string | null
           created_at: string
           created_by: string | null
           deadline_settings: Json
@@ -4018,11 +4019,14 @@ export type Database = {
           reminder_settings: Json
           return_type: Database["public"]["Enums"]["tax_return_type"] | null
           reviewer_policy: string
+          service_offering_id: string | null
+          sort_order: number
           updated_at: string
           workspace_id: string
         }
         Insert: {
           activation_default?: string
+          archived_at?: string | null
           created_at?: string
           created_by?: string | null
           deadline_settings?: Json
@@ -4047,11 +4051,14 @@ export type Database = {
           reminder_settings?: Json
           return_type?: Database["public"]["Enums"]["tax_return_type"] | null
           reviewer_policy?: string
+          service_offering_id?: string | null
+          sort_order?: number
           updated_at?: string
           workspace_id: string
         }
         Update: {
           activation_default?: string
+          archived_at?: string | null
           created_at?: string
           created_by?: string | null
           deadline_settings?: Json
@@ -4076,6 +4083,8 @@ export type Database = {
           reminder_settings?: Json
           return_type?: Database["public"]["Enums"]["tax_return_type"] | null
           reviewer_policy?: string
+          service_offering_id?: string | null
+          sort_order?: number
           updated_at?: string
           workspace_id?: string
         }
@@ -4141,6 +4150,13 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "engagement_type_settings_service_offering_id_fkey"
+            columns: ["service_offering_id"]
+            isOneToOne: false
+            referencedRelation: "service_offerings"
             referencedColumns: ["id"]
           },
         ]
@@ -6838,6 +6854,86 @@ export type Database = {
           },
         ]
       }
+      lead_service_interests: {
+        Row: {
+          created_at: string
+          id: string
+          lead_id: string
+          service_offering_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          lead_id: string
+          service_offering_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          lead_id?: string
+          service_offering_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_service_interests_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lead_service_interests_service_offering_id_fkey"
+            columns: ["service_offering_id"]
+            isOneToOne: false
+            referencedRelation: "service_offerings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_sources: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_system: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_sources_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_role_assignments: {
         Row: {
           assigned_at: string
@@ -8083,6 +8179,53 @@ export type Database = {
           },
         ]
       }
+      service_offerings: {
+        Row: {
+          archived_at: string | null
+          created_at: string
+          description: string | null
+          id: string
+          is_active: boolean
+          is_system: boolean
+          name: string
+          sort_order: number
+          updated_at: string
+          workspace_id: string | null
+        }
+        Insert: {
+          archived_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          archived_at?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          is_system?: boolean
+          name?: string
+          sort_order?: number
+          updated_at?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_offerings_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       services: {
         Row: {
           client_id: string | null
@@ -9025,6 +9168,7 @@ export type Database = {
           assigned_at: string | null
           balance_due: number | null
           client_id: string
+          client_request_id: string | null
           completed_at: string | null
           created_at: string
           created_by: string | null
@@ -9082,6 +9226,7 @@ export type Database = {
           assigned_at?: string | null
           balance_due?: number | null
           client_id: string
+          client_request_id?: string | null
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -9139,6 +9284,7 @@ export type Database = {
           assigned_at?: string | null
           balance_due?: number | null
           client_id?: string
+          client_request_id?: string | null
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -12016,6 +12162,23 @@ export type Database = {
       finish_outbox_failure: {
         Args: { p_error: string; p_outbox_id: string }
         Returns: undefined
+      }
+      set_client_identity_value: {
+        Args: {
+          p_client_id: string
+          p_identifier_type: string
+          p_value: string
+          p_workspace_id: string
+        }
+        Returns: undefined
+      }
+      reveal_client_identity_value: {
+        Args: {
+          p_client_id: string
+          p_identifier_type: string
+          p_workspace_id: string
+        }
+        Returns: string
       }
       generate_intake_document_request: {
         Args: { p_send?: boolean; p_submission_id: string }

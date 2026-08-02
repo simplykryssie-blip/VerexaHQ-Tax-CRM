@@ -14,6 +14,7 @@ type Result = { error?: string; success?: string };
 const packageSchema = z.object({
   id: z.string().uuid().optional(),
   name: z.string().trim().min(3).max(140),
+  serviceOfferingId: z.string().optional(),
   engagementType: z.string().min(1),
   returnType: z.string().optional(),
   pricingMethod: z.enum(["fixed", "starting_at", "range", "staff_entered", "rule_based"]),
@@ -46,6 +47,7 @@ export async function saveServicePackageAction(input: z.input<typeof packageSche
   const values = {
     workspace_id: auth.workspace.workspace.id,
     name: data.name,
+    service_offering_id: data.serviceOfferingId && data.serviceOfferingId !== "none" ? data.serviceOfferingId : null,
     engagement_type: data.engagementType as EngagementType,
     return_type: (data.returnType && data.returnType !== "none" ? data.returnType : null) as ReturnType | null,
     pricing_method: data.pricingMethod,
@@ -79,4 +81,18 @@ export async function setServicePackageActiveAction(id: string, active: boolean)
   if (error) return { error: "The package status could not be changed." };
   revalidatePath("/services");
   return { success: active ? "Package activated." : "Package deactivated. Existing engagements were not changed." };
+}
+
+export async function archiveServicePackageAction(id: string): Promise<Result> {
+  const auth = await authorize("service_packages.deactivate");
+  if ("error" in auth) return { error: auth.error };
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from("engagement_type_settings")
+    .update({ archived_at: new Date().toISOString(), is_active: false })
+    .eq("id", id)
+    .eq("workspace_id", auth.workspace.workspace.id);
+  if (error) return { error: "The package could not be archived." };
+  revalidatePath("/services");
+  return { success: "Package archived. Existing engagements were not changed." };
 }

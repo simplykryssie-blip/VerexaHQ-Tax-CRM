@@ -5,6 +5,7 @@ import {
   ClipboardList,
   FileText,
   FolderOpen,
+  Inbox,
   LayoutDashboard,
   ListChecks,
   Settings,
@@ -44,7 +45,7 @@ const CORE_NAV_ITEMS: NavItem[] = [
   { href: "/engagements", label: "Engagements", icon: ClipboardList, permissionKey: "engagements.view" },
   { href: "/pricing", label: "Pricing & Quotes", icon: BadgeDollarSign, permissionKey: "pricing.view" },
   { href: "/intakes", label: "Intakes", icon: FileText, permissionKey: "intakes.view" },
-  { href: "/document-requests", label: "Document Requests", icon: FolderOpen, permissionKey: "documents.view" },
+  { href: "/document-requests", label: "Document Requests", icon: Inbox, permissionKey: "documents.view" },
   { href: "/documents", label: "Document Vault", icon: FolderOpen, permissionKey: "documents.view" },
   { href: "/communications", label: "Communications", icon: MessagesSquare, permissionKey: "communications.view" },
   { href: "/calendar", label: "Calendar", icon: CalendarDays, permissionKey: "appointments.view" },
@@ -72,7 +73,7 @@ export function navItemsForWorkspace(
     items.push({ href: "/workflows", label: "Automations", icon: Workflow, permissionKey: "automation.view" });
     items.push({ href: "/reports", label: "Reports", icon: BarChart3, permissionKey: "reports.view" });
     items.push({ href: "/team", label: "Team", icon: UserCog, permissionKey: "team.manage" });
-    items.push({ href: "/services", label: "Services & Engagement Types", icon: WalletCards, permissionKey: "service_packages.view" });
+    items.push({ href: "/services", label: "Services & Packages", icon: WalletCards, permissionKey: "service_packages.view" });
     items.push({ href: "/settings/integrations", label: "Integrations", icon: Plug, permissionKey: "integrations.manage" });
     items.push({ href: "/settings", label: "Settings", icon: Settings, permissionKey: "settings.manage" });
   }

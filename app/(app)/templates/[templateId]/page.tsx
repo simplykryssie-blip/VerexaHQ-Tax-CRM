@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { requireWorkspace } from "@/lib/auth/workspace";
 import { requirePermission } from "@/lib/permissions/granular";
-import { getTemplateDetail } from "@/features/templates/queries";
+import { getTemplateDetail, getTemplateUsage } from "@/features/templates/queries";
 import { TemplateDetailPanel } from "@/features/templates/template-detail-panel";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ForbiddenState } from "@/components/ui/ForbiddenState";
@@ -17,7 +17,7 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
   if (!access.allowed) return <ForbiddenState description={access.reason} />;
 
   const { templateId } = await params;
-  const { template, versions } = await getTemplateDetail(templateId);
+  const [{ template, versions }, usage] = await Promise.all([getTemplateDetail(templateId), getTemplateUsage(templateId)]);
   if (!template) notFound();
 
   return (
@@ -27,7 +27,7 @@ export default async function TemplateDetailPage({ params }: { params: Promise<{
         description="View the full client experience before sending, or edit a workspace-owned draft."
         actions={<Button asChild variant="outline" size="sm"><Link href="/templates"><ArrowLeft className="size-4" /> Back to templates</Link></Button>}
       />
-      <TemplateDetailPanel template={template} versions={versions} workspaceId={workspace.workspace.id} />
+      <TemplateDetailPanel template={template} versions={versions} workspaceId={workspace.workspace.id} usage={usage} />
     </div>
   );
 }

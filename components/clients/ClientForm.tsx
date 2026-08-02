@@ -29,9 +29,9 @@ export function ClientForm() {
     formState: { errors, isSubmitting },
   } = useForm<CreateClientInput>({
     resolver: zodResolver(createClientSchema),
-    defaultValues: { clientType: "individual", setupMode: "active" },
+    defaultValues: { clientType: "individual", setupMode: "active", mailingSameAsPhysical: true, country: "US", mailingCountry: "US" },
   });
-  const [email,phone,overrideReason,clientType]=useWatch({control,name:["email","phone","duplicateOverrideReason","clientType"]});
+  const [email,phone,overrideReason,clientType,mailingSameAsPhysical]=useWatch({control,name:["email","phone","duplicateOverrideReason","clientType","mailingSameAsPhysical"]});
 
   useEffect(()=>{
     if(overrideReason)return;
@@ -123,6 +123,61 @@ export function ClientForm() {
           <input id="phone" type="tel" className={inputClassName} {...register("phone")} />
         </FormField>
       </div>
+
+      <fieldset className="space-y-3 rounded-xl border border-border p-4">
+        <legend className="px-1 text-sm font-semibold text-foreground">Physical address</legend>
+        <FormField label="Address line 1" htmlFor="addressLine1" error={errors.addressLine1?.message}>
+          <input id="addressLine1" className={inputClassName} {...register("addressLine1")} />
+        </FormField>
+        <FormField label="Address line 2" htmlFor="addressLine2" error={errors.addressLine2?.message}>
+          <input id="addressLine2" className={inputClassName} {...register("addressLine2")} />
+        </FormField>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <FormField label="City" htmlFor="city" error={errors.city?.message}>
+            <input id="city" className={inputClassName} {...register("city")} />
+          </FormField>
+          <FormField label="State" htmlFor="state" error={errors.state?.message}>
+            <input id="state" className={inputClassName} {...register("state")} />
+          </FormField>
+          <FormField label="ZIP / postal code" htmlFor="postalCode" error={errors.postalCode?.message}>
+            <input id="postalCode" className={inputClassName} {...register("postalCode")} />
+          </FormField>
+        </div>
+        <FormField label="Country" htmlFor="country" error={errors.country?.message}>
+          <input id="country" className={inputClassName} {...register("country")} />
+        </FormField>
+
+        <label className="flex cursor-pointer items-center gap-2 pt-1 text-sm text-foreground">
+          <input type="checkbox" className="accent-[var(--accent-600)]" {...register("mailingSameAsPhysical")} />
+          Mailing address is the same as physical address
+        </label>
+
+        {mailingSameAsPhysical === false && (
+          <div className="space-y-3 rounded-lg border border-border bg-slate-50/60 p-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted">Mailing address</p>
+            <FormField label="Address line 1" htmlFor="mailingLine1" error={errors.mailingLine1?.message}>
+              <input id="mailingLine1" className={inputClassName} {...register("mailingLine1")} />
+            </FormField>
+            <FormField label="Address line 2" htmlFor="mailingLine2" error={errors.mailingLine2?.message}>
+              <input id="mailingLine2" className={inputClassName} {...register("mailingLine2")} />
+            </FormField>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <FormField label="City" htmlFor="mailingCity" error={errors.mailingCity?.message}>
+                <input id="mailingCity" className={inputClassName} {...register("mailingCity")} />
+              </FormField>
+              <FormField label="State" htmlFor="mailingState" error={errors.mailingState?.message}>
+                <input id="mailingState" className={inputClassName} {...register("mailingState")} />
+              </FormField>
+              <FormField label="ZIP / postal code" htmlFor="mailingPostalCode" error={errors.mailingPostalCode?.message}>
+                <input id="mailingPostalCode" className={inputClassName} {...register("mailingPostalCode")} />
+              </FormField>
+            </div>
+            <FormField label="Country" htmlFor="mailingCountry" error={errors.mailingCountry?.message}>
+              <input id="mailingCountry" className={inputClassName} {...register("mailingCountry")} />
+            </FormField>
+          </div>
+        )}
+      </fieldset>
 
       <FormField label="Notes" htmlFor="notes" error={errors.notes?.message}>
         <textarea id="notes" rows={4} className={inputClassName} {...register("notes")} />

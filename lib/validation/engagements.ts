@@ -172,6 +172,7 @@ function withValidDueDates<T extends z.ZodType<{ dueDate?: string; internalDueDa
 export const createEngagementSchema = withValidDueDates(
   engagementBaseObjectSchema.extend({
     activationMode: z.enum(["save_draft", "activate_only", "activate_and_send"]).default("save_draft"),
+    clientRequestId: z.string().uuid().optional(),
   }),
 );
 export type CreateEngagementInput = z.infer<typeof createEngagementSchema>;

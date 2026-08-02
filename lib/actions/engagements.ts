@@ -163,11 +163,28 @@ export async function createEngagementAction(input: CreateEngagementInput): Prom
     },
   };
 
+  if (data.clientRequestId) {
+    const { data: existing } = await supabase
+      .from("tax_engagements")
+      .select("id")
+      .eq("workspace_id", workspace.workspace.id)
+      .eq("client_request_id", data.clientRequestId)
+      .maybeSingle();
+    if (existing) {
+      // A repeated submit with the same idempotency key (double-click,
+      // duplicate network retry) — return the engagement already created
+      // instead of creating a second one.
+      revalidateEngagement(existing.id);
+      return { engagementId: existing.id, clientId: data.clientId, sendPortalInvite: false };
+    }
+  }
+
   const { data: row, error } = await supabase
     .from("tax_engagements")
     .insert({
       workspace_id: workspace.workspace.id,
       client_id: data.clientId,
+      client_request_id: data.clientRequestId || null,
       service_id: data.serviceId || null,
       title: data.title,
       tax_year: data.taxYear,
