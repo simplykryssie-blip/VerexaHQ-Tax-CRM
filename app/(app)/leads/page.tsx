@@ -8,6 +8,12 @@ import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@
 import { LeadFormDialog } from "@/features/leads/lead-form-dialog";
 import { LEAD_STATUSES, LEAD_STATUS_LABELS } from "@/lib/validation/leads";
 import { formatDate } from "@/lib/formatters";
+import { requireWorkspace } from "@/lib/auth/workspace";
+import { requirePermission } from "@/lib/permissions/granular";
+import { ForbiddenState } from "@/components/ui/ForbiddenState";
+import { LeadStageSelect } from "@/features/leads/lead-stage-select";
+import { getLeadCatalogOptions } from "@/features/leads/queries";
+import type { PickerOption } from "@/features/engagements/client-picker";
 
 export default async function LeadsPage({
   searchParams,
@@ -15,18 +21,16 @@ export default async function LeadsPage({
   searchParams: Promise<{ view?: string; status?: string }>;
 }) {
   const { view = "table", status } = await searchParams;
+  const { workspace } = await requireWorkspace();
+  if (!workspace) return <ForbiddenState />;
+  const [viewAccess, createAccess, editAccess] = await Promise.all([
+    requirePermission(workspace.workspace.id, "leads.view"),
+    requirePermission(workspace.workspace.id, "leads.create"),
+    requirePermission(workspace.workspace.id, "leads.edit"),
+  ]);
+  if (!viewAccess.allowed) return <ForbiddenState description={viewAccess.reason} />;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
+  const workspaceId = workspace.workspace.id;
 
   let query = supabase
     .from("leads")
@@ -37,6 +41,19 @@ export default async function LeadsPage({
 
   const { data: leads, error } = await query;
 
+  const [{ leadSources, serviceOfferings }, { data: staffMembers }] = await Promise.all([
+    getLeadCatalogOptions(workspaceId),
+    supabase
+      .from("workspace_members")
+      .select("user_id, profile:user_profiles(display_name, first_name, last_name)")
+      .eq("workspace_id", workspaceId)
+      .eq("status", "active"),
+  ]);
+  const staffOptions: PickerOption[] = (staffMembers ?? []).map((s) => {
+    const profile = s.profile as { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null;
+    return { id: s.user_id, label: profile?.display_name || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Team member" };
+  });
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -44,7 +61,9 @@ export default async function LeadsPage({
           <h1 className="text-2xl font-semibold tracking-tight">Leads</h1>
           <p className="text-sm text-muted-foreground mt-1">Track prospective clients through your pipeline.</p>
         </div>
-        <LeadFormDialog workspaceId={workspaceId} />
+        {createAccess.allowed && (
+          <LeadFormDialog workspaceId={workspaceId} leadSources={leadSources} serviceOfferings={serviceOfferings} staff={staffOptions} />
+        )}
       </div>
 
       <div className="flex items-center gap-2">
@@ -85,6 +104,7 @@ export default async function LeadsPage({
                         {lead.first_name} {lead.last_name}
                       </div>
                       <div className="text-xs text-muted-foreground truncate">{lead.company || lead.email || "—"}</div>
+                      <div className="mt-3"><LeadStageSelect leadId={lead.id} value={lead.status} disabled={!editAccess.allowed} /></div>
                     </Link>
                   ))}
                 </div>
@@ -116,7 +136,7 @@ export default async function LeadsPage({
                   </TableCell>
                   <TableCell>{lead.company || "—"}</TableCell>
                   <TableCell>
-                    <Badge variant="secondary">{LEAD_STATUS_LABELS[lead.status]}</Badge>
+                    {editAccess.allowed ? <LeadStageSelect leadId={lead.id} value={lead.status} /> : <Badge variant="secondary">{LEAD_STATUS_LABELS[lead.status]}</Badge>}
                   </TableCell>
                   <TableCell>{lead.source || "—"}</TableCell>
                   <TableCell>{formatDate(lead.consultation_at)}</TableCell>

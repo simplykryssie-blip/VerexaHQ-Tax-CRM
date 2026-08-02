@@ -1,74 +1,54 @@
-import { Wallet } from "lucide-react";
+import { requireWorkspace } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
-import { EmptyState } from "@/components/empty-state";
-import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { ServiceFormDialog } from "@/features/services/service-form-dialog";
-import { ServiceStatusToggle } from "@/features/services/service-status-toggle";
+import { requirePermission } from "@/lib/permissions/granular";
+import { ForbiddenState } from "@/components/ui/ForbiddenState";
+import { ServicePackageManager, type ServicePackageSummary } from "@/features/service-packages/service-package-manager";
+import { getLeadCatalogOptions } from "@/features/leads/queries";
 
 export default async function ServicesPage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
+  const { workspace } = await requireWorkspace();
+  if (!workspace) return <ForbiddenState description="Select a workspace to manage service packages." />;
 
-  // Workspace-level service offerings (client_id is null) — services tied
-  // to a specific client show up on that client's Services tab instead.
-  const { data: services } = await supabase
-    .from("services")
-    .select("*")
-    .eq("workspace_id", workspaceId)
-    .is("client_id", null)
-    .order("created_at", { ascending: false });
+  const access = await requirePermission(workspace.workspace.id, "service_packages.view");
+  if (!access.allowed) return <ForbiddenState description={access.reason} />;
+
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("engagement_type_settings")
+    .select(`
+      *,
+      workflow:workflow_definitions!engagement_type_settings_primary_workflow_definition_id_fkey(name),
+      organizer:templates!engagement_type_settings_organizer_template_id_fkey(name),
+      letter:templates!engagement_type_settings_engagement_letter_template_id_fkey(name),
+      checklist:templates!engagement_type_settings_document_checklist_template_id_fkey(name),
+      serviceOffering:service_offerings!engagement_type_settings_service_offering_id_fkey(id, name)
+    `)
+    .eq("workspace_id", workspace.workspace.id)
+    .is("archived_at", null)
+    .order("is_active", { ascending: false })
+    .order("sort_order")
+    .order("name");
+
+  if (error) throw error;
+
+  const [createAccess, editAccess, duplicateAccess, deactivateAccess, { serviceOfferings }] = await Promise.all([
+    requirePermission(workspace.workspace.id, "service_packages.create"),
+    requirePermission(workspace.workspace.id, "service_packages.edit"),
+    requirePermission(workspace.workspace.id, "service_packages.duplicate"),
+    requirePermission(workspace.workspace.id, "service_packages.deactivate"),
+    getLeadCatalogOptions(workspace.workspace.id),
+  ]);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Services</h1>
-          <p className="text-sm text-muted-foreground mt-1">The services your workspace offers.</p>
-        </div>
-        <ServiceFormDialog workspaceId={workspaceId} />
-      </div>
-
-      {!services || services.length === 0 ? (
-        <EmptyState icon={Wallet} title="No services yet" description="Add the services your workspace offers to clients." />
-      ) : (
-        <div className="rounded-lg border border-border bg-card">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {services.map((s) => (
-                <TableRow key={s.id}>
-                  <TableCell className="font-medium">{s.name}</TableCell>
-                  <TableCell className="text-muted-foreground">{s.description || "—"}</TableCell>
-                  <TableCell>
-                    <Badge variant={s.status === "active" ? "success" : "muted"}>{s.status}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <ServiceStatusToggle id={s.id} status={s.status} />
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
-    </div>
+    <ServicePackageManager
+      packages={(data ?? []) as ServicePackageSummary[]}
+      serviceOfferings={serviceOfferings}
+      permissions={{
+        create: createAccess.allowed,
+        edit: editAccess.allowed,
+        duplicate: duplicateAccess.allowed,
+        deactivate: deactivateAccess.allowed,
+      }}
+    />
   );
 }

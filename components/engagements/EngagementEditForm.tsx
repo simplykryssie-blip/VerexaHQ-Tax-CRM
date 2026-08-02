@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import {
@@ -18,6 +18,7 @@ import { engagementTypeLabels, returnTypeLabels, engagementPriorityMeta } from "
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/LegacyButton";
 import type { TaxEngagement } from "@/lib/types";
+import { JurisdictionPicker } from "@/components/engagements/JurisdictionPicker";
 
 type EngagementEditFormInput = z.input<typeof updateEngagementSchema>;
 
@@ -27,8 +28,18 @@ const isCurrentEngagementType = (value: string): value is EngagementTypeOption =
 export function EngagementEditForm({ engagement }: { engagement: TaxEngagement }) {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const metadata = (engagement.metadata && typeof engagement.metadata === "object" && !Array.isArray(engagement.metadata)
+    ? engagement.metadata
+    : {}) as Record<string, unknown>;
+  const staffDeadlines = (metadata.staff_deadlines && typeof metadata.staff_deadlines === "object"
+    ? metadata.staff_deadlines
+    : {}) as Record<string, unknown>;
+  const savedJurisdictions = Array.isArray(metadata.jurisdictions)
+    ? metadata.jurisdictions.filter((value): value is string => typeof value === "string")
+    : engagement.jurisdiction?.split(",").map((value) => value.trim()).filter(Boolean) ?? [];
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<EngagementEditFormInput, unknown, UpdateEngagementInput>({
@@ -39,9 +50,13 @@ export function EngagementEditForm({ engagement }: { engagement: TaxEngagement }
       engagementType: isCurrentEngagementType(engagement.engagement_type) ? engagement.engagement_type : "other",
       returnType: engagement.return_type ?? "",
       priority: engagement.priority,
-      dueDate: engagement.due_date ?? "",
       internalDueDate: engagement.internal_due_date ?? "",
-      jurisdiction: engagement.jurisdiction ?? "",
+      jurisdictions: savedJurisdictions,
+      fiscalYearEnd: (metadata.fiscal_year_end as string | null) ?? "",
+      extensionFiled: engagement.extension_filed,
+      clientDocumentDueDate: (staffDeadlines.client_document_deadline as string | null) ?? "",
+      reviewerDueDate: (staffDeadlines.reviewer_deadline as string | null) ?? "",
+      signatureDueDate: (staffDeadlines.signature_deadline as string | null) ?? "",
       federalReturnRequired: engagement.federal_return_required,
       stateReturnRequired: engagement.state_return_required,
       localReturnRequired: engagement.local_return_required,
@@ -104,18 +119,28 @@ export function EngagementEditForm({ engagement }: { engagement: TaxEngagement }
             ))}
           </select>
         </FormField>
-        <FormField label="Jurisdiction" htmlFor="jurisdiction" error={errors.jurisdiction?.message} hint="e.g. CA, NY — leave blank for federal-only.">
-          <input id="jurisdiction" className={inputClassName} {...register("jurisdiction")} />
+        <FormField label="Fiscal-year end" htmlFor="fiscalYearEnd" hint="Leave blank for calendar-year returns.">
+          <input id="fiscalYearEnd" type="date" className={inputClassName} {...register("fiscalYearEnd")} />
         </FormField>
       </div>
 
+      <div className="rounded-lg border border-accent-200 bg-accent-50 p-3 text-sm text-foreground">
+        Statutory filing and extension dates are recalculated automatically when you save the return type, tax year, fiscal-year end, or jurisdictions.
+      </div>
+
+      <Controller
+        name="jurisdictions"
+        control={control}
+        render={({ field }) => <JurisdictionPicker value={field.value ?? []} onChange={field.onChange} />}
+      />
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FormField label="Due date" htmlFor="dueDate" error={errors.dueDate?.message}>
-          <input id="dueDate" type="date" className={inputClassName} {...register("dueDate")} />
-        </FormField>
         <FormField label="Internal due date" htmlFor="internalDueDate" error={errors.internalDueDate?.message} hint="Staff-only target, not shown to the client.">
           <input id="internalDueDate" type="date" className={inputClassName} {...register("internalDueDate")} />
         </FormField>
+        <label className="flex min-h-11 items-center gap-2 self-end pb-2 text-sm text-foreground">
+          <input type="checkbox" {...register("extensionFiled")} /> Extension filed or accepted
+        </label>
       </div>
 
       <div className="flex flex-wrap gap-6">
@@ -124,16 +149,18 @@ export function EngagementEditForm({ engagement }: { engagement: TaxEngagement }
           Federal return required
         </label>
         <label className="flex items-center gap-2 text-sm text-foreground">
-          <input type="checkbox" {...register("stateReturnRequired")} />
-          State return required
-        </label>
-        <label className="flex items-center gap-2 text-sm text-foreground">
           <input type="checkbox" {...register("localReturnRequired")} />
           Local return required
         </label>
       </div>
 
-      <FormField label="Description" htmlFor="description" error={errors.description?.message}>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <FormField label="Client document deadline" htmlFor="clientDocumentDueDate"><input id="clientDocumentDueDate" type="date" className={inputClassName} {...register("clientDocumentDueDate")} /></FormField>
+        <FormField label="Reviewer deadline" htmlFor="reviewerDueDate"><input id="reviewerDueDate" type="date" className={inputClassName} {...register("reviewerDueDate")} /></FormField>
+        <FormField label="Signature deadline" htmlFor="signatureDueDate"><input id="signatureDueDate" type="date" className={inputClassName} {...register("signatureDueDate")} /></FormField>
+      </div>
+
+      <FormField label="Engagement scope / internal notes" htmlFor="description" error={errors.description?.message} hint="Record included work, special circumstances, and exclusions.">
         <textarea id="description" rows={3} className={inputClassName} {...register("description")} />
       </FormField>
 

@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { InviteTeamMemberDialog } from "@/features/team/invite-dialog";
 import { TeamMemberRow } from "@/features/team/member-row";
+import { requirePermission } from "@/lib/permissions/granular";
 
 export default async function TeamPage() {
   const supabase = await createClient();
@@ -15,7 +16,9 @@ export default async function TeamPage() {
     .limit(1)
     .maybeSingle();
   const workspaceId = myMembership!.workspace_id;
-  const canManage = myMembership!.role === "owner" || myMembership!.role === "admin";
+  const teamAccess = await requirePermission(workspaceId, "team.manage");
+  const canManage = teamAccess.allowed;
+  const canAssignAdmin = myMembership!.role === "owner" || myMembership!.role === "admin";
 
   const { data: members } = await supabase
     .from("workspace_members")
@@ -31,7 +34,7 @@ export default async function TeamPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Team</h1>
           <p className="text-sm text-muted-foreground mt-1">Manage roles and access for your office.</p>
         </div>
-        {canManage && <InviteTeamMemberDialog workspaceId={workspaceId} />}
+        {canManage && <InviteTeamMemberDialog workspaceId={workspaceId} canAssignAdmin={canAssignAdmin} />}
       </div>
 
       <div className="rounded-lg border border-border bg-card divide-y divide-border">
@@ -48,6 +51,7 @@ export default async function TeamPage() {
               status={m.status}
               title={m.title}
               canManage={canManage}
+              canAssignAdmin={canAssignAdmin}
               isSelf={m.user_id === user!.id}
             />
           );

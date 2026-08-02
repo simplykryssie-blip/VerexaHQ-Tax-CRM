@@ -50,7 +50,7 @@ export function ClientFormDialog({ workspaceId }: { workspaceId: string }) {
   });
 
   const clientType = watch("clientType");
-  const isBusiness = clientType === "business" || clientType === "organization";
+  const isBusiness = clientType === "business";
 
   async function onSubmit(values: ClientInput) {
     setSubmitting(true);
@@ -247,6 +247,9 @@ export function ClientFormDialog({ workspaceId }: { workspaceId: string }) {
           </div>
 
           <DialogFooter>
+            <Button type="button" variant="outline" disabled={submitting} onClick={() => setOpen(false)}>
+              Cancel
+            </Button>
             <Button type="submit" variant="brand" disabled={submitting}>
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Create client

@@ -1,6 +1,7 @@
 import { z } from "zod";
 
-export const clientTypeOptions = ["individual", "business", "household", "organization"] as const;
+// A household is a relationship group, never a client record.
+export const clientTypeOptions = ["individual", "business"] as const;
 export const clientStatusOptions = ["lead", "prospect", "active", "inactive", "archived"] as const;
 export const CONTACT_METHODS = ["email", "phone", "sms", "address", "other"] as const;
 export const CLIENT_TYPES = clientTypeOptions;
@@ -8,8 +9,6 @@ export const CLIENT_STATUSES = clientStatusOptions;
 export const CLIENT_TYPE_LABELS: Record<(typeof CLIENT_TYPES)[number], string> = {
   individual: "Individual",
   business: "Business",
-  household: "Household",
-  organization: "Organization",
 };
 export const CLIENT_STATUS_LABELS: Record<(typeof CLIENT_STATUSES)[number], string> = {
   lead: "Lead",
@@ -43,13 +42,35 @@ export const clientSchema = z.object({
 export type ClientInput = z.infer<typeof clientSchema>;
 
 export const createClientSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required").max(120),
-  lastName: z.string().trim().min(1, "Last name is required").max(120),
+  firstName: z.string().trim().max(120).optional(),
+  lastName: z.string().trim().max(120).optional(),
   clientType: z.enum(clientTypeOptions),
-  status: z.enum(clientStatusOptions),
+  setupMode: z.enum(["active", "active_with_engagement"]),
   email: z.union([z.string().trim().email("Enter a valid email address"), z.literal("")]).optional(),
   phone: z.string().trim().max(40).optional(),
   company: z.string().trim().max(200).optional(),
   notes: z.string().trim().max(2000).optional(),
+  duplicateOverrideReason: z.string().trim().max(500).optional(),
+  addressLine1: z.string().trim().max(200).optional(),
+  addressLine2: z.string().trim().max(200).optional(),
+  city: z.string().trim().max(120).optional(),
+  state: z.string().trim().max(60).optional(),
+  postalCode: z.string().trim().max(20).optional(),
+  country: z.string().trim().max(60).optional(),
+  mailingSameAsPhysical: z.boolean(),
+  mailingLine1: z.string().trim().max(200).optional(),
+  mailingLine2: z.string().trim().max(200).optional(),
+  mailingCity: z.string().trim().max(120).optional(),
+  mailingState: z.string().trim().max(60).optional(),
+  mailingPostalCode: z.string().trim().max(20).optional(),
+  mailingCountry: z.string().trim().max(60).optional(),
+}).superRefine((value, ctx) => {
+  if (value.clientType === "individual") {
+    if (!value.firstName) ctx.addIssue({ code: "custom", path: ["firstName"], message: "First name is required" });
+    if (!value.lastName) ctx.addIssue({ code: "custom", path: ["lastName"], message: "Last name is required" });
+  }
+  if (value.clientType === "business" && !value.company) {
+    ctx.addIssue({ code: "custom", path: ["company"], message: "Business name is required" });
+  }
 });
 export type CreateClientInput = z.infer<typeof createClientSchema>;

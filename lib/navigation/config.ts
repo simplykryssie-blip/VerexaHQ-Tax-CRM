@@ -29,6 +29,7 @@ import {
   ScrollText,
   Handshake,
   ClipboardCheck,
+  FileInput,
 } from "lucide-react";
 import type { Capability } from "@/lib/permissions/capabilities";
 
@@ -57,6 +58,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Relationships",
     items: [
       { label: "Leads", href: "/leads", icon: UsersRound },
+      { label: "Lead Forms", href: "/lead-forms", icon: FileInput },
       { label: "Clients", href: "/clients", icon: Users },
       { label: "Households", href: "/households", icon: Home },
     ],

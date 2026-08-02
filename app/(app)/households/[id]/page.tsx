@@ -7,15 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import { MemberFormDialog } from "@/features/households/member-form-dialog";
 import { RemoveMemberButton } from "@/features/households/remove-member-button";
 import { formatDate } from "@/lib/formatters";
+import { requireWorkspace } from "@/lib/auth/workspace";
+import { requirePermission } from "@/lib/permissions/granular";
+import { ForbiddenState } from "@/components/ui/ForbiddenState";
 
 export default async function HouseholdDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const {workspace}=await requireWorkspace(); if(!workspace)return <ForbiddenState/>;
+  const [viewAccess,manageAccess]=await Promise.all([requirePermission(workspace.workspace.id,"clients.view"),requirePermission(workspace.workspace.id,"households.manage")]); if(!viewAccess.allowed)return <ForbiddenState description={viewAccess.reason}/>;
   const supabase = await createClient();
 
-  const [{ data: household }, { data: members }, { data: engagements }] = await Promise.all([
-    supabase.from("tax_households").select("*").eq("id", id).maybeSingle(),
-    supabase.from("household_members").select("*").eq("household_id", id).order("sort_order"),
+  const [{ data: household }, { data: members }, { data: engagements },{data:clients}] = await Promise.all([
+    supabase.from("tax_households").select("*").eq("id", id).eq("workspace_id",workspace.workspace.id).maybeSingle(),
+    supabase.from("household_members").select("*").eq("household_id", id).eq("workspace_id",workspace.workspace.id).order("sort_order"),
     supabase.from("tax_engagements").select("id, engagement_number, tax_year, status").eq("household_id", id),
+    supabase.from("clients").select("id,first_name,last_name,company,email").eq("workspace_id",workspace.workspace.id).eq("client_type","individual").is("archived_at",null).order("last_name"),
   ]);
 
   if (!household) notFound();
@@ -33,7 +39,7 @@ export default async function HouseholdDetailPage({ params }: { params: Promise<
 
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-semibold tracking-tight">{household.household_name}</h1>
-        <MemberFormDialog householdId={household.id} workspaceId={household.workspace_id} />
+        {manageAccess.allowed&&<MemberFormDialog householdId={household.id} workspaceId={household.workspace_id} clients={clients??[]} />}
       </div>
 
       <Card>
@@ -63,7 +69,7 @@ export default async function HouseholdDetailPage({ params }: { params: Promise<
                     </span>{" "}
                     <span className="text-muted-foreground">· {m.relationship} · {formatDate(m.date_of_birth)}</span>
                   </div>
-                  <RemoveMemberButton memberId={m.id} />
+                  {manageAccess.allowed&&<RemoveMemberButton memberId={m.id} />}
                 </li>
               ))}
             </ul>
@@ -83,7 +89,7 @@ export default async function HouseholdDetailPage({ params }: { params: Promise<
                   <span>
                     {m.first_name} {m.last_name} · {m.relationship}
                   </span>
-                  <RemoveMemberButton memberId={m.id} />
+                  {manageAccess.allowed&&<RemoveMemberButton memberId={m.id} />}
                 </li>
               ))}
             </ul>
@@ -116,14 +122,14 @@ export default async function HouseholdDetailPage({ params }: { params: Promise<
   );
 }
 
-function MemberCard({ label, member }: { label: string; member: { first_name: string; last_name: string; date_of_birth: string | null } | undefined }) {
+function MemberCard({ label, member }: { label: string; member: { first_name: string; last_name: string; date_of_birth: string | null; client_id?:string|null } | undefined }) {
   return (
     <div className="rounded-md border border-border p-3">
       <div className="text-xs text-muted-foreground">{label}</div>
       {member ? (
         <>
           <div className="font-medium">
-            {member.first_name} {member.last_name}
+            {member.client_id?<Link href={`/clients/${member.client_id}`} className="hover:underline">{member.first_name} {member.last_name}</Link>:<>{member.first_name} {member.last_name}</>}
           </div>
           <div className="text-xs text-muted-foreground">DOB: {formatDate(member.date_of_birth)}</div>
         </>

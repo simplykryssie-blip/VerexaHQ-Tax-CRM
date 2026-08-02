@@ -22,6 +22,7 @@ import { EngagementNotesTab } from "@/components/engagements/EngagementNotesTab"
 import { EngagementActivityList } from "@/components/engagements/EngagementActivityList";
 import { engagementStatusMeta } from "@/lib/status";
 import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
+import { requirePermission } from "@/lib/permissions/granular";
 
 export default async function EngagementDetailPage({
   params,
@@ -41,10 +42,11 @@ export default async function EngagementDetailPage({
   const canArchive = MANAGE_ROLES.includes(workspace.role);
   const statusMeta = engagementStatusMeta(detail.engagement.status);
 
-  const [organizerSummary, organizerTemplates, priorYearOrganizers] = await Promise.all([
+  const [organizerSummary, organizerTemplates, priorYearOrganizers, advanceAccess] = await Promise.all([
     getEngagementOrganizerSummary(supabase, workspace.workspace.id, engagementId),
     listOrganizerTemplateOptions(),
     listPriorYearOrganizers(supabase, detail.engagement.client_id, engagementId),
+    requirePermission(workspace.workspace.id,"engagements.advance"),
   ]);
   const recommendedTemplateId = organizerSummary
     ? null
@@ -78,6 +80,13 @@ export default async function EngagementDetailPage({
           staff={staff}
           canManage={canManage}
           canArchive={canArchive}
+          canAssignReviewer={MANAGE_ROLES.includes(workspace.role)}
+          workflow={detail.workflow}
+          workflowStages={detail.workflowStages}
+          workflowTransitions={detail.workflowTransitions}
+          progressTracker={detail.progressTracker}
+          deadlines={detail.deadlines}
+          canAdvance={advanceAccess.allowed}
         />
       ),
     },

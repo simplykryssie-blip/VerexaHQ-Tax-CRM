@@ -36,8 +36,15 @@ export async function POST(request: Request) {
     .eq("status", "active")
     .maybeSingle();
 
-  if (!membership || (membership.role !== "owner" && membership.role !== "admin")) {
-    return NextResponse.json({ error: "Only owners and admins can invite team members." }, { status: 403 });
+  const { data: canManageTeam } = await supabase.rpc("has_permission", {
+    p_workspace_id: workspaceId,
+    p_permission_key: "team.manage",
+  });
+  if (!membership || !canManageTeam) {
+    return NextResponse.json({ error: "You don't have permission to invite team members." }, { status: 403 });
+  }
+  if (membership.role === "ero" && role === "admin") {
+    return NextResponse.json({ error: "ERO users can't assign the Admin role." }, { status: 403 });
   }
 
   let admin;

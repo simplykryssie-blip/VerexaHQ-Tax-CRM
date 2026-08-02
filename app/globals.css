@@ -1,12 +1,42 @@
 @import "tailwindcss";
 
 :root {
+  /* Tailwind v4 only reads tokens declared here via @theme — tailwind.config.ts's
+     theme.extend.colors (primary, secondary, destructive, card, popover, sidebar,
+     input, ring, brand-gradient) is legacy v3-style config with no @config bridge,
+     so none of it was ever actually generating CSS. Every button/card/popover/
+     sidebar surface that relied on those classes rendered with no background and
+     the raw text color, which is how "brand" buttons (bg-brand-gradient text-white)
+     ended up as invisible white-on-nothing. Filling in the missing tokens here. */
+  color-scheme: light;
+
   --background: #f7faf9;
   --surface: #ffffff;
   --foreground: #10231e;
   --muted: #5b6b66;
+  --muted-foreground: #5b6b66;
   --border: #e2e8e5;
+  --input: #e2e8e5;
+  --ring: #14b88a;
 
+  --primary: #0d9270;
+  --primary-foreground: #ffffff;
+  --secondary: #eef2f1;
+  --secondary-foreground: #10231e;
+  --destructive: #b91c1c;
+  --destructive-foreground: #ffffff;
+  --card: #ffffff;
+  --card-foreground: #10231e;
+  --popover: #ffffff;
+  --popover-foreground: #10231e;
+
+  --sidebar: #ffffff;
+  --sidebar-foreground: #10231e;
+  --sidebar-accent: #ecfdf5;
+  --sidebar-border: #e2e8e5;
+
+  --accent: #d1fae5;
+  --accent-foreground: #0a7259;
   --accent-50: #ecfdf5;
   --accent-100: #d1fae5;
   --accent-200: #a7f3d0;
@@ -18,6 +48,8 @@
   --warning: #b45309;
   --danger: #b91c1c;
   --info: #0369a1;
+
+  --brand-gradient: linear-gradient(135deg, hsl(174 84% 24%) 0%, hsl(152 60% 36%) 100%);
 }
 
 @theme inline {
@@ -25,8 +57,29 @@
   --color-surface: var(--surface);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-border: var(--sidebar-border);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-accent-50: var(--accent-50);
   --color-accent-100: var(--accent-100);
   --color-accent-200: var(--accent-200);
@@ -39,6 +92,8 @@
   --color-danger: var(--danger);
   --color-info: var(--info);
 
+  --background-image-brand-gradient: var(--brand-gradient);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -49,6 +104,18 @@ body {
 }
 
 ::selection {
-  background: var(--accent-100);
-  color: var(--accent-700);
+  background: var(--accent-700);
+  color: #ffffff;
+}
+
+input,
+select,
+textarea {
+  accent-color: var(--accent-600);
+}
+
+input::selection,
+textarea::selection {
+  background: var(--accent-700);
+  color: #ffffff;
 }

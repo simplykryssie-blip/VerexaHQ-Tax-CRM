@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Loader2, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "@/components/ui/toaster";
+import { useRouter } from "next/navigation";
 import { outboxStatusLabel, outboxChannelLabel } from "@/lib/validation/notifications";
 import { formatDateTime } from "@/lib/formatters";
 import type { Tables } from "@/types/database";
@@ -11,9 +14,11 @@ import type { Tables } from "@/types/database";
 type OutboxRow = Tables<"communication_outbox"> & { client?: { first_name?: string | null; last_name?: string | null; company?: string | null } | null };
 
 export function CommunicationOutboxRow({ item }: { item: OutboxRow }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [events, setEvents] = useState<Tables<"communication_events">[] | null>(null);
   const [loading, setLoading] = useState(false);
+  const [retrying, setRetrying] = useState(false);
   const client = item.client;
   const clientName = client?.company || `${client?.first_name ?? ""} ${client?.last_name ?? ""}`.trim();
 
@@ -27,6 +32,19 @@ export function CommunicationOutboxRow({ item }: { item: OutboxRow }) {
       setEvents(data ?? []);
       setLoading(false);
     }
+  }
+
+  async function retry() {
+    setRetrying(true);
+    const supabase = createClient();
+    const { error } = await supabase.rpc("retry_communication", { p_outbox_id: item.id });
+    setRetrying(false);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Communication queued for retry");
+    router.refresh();
   }
 
   return (
@@ -53,6 +71,11 @@ export function CommunicationOutboxRow({ item }: { item: OutboxRow }) {
       {open && (
         <div className="px-3 pb-3">
           {item.error_message && <p className="text-xs text-destructive mb-2">{item.error_message}</p>}
+          {(item.status === "failed" || item.status === "cancelled") && (
+            <Button type="button" size="sm" variant="outline" className="mb-2" onClick={retry} disabled={retrying}>
+              {retrying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RotateCcw className="h-3.5 w-3.5" />} Retry delivery
+            </Button>
+          )}
           {loading ? (
             <p className="text-xs text-muted-foreground">Loading events…</p>
           ) : !events || events.length === 0 ? (

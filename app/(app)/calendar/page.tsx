@@ -51,8 +51,8 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
       .eq("status", "active"),
   ]);
 
-  const clientOptions: PickerOption[] = (clients ?? []).map((c) => ({ id: c.id, label: c.company || `${c.first_name} ${c.last_name}` }));
-  const leadOptions: PickerOption[] = (leads ?? []).map((l) => ({ id: l.id, label: `${l.first_name} ${l.last_name}` }));
+  const clientOptions: PickerOption[] = (clients ?? []).map((c) => ({ id: c.id, label: c.company || `${c.first_name} ${c.last_name}`, sublabel: "Client" }));
+  const leadOptions: PickerOption[] = (leads ?? []).map((l) => ({ id: l.id, label: `${l.first_name} ${l.last_name}`, sublabel: "Lead" }));
   const staffOptions: PickerOption[] = (staffMembers ?? []).map((s) => {
     const profile = s.profile as { display_name?: string | null; first_name?: string | null; last_name?: string | null } | null;
     return { id: s.user_id, label: profile?.display_name || [profile?.first_name, profile?.last_name].filter(Boolean).join(" ") || "Team member" };
@@ -89,7 +89,15 @@ export default async function CalendarPage({ searchParams }: { searchParams: Pro
           <h1 className="text-2xl font-semibold tracking-tight">Calendar</h1>
           <p className="text-sm text-muted-foreground mt-1">Appointments across your workspace.</p>
         </div>
-        <AppointmentFormDialog workspaceId={workspaceId} clients={clientOptions} leads={leadOptions} staff={staffOptions} appointmentTypes={appointmentTypes} defaultStart={anchor} />
+        <AppointmentFormDialog
+          workspaceId={workspaceId}
+          clients={clientOptions}
+          leads={leadOptions}
+          staff={staffOptions}
+          appointmentTypes={appointmentTypes}
+          defaultStart={anchor}
+          currentUserId={user!.id}
+        />
       </div>
 
       <div className="flex items-center justify-between flex-wrap gap-3">

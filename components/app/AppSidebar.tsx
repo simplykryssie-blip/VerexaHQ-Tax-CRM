@@ -7,6 +7,7 @@ import { navItemsForWorkspace } from "@/components/app/nav";
 import { cn } from "@/lib/utils";
 import { PracticeViewSwitcher } from "@/components/app/PracticeViewSwitcher";
 import type { MembershipRole, Workspace } from "@/lib/types";
+import { usePermissions } from "@/components/providers/permission-provider";
 
 export function AppSidebar({
   workspaceName,
@@ -20,7 +21,18 @@ export function AppSidebar({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const navItems = navItemsForWorkspace(workspaceType, role);
+  const { can } = usePermissions();
+  const navItems = navItemsForWorkspace(workspaceType, role).filter((item) => !item.permissionKey || can(item.permissionKey));
+
+  // When a route and one of its subroutes are both nav items (e.g. /settings
+  // and /settings/integrations), only the longest — most specific — matching
+  // href should highlight, not both at once.
+  const activeHref = navItems.reduce<string | null>((best, item) => {
+    const matches = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    if (!matches) return best;
+    if (!best || item.href.length > best.length) return item.href;
+    return best;
+  }, null);
 
   return (
     <div className="flex h-full flex-col bg-white">
@@ -40,8 +52,7 @@ export function AppSidebar({
 
       <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.map((item) => {
-          const active =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
+          const active = item.href === activeHref;
           const Icon = item.icon;
           return (
             <Link

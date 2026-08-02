@@ -36,25 +36,38 @@ import { checkStatusTransition, isActiveStatus } from "@/lib/engagements/transit
 import type { EngagementStatus, EngagementPriority, EngagementEfileStatus } from "@/lib/types";
 import type { TaxEngagement } from "@/lib/types";
 import type { UserSummary } from "@/lib/data/users";
+import { ProductionWorkflowPanel, type AllowedTransition, type EngagementDeadline, type FrozenStage, type FrozenWorkflow, type ProgressTracker } from "@/components/engagements/ProductionWorkflowPanel";
 
 export function EngagementWorkflowTab({
   engagement,
   staff,
   canManage,
   canArchive,
+  canAssignReviewer,
+  workflow,
+  workflowStages,
+  workflowTransitions,
+  progressTracker,
+  deadlines,
+  canAdvance,
 }: {
   engagement: TaxEngagement;
   staff: UserSummary[];
   canManage: boolean;
   canArchive: boolean;
+  canAssignReviewer: boolean;
+  workflow: FrozenWorkflow | null;
+  workflowStages: FrozenStage[];
+  workflowTransitions: AllowedTransition[];
+  progressTracker: ProgressTracker | null;
+  deadlines: EngagementDeadline[];
+  canAdvance: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [preparerId, setPreparerId] = useState(engagement.primary_preparer_user_id ?? "");
   const [reviewerId, setReviewerId] = useState(engagement.reviewer_user_id ?? "");
   const [responsibleId, setResponsibleId] = useState(engagement.responsible_staff_user_id ?? "");
-  const [dueDate, setDueDate] = useState(engagement.due_date ?? "");
   const [internalDueDate, setInternalDueDate] = useState(engagement.internal_due_date ?? "");
-  const [extensionDueDate, setExtensionDueDate] = useState(engagement.extension_due_date ?? "");
 
   const run = (label: string, action: () => Promise<{ error?: string } | void>) => {
     startTransition(async () => {
@@ -104,7 +117,8 @@ export function EngagementWorkflowTab({
 
   return (
     <div className="space-y-6">
-      <Card>
+      {workflow && <ProductionWorkflowPanel engagementId={engagement.id} workflow={workflow} stages={workflowStages} transitions={workflowTransitions} progress={progressTracker} deadlines={deadlines} canAdvance={canAdvance} />}
+      {!workflow && <Card>
         <CardHeader>
           <h2 className="text-sm font-semibold text-foreground">Status</h2>
         </CardHeader>
@@ -167,7 +181,7 @@ export function EngagementWorkflowTab({
             </div>
           )}
         </CardBody>
-      </Card>
+      </Card>}
 
       {canManage && (
         <Card>
@@ -198,6 +212,7 @@ export function EngagementWorkflowTab({
                 id="reviewer"
                 className={inputClassName}
                 value={reviewerId}
+                disabled={!canAssignReviewer}
                 onChange={(e) => {
                   setReviewerId(e.target.value);
                   run("Reviewer updated.", () => assignReviewerAction(engagement.id, e.target.value || null));
@@ -210,6 +225,7 @@ export function EngagementWorkflowTab({
                   </option>
                 ))}
               </select>
+              {!canAssignReviewer && <p className="mt-1 text-xs text-muted">Reviewer assignment is controlled by the ERO or workspace administrator.</p>}
             </FormField>
             <FormField label="Responsible staff" htmlFor="responsible">
               <select
@@ -236,7 +252,7 @@ export function EngagementWorkflowTab({
       {canManage && (
         <Card>
           <CardHeader>
-            <h2 className="text-sm font-semibold text-foreground">Priority &amp; due dates</h2>
+            <h2 className="text-sm font-semibold text-foreground">Priority &amp; internal target</h2>
           </CardHeader>
           <CardBody className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <FormField label="Priority" htmlFor="priority">
@@ -253,17 +269,6 @@ export function EngagementWorkflowTab({
                 ))}
               </select>
             </FormField>
-            <div />
-            <FormField label="Due date" htmlFor="dueDate">
-              <input
-                id="dueDate"
-                type="date"
-                className={inputClassName}
-                value={dueDate ?? ""}
-                onChange={(e) => setDueDate(e.target.value)}
-                onBlur={() => run("Due date updated.", () => changeDueDatesAction({ engagementId: engagement.id, dueDate }))}
-              />
-            </FormField>
             <FormField label="Internal due date" htmlFor="internalDueDate">
               <input
                 id="internalDueDate"
@@ -274,16 +279,7 @@ export function EngagementWorkflowTab({
                 onBlur={() => run("Internal due date updated.", () => changeDueDatesAction({ engagementId: engagement.id, internalDueDate }))}
               />
             </FormField>
-            <FormField label="Extension due date" htmlFor="extensionDueDate">
-              <input
-                id="extensionDueDate"
-                type="date"
-                className={inputClassName}
-                value={extensionDueDate ?? ""}
-                onChange={(e) => setExtensionDueDate(e.target.value)}
-                onBlur={() => run("Extension due date updated.", () => changeDueDatesAction({ engagementId: engagement.id, extensionDueDate }))}
-              />
-            </FormField>
+            <p className="self-end pb-2 text-xs text-muted">Statutory filing and extension dates are calculated from the return and jurisdictions on the Edit screen.</p>
           </CardBody>
         </Card>
       )}

@@ -52,7 +52,7 @@ export const appointmentSchema = z.object({
   locationType: z.enum(APPOINTMENT_LOCATION_TYPES).default("office"),
   locationText: z.string().max(500).optional().nullable(),
   startsAt: z.string().min(1, "Choose a start time."),
-  durationMinutes: z.coerce.number().int().min(5).max(480).default(30),
+  durationMinutes: z.coerce.number().int().min(5).default(30),
   clientNotes: z.string().max(2000).optional().nullable(),
   internalNotes: z.string().max(2000).optional().nullable(),
   reminderTimings: z.array(z.number()).default([1440]),

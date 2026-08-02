@@ -22,8 +22,23 @@ import {
   type UpdateEngagementInput,
 } from "@/lib/validation/engagements";
 import { checkStatusTransition, checkTransitionPrerequisites, timestampsForStatusChange } from "@/lib/engagements/transitions";
+import { requirePermission } from "@/lib/permissions/granular";
+import {
+  calculateEngagementDeadlines,
+  deadlineScheduleAsJson,
+  primaryDeadlines,
+  US_JURISDICTIONS,
+  type JurisdictionCode,
+} from "@/lib/tax/deadlines";
 
-type ActionResult = { error?: string; engagementId?: string };
+type ActionResult = {
+  error?: string;
+  warning?: string;
+  engagementId?: string;
+  sendPortalInvite?: boolean;
+  clientId?: string;
+  activation?: Record<string, unknown>;
+};
 
 /**
  * Authenticates the user, resolves their workspace, and checks they hold a
@@ -70,40 +85,131 @@ export async function createEngagementAction(input: CreateEngagementInput): Prom
   const { workspace, error: authError } = await requireStaff();
   if (!workspace) return { error: authError };
 
+  const createPermission = await requirePermission(workspace.workspace.id, "engagements.create");
+  if (!createPermission.allowed) return { error: createPermission.reason };
+
   const parsed = createEngagementSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   const data = parsed.data;
+  if (data.activationMode !== "save_draft") {
+    const activatePermission = await requirePermission(workspace.workspace.id, "engagements.activate");
+    if (!activatePermission.allowed) return { error: activatePermission.reason };
+  }
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
+  const { data: clientRecord } = await supabase
+    .from("clients")
+    .select("id, email, portal_user_id, assigned_reviewer_user_id")
+    .eq("id", data.clientId)
+    .eq("workspace_id", workspace.workspace.id)
+    .maybeSingle();
+  if (!clientRecord) return { error: "Client not found in this workspace." };
+
+  let reviewerUserId = data.reviewerUserId || clientRecord.assigned_reviewer_user_id || null;
+  if (workspace.role === "preparer") {
+    const { data: eroMembership } = await supabase
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspace.workspace.id)
+      .eq("role", "ero")
+      .eq("status", "active")
+      .limit(1)
+      .maybeSingle();
+    reviewerUserId = clientRecord.assigned_reviewer_user_id || eroMembership?.user_id || null;
+  } else if (!reviewerUserId && ["owner", "admin", "ero", "reviewer"].includes(workspace.role)) {
+    reviewerUserId = user?.id ?? null;
+  }
+
+  if (reviewerUserId) {
+    const { data: reviewerMembership } = await supabase
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspace.workspace.id)
+      .eq("user_id", reviewerUserId)
+      .eq("status", "active")
+      .maybeSingle();
+    if (!reviewerMembership) return { error: "Choose an active staff member in this tax office as reviewer." };
+  }
+
+  const validJurisdictions = new Set(US_JURISDICTIONS.map(([code]) => code));
+  const jurisdictions = data.jurisdictions.filter(
+    (code): code is JurisdictionCode => validJurisdictions.has(code as JurisdictionCode),
+  );
+  const schedule = calculateEngagementDeadlines({
+    taxYear: data.taxYear,
+    returnType: data.returnType || null,
+    fiscalYearEnd: data.fiscalYearEnd || null,
+    federalRequired: data.federalReturnRequired,
+    jurisdictions,
+  });
+  const automatic = primaryDeadlines(schedule);
+  const metadata = {
+    activation_mode: data.activationMode,
+    jurisdictions,
+    fiscal_year_end: data.fiscalYearEnd || null,
+    deadline_schedule: deadlineScheduleAsJson(schedule),
+    staff_deadlines: {
+      client_document_deadline: data.clientDocumentDueDate || null,
+      internal_preparation_target: data.internalDueDate || null,
+      reviewer_deadline: data.reviewerDueDate || null,
+      signature_deadline: data.signatureDueDate || null,
+      custom: data.customDeadlineDate
+        ? { label: data.customDeadlineLabel || "Custom deadline", date: data.customDeadlineDate }
+        : null,
+    },
+  };
+
+  if (data.clientRequestId) {
+    const { data: existing } = await supabase
+      .from("tax_engagements")
+      .select("id")
+      .eq("workspace_id", workspace.workspace.id)
+      .eq("client_request_id", data.clientRequestId)
+      .maybeSingle();
+    if (existing) {
+      // A repeated submit with the same idempotency key (double-click,
+      // duplicate network retry) — return the engagement already created
+      // instead of creating a second one.
+      revalidateEngagement(existing.id);
+      return { engagementId: existing.id, clientId: data.clientId, sendPortalInvite: false };
+    }
+  }
+
   const { data: row, error } = await supabase
     .from("tax_engagements")
     .insert({
       workspace_id: workspace.workspace.id,
       client_id: data.clientId,
+      client_request_id: data.clientRequestId || null,
       service_id: data.serviceId || null,
       title: data.title,
       tax_year: data.taxYear,
       engagement_type: data.engagementType,
       return_type: data.returnType || null,
-      status: data.status,
+      status: "draft",
       priority: data.priority,
       primary_preparer_user_id: data.preparerUserId || null,
-      reviewer_user_id: data.reviewerUserId || null,
+      reviewer_user_id: reviewerUserId,
       responsible_staff_user_id: data.responsibleStaffUserId || null,
-      assigned_at: data.preparerUserId || data.reviewerUserId ? new Date().toISOString() : null,
-      due_date: data.dueDate || null,
+      assigned_at: data.preparerUserId || reviewerUserId ? new Date().toISOString() : null,
+      due_date: automatic.filingDate,
       internal_due_date: data.internalDueDate || null,
-      jurisdiction: data.jurisdiction || null,
+      extension_due_date: data.extensionFiled ? automatic.extensionDate : null,
+      extension_requested: data.extensionFiled,
+      extension_filed: data.extensionFiled,
+      jurisdiction: jurisdictions.join(", ") || null,
       federal_return_required: data.federalReturnRequired,
-      state_return_required: data.stateReturnRequired,
+      state_return_required: jurisdictions.length > 0,
       local_return_required: data.localReturnRequired,
       description: data.description || null,
       document_request_id: data.documentRequestId || null,
       created_by: user?.id ?? null,
+      opened_at: data.activationMode === "save_draft" ? null : new Date().toISOString(),
+      metadata,
     })
     .select("id")
     .single();
@@ -120,8 +226,36 @@ export async function createEngagementAction(input: CreateEngagementInput): Prom
       .eq("workspace_id", workspace.workspace.id);
   }
 
+  await supabase
+    .from("clients")
+    .update({ status: "active", assigned_reviewer_user_id: reviewerUserId })
+    .eq("id", data.clientId)
+    .eq("workspace_id", workspace.workspace.id);
+
+  let warning = schedule.warnings.length ? schedule.warnings.join(" ") : undefined;
+  let activation: Record<string, unknown> | undefined;
+  if (data.activationMode !== "save_draft") {
+    const activationMode = data.activationMode === "activate_and_send" ? "activate_and_send" : "activate_without_sending";
+    const { data: activationResult, error: activationError } = await supabase.rpc("activate_tax_engagement", {
+      p_engagement_id: row.id,
+      p_activation_mode: activationMode,
+    });
+    if (activationError) return { error: `The draft was created, but activation failed: ${activationError.message}` };
+    if (activationResult && typeof activationResult === "object" && !Array.isArray(activationResult)) {
+      activation = activationResult as Record<string, unknown>;
+      const rpcWarnings = Array.isArray(activation.warnings) ? activation.warnings.filter((value): value is string => typeof value === "string") : [];
+      warning = [warning, ...rpcWarnings].filter(Boolean).join(" ") || undefined;
+    }
+  }
+
   revalidateEngagement(row.id);
-  return { engagementId: row.id };
+  return {
+    engagementId: row.id,
+    clientId: data.clientId,
+    sendPortalInvite: false,
+    warning,
+    activation,
+  };
 }
 
 export async function updateEngagementAction(engagementId: string, input: UpdateEngagementInput): Promise<ActionResult> {
@@ -132,24 +266,66 @@ export async function updateEngagementAction(engagementId: string, input: Update
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Invalid input." };
   const data = parsed.data;
 
+  const supabase = await createClient();
+  const { data: current } = await supabase
+    .from("tax_engagements")
+    .select("metadata, tax_year, return_type, federal_return_required, jurisdiction")
+    .eq("id", engagementId)
+    .eq("workspace_id", workspace.workspace.id)
+    .maybeSingle();
+  if (!current) return { error: "Engagement not found." };
+
+  const validJurisdictions = new Set(US_JURISDICTIONS.map(([code]) => code));
+  const jurisdictions = (data.jurisdictions ?? current.jurisdiction?.split(",").map((value) => value.trim()) ?? [])
+    .filter((code): code is JurisdictionCode => validJurisdictions.has(code as JurisdictionCode));
+  const schedule = calculateEngagementDeadlines({
+    taxYear: data.taxYear ?? current.tax_year ?? new Date().getFullYear(),
+    returnType: data.returnType === undefined ? current.return_type : data.returnType || null,
+    fiscalYearEnd: data.fiscalYearEnd || null,
+    federalRequired: data.federalReturnRequired ?? current.federal_return_required,
+    jurisdictions,
+  });
+  const automatic = primaryDeadlines(schedule);
+  const currentMetadata = (current.metadata && typeof current.metadata === "object" && !Array.isArray(current.metadata)
+    ? current.metadata
+    : {}) as Record<string, unknown>;
+  const metadata = {
+    ...currentMetadata,
+    jurisdictions,
+    fiscal_year_end: data.fiscalYearEnd || null,
+    deadline_schedule: deadlineScheduleAsJson(schedule),
+    staff_deadlines: {
+      client_document_deadline: data.clientDocumentDueDate || null,
+      internal_preparation_target: data.internalDueDate || null,
+      reviewer_deadline: data.reviewerDueDate || null,
+      signature_deadline: data.signatureDueDate || null,
+      custom: data.customDeadlineDate
+        ? { label: data.customDeadlineLabel || "Custom deadline", date: data.customDeadlineDate }
+        : null,
+    },
+  };
+
   const patch: TablesUpdate<"tax_engagements"> = {};
   if (data.title !== undefined) patch.title = data.title;
   if (data.taxYear !== undefined) patch.tax_year = data.taxYear;
   if (data.engagementType !== undefined) patch.engagement_type = data.engagementType;
   if (data.returnType !== undefined) patch.return_type = data.returnType || null;
   if (data.priority !== undefined) patch.priority = data.priority;
-  if (data.dueDate !== undefined) patch.due_date = data.dueDate || null;
+  patch.due_date = automatic.filingDate;
   if (data.internalDueDate !== undefined) patch.internal_due_date = data.internalDueDate || null;
-  if (data.jurisdiction !== undefined) patch.jurisdiction = data.jurisdiction || null;
+  patch.extension_due_date = data.extensionFiled ? automatic.extensionDate : null;
+  patch.extension_requested = Boolean(data.extensionFiled);
+  patch.extension_filed = Boolean(data.extensionFiled);
+  patch.jurisdiction = jurisdictions.join(", ") || null;
   if (data.federalReturnRequired !== undefined) patch.federal_return_required = data.federalReturnRequired;
-  if (data.stateReturnRequired !== undefined) patch.state_return_required = data.stateReturnRequired;
+  patch.state_return_required = jurisdictions.length > 0;
   if (data.localReturnRequired !== undefined) patch.local_return_required = data.localReturnRequired;
   if (data.description !== undefined) patch.description = data.description || null;
   if (data.balanceDue !== undefined) patch.balance_due = data.balanceDue;
   if (data.refundAmount !== undefined) patch.refund_amount = data.refundAmount;
   if (data.serviceId !== undefined) patch.service_id = data.serviceId || null;
+  patch.metadata = metadata;
 
-  const supabase = await createClient();
   const { error } = await supabase
     .from("tax_engagements")
     .update(patch)
@@ -176,6 +352,16 @@ async function assignUser(
   if (!parsed.success) return { error: "Invalid input." };
 
   const supabase = await createClient();
+  if (userId) {
+    const { data: activeMember } = await supabase
+      .from("workspace_members")
+      .select("user_id")
+      .eq("workspace_id", workspace.workspace.id)
+      .eq("user_id", userId)
+      .eq("status", "active")
+      .maybeSingle();
+    if (!activeMember) return { error: "That person is not active staff in this tax office." };
+  }
   const { data: current } = await supabase
     .from("tax_engagements")
     .select(column)
@@ -206,6 +392,11 @@ export async function assignPreparerAction(engagementId: string, userId: string 
 }
 
 export async function assignReviewerAction(engagementId: string, userId: string | null): Promise<ActionResult> {
+  const { workspace, error } = await requireStaff();
+  if (!workspace) return { error };
+  if (workspace.role === "preparer") {
+    return { error: "The connected ERO controls reviewer assignment for PTIN preparer accounts." };
+  }
   return assignUser(engagementId, userId, "reviewer_user_id", "reviewer_assigned", "Reviewer assigned");
 }
 
@@ -370,9 +561,25 @@ export async function markExtensionFiledAction(engagementId: string): Promise<Ac
   if (!workspace) return { error: authError };
 
   const supabase = await createClient();
+  const { data: engagement } = await supabase
+    .from("tax_engagements")
+    .select("metadata")
+    .eq("id", engagementId)
+    .eq("workspace_id", workspace.workspace.id)
+    .maybeSingle();
+  const metadata = (engagement?.metadata && typeof engagement.metadata === "object" && !Array.isArray(engagement.metadata)
+    ? engagement.metadata
+    : {}) as Record<string, unknown>;
+  const deadlineSchedule = (metadata.deadline_schedule && typeof metadata.deadline_schedule === "object"
+    ? metadata.deadline_schedule
+    : {}) as { items?: Array<{ authority?: string; extensionDate?: string | null; ruleStatus?: string }> };
+  const calculated = deadlineSchedule.items?.filter((item) => item.ruleStatus === "calculated") ?? [];
+  const extensionDueDate = calculated.find((item) => item.authority === "IRS")?.extensionDate
+    ?? calculated.find((item) => item.extensionDate)?.extensionDate
+    ?? null;
   const { error } = await supabase
     .from("tax_engagements")
-    .update({ extension_requested: true, extension_filed: true })
+    .update({ extension_requested: true, extension_filed: true, extension_due_date: extensionDueDate })
     .eq("id", engagementId)
     .eq("workspace_id", workspace.workspace.id);
 

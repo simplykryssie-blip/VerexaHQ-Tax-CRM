@@ -95,6 +95,7 @@ export function ReturnReleasePanel({ engagementId, initialControls }: { engageme
                 </p>
                 <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={2} placeholder="Release notes (optional)" />
                 <DialogFooter>
+                  <Button variant="outline" disabled={busy} onClick={() => setOpen(false)}>Cancel</Button>
                   <Button variant="brand" disabled={busy} onClick={release}>
                     {busy && <Loader2 className="h-4 w-4 animate-spin" />}
                     Release

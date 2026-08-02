@@ -4,20 +4,16 @@ import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/empty-state";
 import { HouseholdFormDialog } from "@/features/households/household-form-dialog";
 import { Card, CardContent } from "@/components/ui/card";
+import { requireWorkspace } from "@/lib/auth/workspace";
+import { requirePermission } from "@/lib/permissions/granular";
+import { ForbiddenState } from "@/components/ui/ForbiddenState";
 
 export default async function HouseholdsPage() {
+  const {workspace}=await requireWorkspace(); if(!workspace)return <ForbiddenState/>;
+  const [viewAccess,manageAccess]=await Promise.all([requirePermission(workspace.workspace.id,"clients.view"),requirePermission(workspace.workspace.id,"households.manage")]);
+  if(!viewAccess.allowed)return <ForbiddenState description={viewAccess.reason}/>;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  const { data: membership } = await supabase
-    .from("workspace_members")
-    .select("workspace_id")
-    .eq("user_id", user!.id)
-    .eq("status", "active")
-    .limit(1)
-    .maybeSingle();
-  const workspaceId = membership!.workspace_id;
+  const workspaceId = workspace.workspace.id;
 
   const { data: households } = await supabase
     .from("tax_households")
@@ -32,7 +28,7 @@ export default async function HouseholdsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Households</h1>
           <p className="text-sm text-muted-foreground mt-1">Group related taxpayers, spouses, and dependents.</p>
         </div>
-        <HouseholdFormDialog workspaceId={workspaceId} />
+        {manageAccess.allowed&&<HouseholdFormDialog workspaceId={workspaceId} />}
       </div>
 
       {!households || households.length === 0 ? (

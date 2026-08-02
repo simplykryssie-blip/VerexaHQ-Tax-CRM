@@ -221,10 +221,13 @@ export function NewSignatureRequestForm({
           <Checkbox checked={sendNow} onCheckedChange={(v) => setSendNow(v === true)} />
           Send immediately (generates signing links)
         </label>
-        <Button type="submit" variant="brand" disabled={submitting}>
-          {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {sendNow ? "Create & send" : "Save as draft"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" disabled={submitting} onClick={() => router.push("/signatures")}>Cancel</Button>
+          <Button type="submit" variant="brand" disabled={submitting}>
+            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {sendNow ? "Create & send" : "Save as draft"}
+          </Button>
+        </div>
       </div>
     </form>
   );

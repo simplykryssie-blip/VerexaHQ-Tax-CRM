@@ -30,16 +30,30 @@ grants full database access, bypassing every RLS policy — treat it like a root
 The database, RLS policies, RPCs, storage buckets, and auth settings already exist live in the
 Supabase project — this app has never created its own tables or duplicated the schema. Two things do
 need to be configured in the Supabase dashboard (Auth → URL Configuration) before invite/reset flows
-work correctly in production:
+work correctly in production **and on Vercel Preview deployments**:
 
-- **Site URL** should match `NEXT_PUBLIC_APP_URL`.
-- **Redirect URLs** allow-list should include:
-  - `{APP_URL}/auth/confirm` and `{APP_URL}/reset-password` (staff)
-  - `{APP_URL}/portal/reset-password` (portal — used for both password-reset and completing a portal
-    invite, since a newly-invited client has no password yet)
+- **Site URL** should be `https://tax.verexahq.com` (production).
+- **Redirect URLs** allow-list must include every origin recovery/invite links can actually be opened
+  from, each with the `/auth/confirm` path (the flow always exchanges the recovery token there first,
+  then redirects to `/reset-password`):
+  - Production: `https://tax.verexahq.com/auth/confirm`
+  - Local development: `http://localhost:3000/auth/confirm`
+  - **Vercel Preview** (the domain changes per deployment/branch — use a wildcard, not the one-off URL
+    from any single preview): `https://*-verexa-hq-crm.vercel.app/auth/confirm` (adjust the wildcard
+    to match this project's actual Vercel team/project preview domain pattern — check the exact
+    preview hostname in the Vercel dashboard or a recent deployment URL and confirm the wildcard covers
+    it before relying on preview-based reset testing).
 
-If these aren't set, Supabase's invite/recovery emails will link back to `localhost` or fail to
-redirect, even though the invite/reset logic itself is correct.
+If the origin a reset link is actually opened from isn't in this allow-list, Supabase silently falls
+back to the Site URL instead of honoring the app's requested `redirectTo` — the browser lands on a
+bare, unauthenticated page (commonly rendered as the login screen) instead of `/reset-password`, even
+though the app's own redirect/session-exchange logic is correct. This is the most common cause of
+"clicking the reset link opens the login page."
+
+There is currently no separate portal recovery route — portal and staff users share the same
+`/reset-password` page (`app/(auth)/reset-password/page.tsx`), which now checks for a valid Supabase
+session server-side and shows a specific invalid/expired message (with a link to request a new one)
+instead of silently rendering a broken form when no session exists.
 
 ## Production domain: tax.verexahq.com
 

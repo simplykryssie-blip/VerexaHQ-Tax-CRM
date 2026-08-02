@@ -1,8 +1,9 @@
 import { Card, CardBody, CardHeader } from "@/components/ui/LegacyCard";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { clientStatusMeta } from "@/lib/status";
-import { formatDate, maskLast4, titleCase } from "@/lib/utils";
+import { formatDate, titleCase } from "@/lib/utils";
 import type { Client } from "@/lib/types";
+import { IdentityRevealField } from "@/features/clients/identity-reveal-field";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -13,7 +14,17 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export function ClientOverviewTab({ client }: { client: Client }) {
+export function ClientOverviewTab({
+  client,
+  workspaceId,
+  canRevealIdentity,
+  canManageIdentity,
+}: {
+  client: Client;
+  workspaceId: string;
+  canRevealIdentity: boolean;
+  canManageIdentity: boolean;
+}) {
   const status = clientStatusMeta(client.status);
 
   return (
@@ -32,8 +43,32 @@ export function ClientOverviewTab({ client }: { client: Client }) {
             label="Preferred contact method"
             value={client.preferred_contact_method ? titleCase(client.preferred_contact_method) : "—"}
           />
-          <Field label="SSN (last 4)" value={maskLast4(client.ssn_last4)} />
-          <Field label="EIN (last 4)" value={maskLast4(client.ein_last4)} />
+          <Field
+            label="SSN"
+            value={
+              <IdentityRevealField
+                workspaceId={workspaceId}
+                clientId={client.id}
+                identifierType="ssn"
+                last4={client.ssn_last4}
+                canReveal={canRevealIdentity}
+                canManage={canManageIdentity}
+              />
+            }
+          />
+          <Field
+            label="EIN"
+            value={
+              <IdentityRevealField
+                workspaceId={workspaceId}
+                clientId={client.id}
+                identifierType="ein"
+                last4={client.ein_last4}
+                canReveal={canRevealIdentity}
+                canManage={canManageIdentity}
+              />
+            }
+          />
           <Field label="Source" value={client.source || "—"} />
           <Field label="Client since" value={formatDate(client.created_at)} />
         </dl>

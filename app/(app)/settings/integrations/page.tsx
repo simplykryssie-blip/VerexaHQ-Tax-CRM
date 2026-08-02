@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { PhoneOff, MailX, VideoOff, CreditCard } from "lucide-react";
 import { getCurrentWorkspace } from "@/lib/auth/workspace";
-import { roleHasCapability } from "@/lib/permissions/capabilities";
+import { requirePermission } from "@/lib/permissions/granular";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
@@ -39,7 +39,8 @@ const INTEGRATIONS = [
 export default async function IntegrationsPage() {
   const active = await getCurrentWorkspace();
   if (!active) redirect("/workspaces");
-  if (!roleHasCapability(active.role, "manage_integrations")) redirect("/unauthorized");
+  const integrationAccess = await requirePermission(active.workspace.id, "integrations.manage");
+  if (!integrationAccess.allowed) redirect("/unauthorized");
 
   return (
     <div className="space-y-4">

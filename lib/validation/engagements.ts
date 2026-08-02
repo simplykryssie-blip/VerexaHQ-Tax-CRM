@@ -141,6 +141,14 @@ const engagementBaseObjectSchema = z.object({
   dueDate: z.string().optional().or(z.literal("")),
   internalDueDate: z.string().optional().or(z.literal("")),
   jurisdiction: z.string().trim().max(100).optional(),
+  jurisdictions: z.array(z.string().regex(/^[A-Z]{2}$/)).default([]),
+  fiscalYearEnd: z.string().optional().or(z.literal("")),
+  extensionFiled: z.boolean().default(false),
+  clientDocumentDueDate: z.string().optional().or(z.literal("")),
+  reviewerDueDate: z.string().optional().or(z.literal("")),
+  signatureDueDate: z.string().optional().or(z.literal("")),
+  customDeadlineLabel: z.string().trim().max(120).optional(),
+  customDeadlineDate: z.string().optional().or(z.literal("")),
   federalReturnRequired: z.boolean().default(true),
   stateReturnRequired: z.boolean().default(false),
   localReturnRequired: z.boolean().default(false),
@@ -161,7 +169,12 @@ function withValidDueDates<T extends z.ZodType<{ dueDate?: string; internalDueDa
     });
 }
 
-export const createEngagementSchema = withValidDueDates(engagementBaseObjectSchema);
+export const createEngagementSchema = withValidDueDates(
+  engagementBaseObjectSchema.extend({
+    activationMode: z.enum(["save_draft", "activate_only", "activate_and_send"]).default("save_draft"),
+    clientRequestId: z.string().uuid().optional(),
+  }),
+);
 export type CreateEngagementInput = z.infer<typeof createEngagementSchema>;
 
 export const updateEngagementSchema = withValidDueDates(

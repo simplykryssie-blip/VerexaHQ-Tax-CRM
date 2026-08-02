@@ -20,6 +20,9 @@ import { format } from "date-fns";
 
 type AppointmentType = { id: string; name: string; duration_minutes: number; location_type: string };
 
+const CLIENT_PREFIX = "client:";
+const LEAD_PREFIX = "lead:";
+
 export function AppointmentFormDialog({
   workspaceId,
   clients,
@@ -28,6 +31,7 @@ export function AppointmentFormDialog({
   appointmentTypes,
   defaultStart,
   fixedClientId,
+  currentUserId,
 }: {
   workspaceId: string;
   clients: PickerOption[];
@@ -36,6 +40,7 @@ export function AppointmentFormDialog({
   appointmentTypes: AppointmentType[];
   defaultStart?: Date;
   fixedClientId?: string;
+  currentUserId?: string;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -43,16 +48,34 @@ export function AppointmentFormDialog({
   const [clientId, setClientId] = useState<string | null>(fixedClientId ?? null);
   const [leadId, setLeadId] = useState<string | null>(null);
   const [appointmentTypeId, setAppointmentTypeId] = useState<string | null>(null);
-  const [assignedUserId, setAssignedUserId] = useState<string | null>(null);
+  const [assignedUserId, setAssignedUserId] = useState<string | null>(currentUserId ?? null);
   const [locationType, setLocationType] = useState<keyof typeof APPOINTMENT_LOCATION_LABELS>("office");
   const [locationText, setLocationText] = useState("");
   const [startsAt, setStartsAt] = useState(format(defaultStart ?? new Date(), "yyyy-MM-dd'T'HH:mm"));
   const [durationMinutes, setDurationMinutes] = useState(30);
+  const [useExplicitEnd, setUseExplicitEnd] = useState(false);
+  const [endsAt, setEndsAt] = useState("");
   const [clientNotes, setClientNotes] = useState("");
   const [internalNotes, setInternalNotes] = useState("");
   const [reminderTimings, setReminderTimings] = useState<number[]>([1440]);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const attendeeOptions: PickerOption[] = [
+    ...clients.map((c) => ({ ...c, id: `${CLIENT_PREFIX}${c.id}`, sublabel: c.sublabel ?? "Client" })),
+    ...leads.map((l) => ({ ...l, id: `${LEAD_PREFIX}${l.id}`, sublabel: l.sublabel ?? "Lead" })),
+  ];
+  const attendeeValue = fixedClientId ? `${CLIENT_PREFIX}${fixedClientId}` : clientId ? `${CLIENT_PREFIX}${clientId}` : leadId ? `${LEAD_PREFIX}${leadId}` : null;
+
+  function handleAttendeeChange(id: string) {
+    if (id.startsWith(CLIENT_PREFIX)) {
+      setClientId(id.slice(CLIENT_PREFIX.length));
+      setLeadId(null);
+    } else if (id.startsWith(LEAD_PREFIX)) {
+      setLeadId(id.slice(LEAD_PREFIX.length));
+      setClientId(null);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -68,7 +91,12 @@ export function AppointmentFormDialog({
     } = await supabase.auth.getUser();
 
     const starts = new Date(startsAt);
-    const ends = new Date(starts.getTime() + durationMinutes * 60_000);
+    const ends = useExplicitEnd && endsAt ? new Date(endsAt) : new Date(starts.getTime() + durationMinutes * 60_000);
+    if (ends <= starts) {
+      setError("End must be after the start time.");
+      setSubmitting(false);
+      return;
+    }
 
     const { error: dbError } = await supabase.from("appointments").insert({
       workspace_id: workspaceId,
@@ -119,18 +147,12 @@ export function AppointmentFormDialog({
             <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Intake consultation" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            {!fixedClientId && (
-              <div className="space-y-1">
-                <Label>Client</Label>
-                <SearchablePicker options={clients} value={clientId} onChange={(v) => { setClientId(v); setLeadId(null); }} placeholder="Search clients…" />
-              </div>
-            )}
+          {!fixedClientId && (
             <div className="space-y-1">
-              <Label>Lead</Label>
-              <SearchablePicker options={leads} value={leadId} onChange={(v) => { setLeadId(v); setClientId(fixedClientId ?? null); }} placeholder="Search leads…" />
+              <Label>Attendee / Contact</Label>
+              <SearchablePicker options={attendeeOptions} value={attendeeValue} onChange={handleAttendeeChange} placeholder="Search leads and clients…" />
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
@@ -165,15 +187,31 @@ export function AppointmentFormDialog({
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label>Starts</Label>
-              <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+          <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label>Starts</Label>
+                <Input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} />
+              </div>
+              {useExplicitEnd ? (
+                <div className="space-y-1">
+                  <Label>Ends</Label>
+                  <Input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} />
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  <Label>Duration (minutes)</Label>
+                  <Input type="number" min={5} step={5} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value) || 30)} />
+                </div>
+              )}
             </div>
-            <div className="space-y-1">
-              <Label>Duration (minutes)</Label>
-              <Input type="number" min={5} step={5} value={durationMinutes} onChange={(e) => setDurationMinutes(Number(e.target.value) || 30)} />
-            </div>
+            <button
+              type="button"
+              onClick={() => setUseExplicitEnd((v) => !v)}
+              className="text-xs text-muted-foreground underline underline-offset-2 hover:text-foreground"
+            >
+              {useExplicitEnd ? "Use a duration instead" : "Set an explicit end date/time (multi-day)"}
+            </button>
           </div>
 
           <div className="space-y-1">
@@ -227,6 +265,7 @@ export function AppointmentFormDialog({
           </div>
 
           <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button type="submit" variant="brand" disabled={submitting}>
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Schedule appointment

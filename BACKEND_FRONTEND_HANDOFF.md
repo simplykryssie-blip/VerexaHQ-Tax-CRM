@@ -1,0 +1,218 @@
+# Verexa Tax Office Backend → Frontend Handoff
+
+Backend migrations are applied through 2026-08-02 to Supabase project `VerexaHQ Tax Office`.
+
+## Frontend Sections 4–8 completed (2026-08-02)
+
+- **Section 4 — Intake and Documents:** `/templates` is a full preview/edit library; workspace organizer questions can be added, edited, reordered, required, and removed. Intake review, client organizers, document requests, missing-document tracking, vault categorization, approval/rejection, replacement/versioning, archive/restore, and soft deletion are connected. All creation flows include Back or Cancel controls.
+- **Section 5 — Communications and Scheduling:** `/communications` unifies secure inbox links, scheduled email/SMS, reminders, delivery history, failure detail, and retry. `queue_communication` now enforces `communications.send`, workspace ownership, and the client's email/SMS consent, suppression, and invalid-address flags. Client replies cancel only reminders explicitly carrying `stop_on_client_response=true`. Calendar and appointment scheduling remain available at `/calendar`.
+- **Section 6 — Review, Signatures, Billing, and Release:** `/review-release` unifies ERO review, ordinary e-signature, billing, and return-release queues. `/billing` links staff invoices, payments, balances, refunds/voids, and pricing. Return delivery continues to use `evaluate_return_release` and `release_completed_return`. Form 8879/KBA remains explicitly unavailable until an approved provider is connected.
+- **Section 7 — Client Portal and Administration:** the portal now includes appointments, signatures, invoices/payment history, completed returns, and notifications in addition to organizers, documents, requests, messages, quotes, and engagement progress. `/clients/[clientId]/portal-preview` is an audited, read-only staff preview and cannot perform client actions. Staff navigation exposes Team, Reports, Integrations, Services, Templates, Automations, Billing, and Settings according to granular permissions.
+- **Section 8 — Automation and Integrations:** the existing visual workflow builder, triggers, conditions, waits, actions, approvals, and run history are exposed as Automations. Failed workflow actions and backend automation jobs have permission-checked retry RPCs. Integration cards continue to show truthful Connected/Not Connected status for email, SMS, Zoom, and payments instead of simulating providers.
+- Client type remains only **Individual** or **Business**. A household is a relationship group linking separate client records; it is not a third client record type.
+- `verexahq@gmail.com` now has an active `ero` membership in the MKB ETechnologies ERO workspace. The existing owner membership was not replaced.
+- ERO administration is aligned end-to-end: `team.manage`, `settings.manage`, and `integrations.manage` now drive both the frontend/server checks and the live RLS policies. An ERO can manage operational staff and settings but cannot modify Owner/Admin memberships, assign Admin, or change workspace ownership/type/lifecycle state.
+- New live migrations: `sections_4_8_permissions`, `communications_scheduling_lifecycle`, `automation_operator_retry`, and `align_ero_operational_admin_rls`.
+- Sections 4–8 passed TypeScript, the production build, lint with zero errors, and live rollback lifecycle tests. The 48 lint warnings predate this section and remain non-blocking.
+
+## Sales/client carryover section completed
+
+- `/leads` now has permission-aware table and pipeline views, controlled stage movement, required lost/do-not-contact reasons, and server audit events.
+- Lead conversion runs through `convert_lead_to_client_v2`. It is idempotent, checks normalized email/phone duplicates, can link an existing client, requires permission plus an audit reason to create separately, and transfers lead quotes, assessments, and form submissions to the client.
+- `/lead-forms` and `/lead-forms/[id]` provide the public form builder, preview, copyable link, and draft/publish/pause/archive lifecycle. `/forms/[slug]` is the anonymous published form route. It never exposes sensitive identifier, banking, upload, or tax-document fields.
+- Public form presentation uses a security-invoker reader with an anon column grant and published-row RLS. Anonymous submission remains the validated `submit_public_lead_form` write contract.
+- The new-client flow checks duplicates while staff types and repeats the check transactionally at save. The warning drawer shows masked matches and existing-file links; overrides require a reason and are audited.
+- `/clients/[clientId]` is now the complete client workspace: overview, contact information, intakes, editable tax profile, income/deductions, engagements, document requests, quotes, and household/family groups.
+- Households remain relationship groups. Staff can link an existing Individual client as taxpayer/spouse/member without merging or deleting either client record; dependents may remain non-client members.
+- `/dashboard` is a live operational dashboard and `/work-queue` combines engagement pressure with open staff tasks and mine/all-office scope.
+- Accepted quotes expose **Create change order**. `create_quote_change_order` preserves the locked accepted quote and creates a separately numbered, linked draft that follows the ordinary send/accept lifecycle.
+- New permission keys: `leads.*`, `lead_forms.*`, `clients.duplicate_override`, `households.manage`, and `quotes.change_order`.
+
+## Frontend Section 1 completed
+
+- Granular permission definitions, system/custom roles, scoped grants, member assignments, sensitive-action approvals, and retention/legal-hold controls are live.
+- `get_my_permissions`, `check_permission`, and `has_permission` are the frontend permission contracts. They return allowed/denied, scope, and a denial reason and run with invoker security/RLS.
+- The staff shell now uses those grants for permission-aware navigation.
+- `/services` now manages `engagement_type_settings` service packages and clearly warns about missing workflow/template components.
+- `/engagements/new` previews the matched service package and uses `activate_tax_engagement` for both activation modes. The legacy browser-driven organizer activation path is no longer used.
+- Activation confirmation displays returned artifact identifiers and warnings before staff opens the engagement.
+
+## Frontend Section 2 completed
+
+- `/pricing` is the permission-aware staff workspace for quick assessments, package base pricing, ordered pricing rules, quote creation, and quote lifecycle controls.
+- The calculator stores the frozen answers, recommendation, and applied-rule breakdown in `pricing_assessments`; staff can still review the recommendation before quoting.
+- Quote numbers are generated by `next_quote_number`. Staff use `send_client_quote` and `expire_client_quote` rather than directly changing lifecycle statuses.
+- `/portal/quotes` and `/portal/quotes/[quoteId]` expose only the signed-in client's non-draft quotes. Acceptance and decline use identity-checked RPCs and write audit records.
+- Accepted, declined, expired, and superseded quotes are immutable. Additional accepted scope must be represented by a new `change_order` quote linked through `supersedes_quote_id`.
+- Pricing permissions are granular (`pricing.*` and `quotes.*`) and are enforced by both server actions and RLS. A lead assessment may be calculated before conversion, but a quote must be attached to a portal client before it can be sent.
+
+## Frontend Section 3 completed
+
+- Each engagement's Workflow tab now loads its immutable `engagement_workflow_instances` snapshot and stage instances rather than presenting free-form status buttons.
+- Staff see the current stage, phase completion, allowed outgoing transitions, exception paths, and full stage history. All changes use `set_engagement_workflow_stage`; the browser never patches stage rows directly.
+- Normal transitions come from `workflow_stage_transitions`. Exception transitions require an audit reason. The database remains authoritative if a stale browser attempts an invalid move.
+- The same workspace displays all eight independent progress trackers and active statutory deadlines without conflating them with the main production stage.
+- `engagements.advance` is the granular permission for stage movement and is evaluated with the engagement's assigned staff context.
+
+## Product rules already enforced by the database
+
+- A public lead form creates a lead only. It does not create a portal account, client, or engagement.
+- Creating an engagement automatically applies the firm's matching engagement-type setting and primary workflow.
+- The applied workflow is frozen as an engagement-specific snapshot. Publishing a later workflow version cannot rewrite active or historical engagements.
+- Standalone PTIN workspaces do not require a reviewer unless the firm setting explicitly requires one.
+- A PTIN workspace linked to an ERO automatically inherits an active ERO reviewer and cannot assign outside the ERO workspace.
+- An ERO-office engagement assigned to a preparer/seasonal preparer requires review. The ERO/owner is the default reviewer, and authorized ERO staff can reassign within the ERO workspace.
+- Household is a relationship group, not a new client record type. Use `tax_households` and `household_members`; new client UX should offer Individual or Business.
+- Organizer, document, engagement-letter, payment, signature, extension, filing, and review progress are separate trackers—not dozens of overloaded workflow statuses.
+- Automatic extensions activate the extended filing deadline without replacing or deactivating the original payment deadline.
+
+## New backend modules
+
+| Module | Primary tables |
+|---|---|
+| Firm defaults | `engagement_type_settings` |
+| Editable workflow stages | `workflow_stages`, `workflow_stage_transitions` |
+| Frozen engagement workflow | `engagement_workflow_instances`, `engagement_workflow_stage_instances` |
+| Separate progress | `engagement_progress_trackers` |
+| Deadline ledger | `engagement_deadlines`, `tax_jurisdiction_rule_profiles` |
+| Lead forms | `lead_forms`, `lead_form_submissions` |
+| Pricing | `pricing_assessments`, `pricing_rules`, `client_quotes` |
+| Sensitive duplicate detection | `private.client_identifier_fingerprints` plus the masked duplicate RPC |
+
+All public tables have RLS and explicit Data API grants. The private fingerprint table is not exposed to browser roles.
+
+## Reusable system content seeded
+
+- `Verexa Default Tax Preparation Workflow`
+  - 7 phases
+  - 30 normal/terminal stages
+  - 6 exception stages
+  - 32 controlled transitions
+- `New Tax Client Lead Form`
+- `Tax Preparation Pricing Assessment`
+- Six tax engagement configurations per non-platform workspace:
+  - Individual 1040
+  - Partnership 1065
+  - C corporation 1120
+  - S corporation 1120-S
+  - Nonprofit 990
+  - Amended individual 1040-X
+
+The three generated lead-form records remain `draft`. The frontend must require an intentional Publish action before exposing a link/embed.
+
+## RPCs the frontend/server should use
+
+### `activate_tax_engagement`
+
+Signed-in staff activation endpoint. Inputs:
+
+- `p_engagement_id`
+- `p_activation_mode`: `activate_without_sending` or `activate_and_send`
+
+This is the authoritative activation path. It safely materializes the configured organizer, engagement letter, document request, default tasks, optional invoice, release controls, workflow stage changes, and a queued portal/package-delivery job in one transaction. It is idempotent: repeating the call returns/reuses the existing artifacts instead of creating duplicates. Replace the older frontend-only `activateAndAssignOrganizer` sequence with this RPC.
+
+The response includes the activation ID, status, artifact IDs, and warnings such as a missing client email or a package component that is not configured.
+
+The `process-backend-queues` Edge Function now claims the queued activation job, creates/links portal access, queues one secure package notification, schedules idempotent intake reminders, and marks the activation sent after provider delivery. Queue invocation is restricted to the service-role credential; an ordinary signed-in JWT cannot process every firm's queues.
+
+### `evaluate_return_release` and `release_completed_return`
+
+Use `evaluate_return_release` to display exact blockers before completed-return delivery. It distinguishes a missing invoice from a paid invoice and checks configured payment, signature, review, and optional filing-acceptance requirements.
+
+Use `release_completed_return` for the final staff action. It re-evaluates every requirement inside the transaction, is idempotent after release, and writes engagement activity plus an audit record.
+
+### `submit_public_lead_form`
+
+Anonymous form endpoint. Inputs:
+
+- `p_public_slug`
+- `p_payload`
+- `p_consent_given`
+- `p_honeypot`
+
+It validates the active published form/version, requires email or phone, limits payload size, requires consent, checks a honeypot, blocks SSN/ITIN/EIN/banking/document keys, and creates the lead plus immutable submission record. Anonymous users have no direct table access.
+
+The web route should still add CAPTCHA and provider/IP rate limiting before calling this RPC.
+
+### `find_possible_duplicate_clients`
+
+Signed-in staff endpoint. Inputs:
+
+- `p_workspace_id`
+- normalized email (optional)
+- normalized phone (optional)
+- server-generated HMAC fingerprint (optional)
+
+It verifies workspace membership and returns masked matches plus reasons. Never calculate an SSN/ITIN/EIN HMAC in browser code. A server-only route must normalize the identifier, calculate HMAC-SHA-256 with a dedicated environment secret, and write the fingerprint through the service-role client.
+
+### `set_engagement_workflow_stage`
+
+Signed-in staff endpoint. It uses caller RLS, verifies engagement management rights, enforces the defined transition (or exception stage), requires a reason when configured, updates the workflow snapshot, maps the stage to the engagement status, and writes engagement activity.
+
+## Screens Claude should connect
+
+1. **Workflow Builder**
+   - List workflow templates and versions.
+   - Duplicate Verexa default before editing.
+   - Reorder/edit stages, entry actions, exit requirements, transitions, and exceptions.
+   - Publish a new immutable version.
+   - Set it as primary through `engagement_type_settings`.
+
+2. **Engagement Type Settings**
+   - Choose primary workflow, organizer, engagement letter, document checklist, pricing method, reviewer policy, activation default, and deadline settings per engagement/return type.
+
+3. **Lead Form Builder**
+   - Full preview, edit, duplicate, draft/publish/pause/archive.
+   - Copy link, embed snippet, button snippet, and QR code.
+   - Never permit sensitive-identifier or tax-document fields on a public form.
+
+4. **Pricing Assessment and Quote**
+   - Send the short assessment before full intake.
+   - Apply ordered `pricing_rules` and allow staff review.
+   - Create fixed, starting-at, range, custom, or rule-based quote.
+   - Accepted scope changes create a `change_order` quote; do not overwrite the accepted original.
+
+5. **Template Library**
+   - Filter lead forms, pricing assessments, organizers, questionnaires, engagement letters, consent forms, document requests, messages, and checklists.
+   - Full preview, duplicate, edit draft, publish version, archive, service/workflow assignments, and mobile-client preview.
+
+6. **Engagement Workspace**
+   - Main workflow stage plus the eight separate tracker cards.
+   - Show automatic statutory deadlines separately from staff-created dates.
+   - Use `set_engagement_workflow_stage`; do not directly patch stage-instance rows from the browser.
+
+7. **Duplicate Warning Drawer**
+   - Check normalized email/phone as staff types.
+   - Check SSN/ITIN/EIN only through a server action using the HMAC fingerprint.
+   - Show masked match, status, assignee, match reasons, and Open Client File.
+   - Continuing after a warning should require permission and an audit reason.
+
+## Deadline status
+
+The database contains calendar-year federal rules for tax years 2025 and 2026 for 1040, 709, 1065, 1120-S, 1120, 1041, 990, and 940. It also contains verified Louisiana, Virginia, and Hawaii rules currently supported by the product.
+
+For the remaining states, `tax_jurisdiction_rule_profiles.rule_status` is either `not_applicable` (no general individual income tax) or `review_required`. Do not automatically convert `review_required` to a federal-aligned date. Each state/form/year needs an official source and annual verification before inserting an active `tax_deadline_rules` row.
+
+Tax disaster relief, fiscal years, short years, combat-zone relief, non-calendar entities, and taxpayer-specific postponements remain exception workflows and must not be guessed.
+
+## Files to preserve
+
+- `supabase/migrations/20260801010000_backend_workflow_foundation.sql`
+- `supabase/migrations/20260801010100_seed_verexa_tax_workflow.sql`
+- `supabase/migrations/20260801010200_fix_generic_actor_trigger.sql`
+- `supabase/migrations/20260801010300_seed_statutory_deadline_rules.sql`
+- `supabase/migrations/20260801010400_backend_advisor_hardening.sql`
+- `supabase/migrations/20260801010500_engagement_activation_and_release_gate.sql`
+- `supabase/migrations/20260801010600_activation_advisor_hardening.sql`
+- `supabase/migrations/20260801010700_automation_job_processing.sql`
+- `supabase/migrations/20260801010800_granular_permission_framework.sql`
+- `supabase/migrations/20260801010900_permission_framework_corrections.sql`
+- `supabase/migrations/20260801011000_permission_evaluator_invoker_security.sql`
+- `supabase/migrations/20260801011100_pricing_quote_lifecycle.sql`
+- `supabase/migrations/20260801011200_pricing_permission_hardening.sql`
+- `supabase/migrations/20260801011300_engagement_stage_permission.sql`
+- `supabase/migrations/20260802131343_align_ero_operational_admin_rls.sql`
+- `supabase/functions/process-backend-queues/index.ts`
+- `types/database.ts`
+
+The live database already contains these migrations. Do not manually re-run their SQL. Commit them so local/GitHub migration history stays aligned with Supabase.

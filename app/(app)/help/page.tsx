@@ -17,7 +17,7 @@ const QUICK_LINKS = [
   { label: "Invite your team", href: "/team", icon: UserCog, description: "Add staff and assign roles." },
   { label: "Workspace relationships", href: "/relationships", icon: Handshake, description: "Link to an ERO or service bureau for oversight." },
   { label: "Send a return for ERO review", href: "/engagements", icon: ClipboardCheck, description: "Bulk or individually submit engagements for approval." },
-  { label: "Assign an intake organizer", href: "/intake", icon: FileText, description: "Send a client the questions you need answered." },
+  { label: "Review client intakes", href: "/intakes", icon: FileText, description: "Track organizers, missing answers, and review progress." },
   { label: "Request a signature", href: "/signatures/new", icon: PenTool, description: "Get e-signatures on engagement letters or 8879s." },
   { label: "Create an invoice", href: "/invoices/new", icon: Receipt, description: "Bill a client for completed work." },
 ];
@@ -52,6 +52,38 @@ export default function HelpPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Help &amp; support</h1>
         <p className="text-sm text-muted-foreground mt-1">Quick links to common tasks, answers to frequent questions, and how to reach us during the beta.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">How work moves through Verexa</CardTitle>
+          <CardDescription>The client record stores the person or business. Every service is managed as its own engagement.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ol className="grid gap-3 sm:grid-cols-2">
+            {[
+              ["1", "Create or qualify the lead", "Saving a lead sends nothing and does not create an engagement."],
+              ["2", "Convert to an active client", "Choose Create active client to continue directly into engagement setup."],
+              ["3", "Create each engagement", "Select the service, tax year, return type, jurisdictions, preparer, and reviewer."],
+              ["4", "Confirm deadlines", "Verexa calculates supported statutory dates; staff enters internal and client targets."],
+              ["5", "Choose activation", "Save draft, activate without sending, or activate and send the organizer."],
+              ["6", "Collect intake and documents", "The client confirms saved basic information once and completes service-specific questions."],
+              ["7", "Prepare outside Verexa", "Complete the tax return in your tax preparation software while tracking work here."],
+              ["8", "Submit for review", "The assigned reviewer approves the work or returns it for corrections."],
+              ["9", "Collect signature and payment", "Track authorization, invoice/payment, and filing readiness."],
+              ["10", "File, confirm, and close", "Record filing and acceptance, complete the engagement, then archive it."],
+            ].map(([number, title, description]) => (
+              <li key={number} className="flex gap-3 rounded-lg border border-border p-3">
+                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">{number}</span>
+                <div><p className="text-sm font-medium">{title}</p><p className="mt-0.5 text-xs text-muted-foreground">{description}</p></div>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-5 rounded-lg bg-muted/40 p-4">
+            <p className="text-sm font-medium">Daily staff routine</p>
+            <p className="mt-1 text-sm text-muted-foreground">Open My Work, review assigned and overdue items, open the client card, check intake/messages/missing documents, complete tasks, update status, and submit prepared work to the assigned reviewer.</p>
+          </div>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

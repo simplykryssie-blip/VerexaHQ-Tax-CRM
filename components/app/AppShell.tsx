@@ -6,21 +6,26 @@ import { AppSidebar } from "@/components/app/AppSidebar";
 import { AppHeader } from "@/components/app/AppHeader";
 import { Toaster } from "@/components/ui/LegacyToaster";
 import type { WorkspaceContext } from "@/lib/auth/workspace";
+import type { PermissionMap } from "@/lib/permissions/granular";
+import { PermissionProvider } from "@/components/providers/permission-provider";
 
 export function AppShell({
   workspace,
   memberships,
   userEmail,
+  permissions,
   children,
 }: {
   workspace: WorkspaceContext;
   memberships: WorkspaceContext[];
   userEmail: string;
+  permissions: PermissionMap;
   children: React.ReactNode;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
+    <PermissionProvider permissions={permissions}>
     <div className="flex h-screen overflow-hidden bg-background">
       <aside className="hidden w-64 shrink-0 border-r border-border lg:block">
         <AppSidebar
@@ -67,5 +72,6 @@ export function AppShell({
       </div>
       <Toaster />
     </div>
+    </PermissionProvider>
   );
 }
