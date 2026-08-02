@@ -7,16 +7,16 @@ import {
   createClientSchema,
   clientTypeOptions,
   clientStatusOptions,
+  CONTACT_METHODS,
   type CreateClientInput,
 } from "@/lib/validation/clients";
-import { createClientAction } from "@/lib/actions/clients";
+import { createClientAction, updateClientAction } from "@/lib/actions/clients";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/LegacyButton";
 import { titleCase } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import type { Client } from "@/lib/types";
 
-export function ClientForm() {
-  const router = useRouter();
+export function ClientForm({ client }: { client?: Client }) {
   const [formError, setFormError] = useState<string | null>(null);
   const {
     register,
@@ -24,16 +24,30 @@ export function ClientForm() {
     formState: { errors, isSubmitting },
   } = useForm<CreateClientInput>({
     resolver: zodResolver(createClientSchema),
-    defaultValues: { clientType: "individual", status: "lead" },
+    defaultValues: client
+      ? {
+          firstName: client.first_name ?? "",
+          lastName: client.last_name ?? "",
+          clientType: client.client_type,
+          status: client.status as CreateClientInput["status"],
+          email: client.email ?? "",
+          phone: client.phone ?? "",
+          company: client.company ?? "",
+          notes: client.notes ?? "",
+          dateOfBirth: client.date_of_birth ?? "",
+          ssnLast4: client.ssn_last4 ?? "",
+          einLast4: client.ein_last4 ?? "",
+          preferredContactMethod: (client.preferred_contact_method as CreateClientInput["preferredContactMethod"]) ?? undefined,
+          source: client.source ?? "",
+        }
+      : { clientType: "individual", status: "lead" },
   });
 
   const onSubmit = async (data: CreateClientInput) => {
     setFormError(null);
-    const result = await createClientAction(data);
+    const result = client ? await updateClientAction(client.id, data) : await createClientAction(data);
     if (result?.error) {
       setFormError(result.error);
-    } else {
-      router.refresh();
     }
   };
 
@@ -86,13 +100,42 @@ export function ClientForm() {
         <input id="company" className={inputClassName} {...register("company")} />
       </FormField>
 
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormField label="Date of birth" htmlFor="dateOfBirth" error={errors.dateOfBirth?.message}>
+          <input id="dateOfBirth" type="date" className={inputClassName} {...register("dateOfBirth")} />
+        </FormField>
+        <FormField label="Preferred contact method" htmlFor="preferredContactMethod" error={errors.preferredContactMethod?.message}>
+          <select id="preferredContactMethod" className={inputClassName} {...register("preferredContactMethod")}>
+            <option value="">Select…</option>
+            {CONTACT_METHODS.map((option) => (
+              <option key={option} value={option}>
+                {titleCase(option)}
+              </option>
+            ))}
+          </select>
+        </FormField>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormField label="SSN — last 4 digits" htmlFor="ssnLast4" error={errors.ssnLast4?.message}>
+          <input id="ssnLast4" maxLength={4} placeholder="1234" className={inputClassName} {...register("ssnLast4")} />
+        </FormField>
+        <FormField label="EIN — last 4 digits" htmlFor="einLast4" error={errors.einLast4?.message}>
+          <input id="einLast4" maxLength={4} placeholder="1234" className={inputClassName} {...register("einLast4")} />
+        </FormField>
+      </div>
+
+      <FormField label="Source" htmlFor="source" error={errors.source?.message} hint="Referral, website, converted lead…">
+        <input id="source" className={inputClassName} {...register("source")} />
+      </FormField>
+
       <FormField label="Notes" htmlFor="notes" error={errors.notes?.message}>
         <textarea id="notes" rows={4} className={inputClassName} {...register("notes")} />
       </FormField>
 
       <div className="flex justify-end gap-2">
         <Button type="submit" loading={isSubmitting}>
-          Save client
+          {client ? "Save changes" : "Save client"}
         </Button>
       </div>
     </form>

@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { createClient } from "@/lib/supabase/client";
 import { signupSchema, type SignupInput } from "@/lib/validation/auth";
 import { friendlyAuthError } from "@/lib/errors";
-import { getAppOrigin } from "@/lib/auth/portal";
+import { getAppOrigin } from "@/lib/auth/app-origin";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 export default function SignUpPage() {
