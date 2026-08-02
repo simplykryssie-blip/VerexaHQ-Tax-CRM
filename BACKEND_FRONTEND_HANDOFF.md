@@ -20,6 +20,14 @@ Backend applied to Supabase project `VerexaHQ Tax Office` on 2026-08-01.
 - Accepted, declined, expired, and superseded quotes are immutable. Additional accepted scope must be represented by a new `change_order` quote linked through `supersedes_quote_id`.
 - Pricing permissions are granular (`pricing.*` and `quotes.*`) and are enforced by both server actions and RLS. A lead assessment may be calculated before conversion, but a quote must be attached to a portal client before it can be sent.
 
+## Frontend Section 3 completed
+
+- Each engagement's Workflow tab now loads its immutable `engagement_workflow_instances` snapshot and stage instances rather than presenting free-form status buttons.
+- Staff see the current stage, phase completion, allowed outgoing transitions, exception paths, and full stage history. All changes use `set_engagement_workflow_stage`; the browser never patches stage rows directly.
+- Normal transitions come from `workflow_stage_transitions`. Exception transitions require an audit reason. The database remains authoritative if a stale browser attempts an invalid move.
+- The same workspace displays all eight independent progress trackers and active statutory deadlines without conflating them with the main production stage.
+- `engagements.advance` is the granular permission for stage movement and is evaluated with the engagement's assigned staff context.
+
 ## Product rules already enforced by the database
 
 - A public lead form creates a lead only. It does not create a portal account, client, or engagement.
@@ -176,6 +184,7 @@ Tax disaster relief, fiscal years, short years, combat-zone relief, non-calendar
 - `supabase/migrations/20260801011000_permission_evaluator_invoker_security.sql`
 - `supabase/migrations/20260801011100_pricing_quote_lifecycle.sql`
 - `supabase/migrations/20260801011200_pricing_permission_hardening.sql`
+- `supabase/migrations/20260801011300_engagement_stage_permission.sql`
 - `supabase/functions/process-backend-queues/index.ts`
 - `types/database.ts`
 

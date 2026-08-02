@@ -10,6 +10,13 @@ import type {
   TaxEngagement,
 } from "@/lib/types";
 import type { EngagementListFilters } from "@/lib/validation/engagements";
+import type { Database } from "@/types/database";
+
+type WorkflowInstance = Database["public"]["Tables"]["engagement_workflow_instances"]["Row"];
+type WorkflowStageInstance = Database["public"]["Tables"]["engagement_workflow_stage_instances"]["Row"];
+type ProgressTracker = Database["public"]["Tables"]["engagement_progress_trackers"]["Row"];
+type EngagementDeadline = Database["public"]["Tables"]["engagement_deadlines"]["Row"];
+export type AllowedWorkflowTransition = { stageKey: string; label: string; transitionLabel: string | null; requiresReason: boolean; kind: string };
 
 export const ENGAGEMENTS_PAGE_SIZE = 20;
 
@@ -141,6 +148,11 @@ export type EngagementDetail = {
   notes: EngagementNote[];
   activity: EngagementActivity[];
   userMap: Map<string, UserSummary>;
+  workflow: WorkflowInstance | null;
+  workflowStages: WorkflowStageInstance[];
+  workflowTransitions: AllowedWorkflowTransition[];
+  progressTracker: ProgressTracker | null;
+  deadlines: EngagementDeadline[];
 };
 
 export async function getEngagementDetail(
@@ -204,6 +216,30 @@ export async function getEngagementDetail(
   ];
   const userMap = await getUserSummaryMap(supabase, userIds);
 
+  const [{ data: workflow }, { data: progressTracker }, { data: deadlines }] = await Promise.all([
+    supabase.from("engagement_workflow_instances").select("*").eq("engagement_id",engagementId).maybeSingle(),
+    supabase.from("engagement_progress_trackers").select("*").eq("engagement_id",engagementId).maybeSingle(),
+    supabase.from("engagement_deadlines").select("*").eq("engagement_id",engagementId).order("due_on"),
+  ]);
+  let workflowStages: WorkflowStageInstance[] = [];
+  let workflowTransitions: AllowedWorkflowTransition[] = [];
+  if (workflow) {
+    const { data: stageRows } = await supabase.from("engagement_workflow_stage_instances").select("*").eq("workflow_instance_id",workflow.id).order("sort_order");
+    workflowStages = stageRows ?? [];
+    const current = workflowStages.find((stage) => stage.status === "current");
+    if (current?.source_stage_id) {
+      const { data: transitions } = await supabase.from("workflow_stage_transitions").select("to_stage_id,label,requires_reason,transition_kind").eq("workflow_definition_id",workflow.workflow_definition_id).eq("from_stage_id",current.source_stage_id).order("sort_order");
+      const bySourceId = new Map(workflowStages.filter((stage) => stage.source_stage_id).map((stage) => [stage.source_stage_id as string,stage]));
+      workflowTransitions = (transitions ?? []).flatMap((transition) => {
+        const target = bySourceId.get(transition.to_stage_id);
+        return target ? [{ stageKey: target.stage_key, label: target.label, transitionLabel: transition.label, requiresReason: transition.requires_reason, kind: transition.transition_kind }] : [];
+      });
+      for (const exception of workflowStages.filter((stage) => stage.stage_kind === "exception" && stage.status !== "current")) {
+        if (!workflowTransitions.some((item) => item.stageKey === exception.stage_key)) workflowTransitions.push({ stageKey: exception.stage_key, label: exception.label, transitionLabel: exception.label, requiresReason: true, kind: "exception" });
+      }
+    }
+  }
+
   return {
     engagement,
     client: clientResult.data ?? null,
@@ -219,6 +255,11 @@ export async function getEngagementDetail(
     notes: notesResult.data ?? [],
     activity: activityResult.data ?? [],
     userMap,
+    workflow: workflow ?? null,
+    workflowStages,
+    workflowTransitions,
+    progressTracker: progressTracker ?? null,
+    deadlines: deadlines ?? [],
   };
 }
 

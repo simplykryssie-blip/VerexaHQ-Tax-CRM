@@ -36,6 +36,7 @@ import { checkStatusTransition, isActiveStatus } from "@/lib/engagements/transit
 import type { EngagementStatus, EngagementPriority, EngagementEfileStatus } from "@/lib/types";
 import type { TaxEngagement } from "@/lib/types";
 import type { UserSummary } from "@/lib/data/users";
+import { ProductionWorkflowPanel, type AllowedTransition, type EngagementDeadline, type FrozenStage, type FrozenWorkflow, type ProgressTracker } from "@/components/engagements/ProductionWorkflowPanel";
 
 export function EngagementWorkflowTab({
   engagement,
@@ -43,12 +44,24 @@ export function EngagementWorkflowTab({
   canManage,
   canArchive,
   canAssignReviewer,
+  workflow,
+  workflowStages,
+  workflowTransitions,
+  progressTracker,
+  deadlines,
+  canAdvance,
 }: {
   engagement: TaxEngagement;
   staff: UserSummary[];
   canManage: boolean;
   canArchive: boolean;
   canAssignReviewer: boolean;
+  workflow: FrozenWorkflow | null;
+  workflowStages: FrozenStage[];
+  workflowTransitions: AllowedTransition[];
+  progressTracker: ProgressTracker | null;
+  deadlines: EngagementDeadline[];
+  canAdvance: boolean;
 }) {
   const [isPending, startTransition] = useTransition();
   const [preparerId, setPreparerId] = useState(engagement.primary_preparer_user_id ?? "");
@@ -104,7 +117,8 @@ export function EngagementWorkflowTab({
 
   return (
     <div className="space-y-6">
-      <Card>
+      {workflow && <ProductionWorkflowPanel engagementId={engagement.id} workflow={workflow} stages={workflowStages} transitions={workflowTransitions} progress={progressTracker} deadlines={deadlines} canAdvance={canAdvance} />}
+      {!workflow && <Card>
         <CardHeader>
           <h2 className="text-sm font-semibold text-foreground">Status</h2>
         </CardHeader>
@@ -167,7 +181,7 @@ export function EngagementWorkflowTab({
             </div>
           )}
         </CardBody>
-      </Card>
+      </Card>}
 
       {canManage && (
         <Card>
