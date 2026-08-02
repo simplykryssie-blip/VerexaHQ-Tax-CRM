@@ -51,5 +51,13 @@ export const createClientSchema = z.object({
   phone: z.string().trim().max(40).optional(),
   company: z.string().trim().max(200).optional(),
   notes: z.string().trim().max(2000).optional(),
+  dateOfBirth: z.string().optional(),
+  ssnLast4: lastFour,
+  einLast4: lastFour,
+  preferredContactMethod: z.enum(CONTACT_METHODS).optional(),
+  source: z.string().trim().max(200).optional(),
 });
 export type CreateClientInput = z.infer<typeof createClientSchema>;
+
+export const updateClientSchema = createClientSchema;
+export type UpdateClientInput = z.infer<typeof updateClientSchema>;

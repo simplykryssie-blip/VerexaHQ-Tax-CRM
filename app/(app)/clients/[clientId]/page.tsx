@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { requireWorkspace } from "@/lib/auth/workspace";
+import { Button } from "@/components/ui/LegacyButton";
+import { STAFF_ROLES } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import { getClientDetail } from "@/lib/data/clients";
 import { listDocumentRequestsForClient } from "@/lib/data/document-requests";
@@ -77,7 +80,18 @@ export default async function ClientDetailPage({
       <PageHeader
         title={clientDisplayName(detail.client)}
         description={detail.client.email ?? undefined}
-        actions={<StatusBadge label={status.label} tone={status.tone} />}
+        actions={
+          <>
+            <StatusBadge label={status.label} tone={status.tone} />
+            {STAFF_ROLES.includes(workspace.role) && (
+              <Link href={`/clients/${clientId}/edit`}>
+                <Button variant="secondary" size="sm">
+                  Edit
+                </Button>
+              </Link>
+            )}
+          </>
+        }
       />
       <Tabs tabs={tabs} />
     </div>
