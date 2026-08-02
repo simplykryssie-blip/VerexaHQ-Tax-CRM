@@ -11376,6 +11376,26 @@ export type Database = {
       }
     }
     Functions: {
+      accept_client_quote: {
+        Args: { p_accepted_by_name: string; p_quote_id: string }
+        Returns: Json
+      }
+      decline_client_quote: {
+        Args: { p_accepted_by_name?: string; p_quote_id: string }
+        Returns: Json
+      }
+      expire_client_quote: {
+        Args: { p_quote_id: string }
+        Returns: Json
+      }
+      next_quote_number: {
+        Args: { p_workspace_id: string }
+        Returns: string
+      }
+      send_client_quote: {
+        Args: { p_quote_id: string }
+        Returns: Json
+      }
       check_permission: {
         Args: {
           p_permission_key: string

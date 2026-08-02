@@ -9,6 +9,7 @@ import {
   ListChecks,
   Settings,
   WalletCards,
+  BadgeDollarSign,
   Users,
 } from "lucide-react";
 import type { MembershipRole, Workspace } from "@/lib/types";
@@ -25,6 +26,7 @@ const CORE_NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permissionKey: "dashboard.view" },
   { href: "/clients", label: "Clients", icon: Users, permissionKey: "clients.view" },
   { href: "/engagements", label: "Engagements", icon: ClipboardList, permissionKey: "engagements.view" },
+  { href: "/pricing", label: "Pricing & Quotes", icon: BadgeDollarSign, permissionKey: "pricing.view" },
   { href: "/intakes", label: "Intakes", icon: FileText, permissionKey: "intakes.view" },
   { href: "/document-requests", label: "Document Requests", icon: FolderOpen, permissionKey: "documents.view" },
 ];
