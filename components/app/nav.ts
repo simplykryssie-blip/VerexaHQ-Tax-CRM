@@ -13,7 +13,17 @@ import {
   Users,
   UsersRound,
   FileInput,
+  FileCheck2,
   Home,
+  CalendarDays,
+  MessagesSquare,
+  PenTool,
+  Receipt,
+  Workflow,
+  LayoutTemplate,
+  BarChart3,
+  UserCog,
+  Plug,
 } from "lucide-react";
 import type { MembershipRole, Workspace } from "@/lib/types";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
@@ -35,6 +45,11 @@ const CORE_NAV_ITEMS: NavItem[] = [
   { href: "/pricing", label: "Pricing & Quotes", icon: BadgeDollarSign, permissionKey: "pricing.view" },
   { href: "/intakes", label: "Intakes", icon: FileText, permissionKey: "intakes.view" },
   { href: "/document-requests", label: "Document Requests", icon: FolderOpen, permissionKey: "documents.view" },
+  { href: "/documents", label: "Document Vault", icon: FolderOpen, permissionKey: "documents.view" },
+  { href: "/communications", label: "Communications", icon: MessagesSquare, permissionKey: "communications.view" },
+  { href: "/calendar", label: "Calendar", icon: CalendarDays, permissionKey: "appointments.view" },
+  { href: "/signatures", label: "Signatures", icon: PenTool, permissionKey: "signatures.view" },
+  { href: "/review-release", label: "Review & Release", icon: FileCheck2, permissionKey: "reviews.view" },
 ];
 
 export function navItemsForWorkspace(
@@ -52,7 +67,13 @@ export function navItemsForWorkspace(
   }
 
   if (["owner", "admin", "ero"].includes(role)) {
+    items.push({ href: "/billing", label: "Billing", icon: Receipt, permissionKey: "billing.manage" });
+    items.push({ href: "/templates", label: "Templates & Forms", icon: LayoutTemplate, permissionKey: "templates.manage" });
+    items.push({ href: "/workflows", label: "Automations", icon: Workflow, permissionKey: "automation.view" });
+    items.push({ href: "/reports", label: "Reports", icon: BarChart3, permissionKey: "reports.view" });
+    items.push({ href: "/team", label: "Team", icon: UserCog, permissionKey: "team.manage" });
     items.push({ href: "/services", label: "Services & Engagement Types", icon: WalletCards, permissionKey: "service_packages.view" });
+    items.push({ href: "/settings/integrations", label: "Integrations", icon: Plug, permissionKey: "integrations.manage" });
     items.push({ href: "/settings", label: "Settings", icon: Settings, permissionKey: "settings.manage" });
   }
 

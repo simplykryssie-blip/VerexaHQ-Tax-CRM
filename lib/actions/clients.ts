@@ -73,8 +73,8 @@ export async function createClientAction(input: CreateClientInput): Promise<Acti
     .from("clients")
     .insert({
       workspace_id: workspace.workspace.id,
-      first_name: firstName,
-      last_name: lastName,
+      first_name: firstName || company || "Business",
+      last_name: lastName || "",
       client_type: clientType,
       status,
       email: email || null,
@@ -89,7 +89,7 @@ export async function createClientAction(input: CreateClientInput): Promise<Acti
     .single();
 
   if (error || !data) {
-    return { error: "We couldn't save this client. Please try again." };
+    return { error: error?.message ? `We couldn't save this client: ${error.message}` : "We couldn't save this client. Please try again." };
   }
 
   if (duplicates.length) {

@@ -16,6 +16,7 @@ import { createClient } from "@/lib/supabase/client";
 import { friendlyDbError } from "@/lib/errors";
 import { toast } from "@/components/ui/toaster";
 import type { RequestItemInput } from "@/lib/validation/document-requests";
+import Link from "next/link";
 
 type Category = { id: string; name: string };
 type RequestTemplate = { id: string; title: string; template_id: string };
@@ -297,10 +298,13 @@ export function NewDocumentRequestWizard({
           <Checkbox checked={sendNow} onCheckedChange={(v) => setSendNow(v === true)} />
           Send to client immediately
         </label>
-        <Button type="submit" variant="brand" disabled={submitting}>
-          {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-          {sendNow ? "Send request" : "Save as draft"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button asChild type="button" variant="outline" disabled={submitting}><Link href="/document-requests">Cancel</Link></Button>
+          <Button type="submit" variant="brand" disabled={submitting}>
+            {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+            {sendNow ? "Send request" : "Save as draft"}
+          </Button>
+        </div>
       </div>
     </form>
   );

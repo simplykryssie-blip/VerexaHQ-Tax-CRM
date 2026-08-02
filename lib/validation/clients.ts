@@ -42,8 +42,8 @@ export const clientSchema = z.object({
 export type ClientInput = z.infer<typeof clientSchema>;
 
 export const createClientSchema = z.object({
-  firstName: z.string().trim().min(1, "First name is required").max(120),
-  lastName: z.string().trim().min(1, "Last name is required").max(120),
+  firstName: z.string().trim().max(120).optional(),
+  lastName: z.string().trim().max(120).optional(),
   clientType: z.enum(clientTypeOptions),
   setupMode: z.enum(["active", "active_with_engagement"]),
   email: z.union([z.string().trim().email("Enter a valid email address"), z.literal("")]).optional(),
@@ -51,5 +51,13 @@ export const createClientSchema = z.object({
   company: z.string().trim().max(200).optional(),
   notes: z.string().trim().max(2000).optional(),
   duplicateOverrideReason: z.string().trim().max(500).optional(),
+}).superRefine((value, ctx) => {
+  if (value.clientType === "individual") {
+    if (!value.firstName) ctx.addIssue({ code: "custom", path: ["firstName"], message: "First name is required" });
+    if (!value.lastName) ctx.addIssue({ code: "custom", path: ["lastName"], message: "Last name is required" });
+  }
+  if (value.clientType === "business" && !value.company) {
+    ctx.addIssue({ code: "custom", path: ["company"], message: "Business name is required" });
+  }
 });
 export type CreateClientInput = z.infer<typeof createClientSchema>;

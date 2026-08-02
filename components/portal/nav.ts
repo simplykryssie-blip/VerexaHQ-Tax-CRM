@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Home, FileText, FolderOpen, ClipboardList, MessageCircleQuestion, MessagesSquare, UserRound, Briefcase, BadgeDollarSign } from "lucide-react";
+import { Home, FileText, FolderOpen, ClipboardList, MessageCircleQuestion, MessagesSquare, UserRound, Briefcase, BadgeDollarSign, CalendarDays, PenTool, Receipt, FileCheck2, Bell } from "lucide-react";
 
 export type PortalNavItem = {
   href: string;
@@ -17,6 +17,11 @@ export const PORTAL_NAV_ITEMS: PortalNavItem[] = [
   { href: "/portal/document-requests", label: "Requests", shortLabel: "Requests", icon: ClipboardList },
   { href: "/portal/clarifications", label: "Clarifications", shortLabel: "Questions", icon: MessageCircleQuestion },
   { href: "/portal/messages", label: "Messages", shortLabel: "Messages", icon: MessagesSquare },
+  { href: "/portal/appointments", label: "Appointments", shortLabel: "Calendar", icon: CalendarDays },
+  { href: "/portal/signatures", label: "Signatures", shortLabel: "Sign", icon: PenTool },
+  { href: "/portal/invoices", label: "Invoices & Payments", shortLabel: "Billing", icon: Receipt },
+  { href: "/portal/returns", label: "Completed Returns", shortLabel: "Returns", icon: FileCheck2 },
+  { href: "/portal/notifications", label: "Notifications", shortLabel: "Alerts", icon: Bell },
   { href: "/portal/profile", label: "Profile", shortLabel: "Profile", icon: UserRound },
 ];
 

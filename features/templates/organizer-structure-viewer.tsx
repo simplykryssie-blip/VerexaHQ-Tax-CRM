@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Loader2, Save } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, Plus, Save, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createClient } from "@/lib/supabase/client";
 import { friendlyDbError } from "@/lib/errors";
 import { toast } from "@/components/ui/toaster";
@@ -19,10 +19,8 @@ const NON_INPUT_TYPES = new Set(["heading", "divider", "paragraph"]);
 /** Renders an organizer's actual questions from form_sections/form_fields —
  * the template_versions.content JSON blob is empty for form-kind templates,
  * so this is the only place the real structure is visible. In `editable`
- * mode (a workspace-owned, non-system template) staff can adjust label,
- * help text, and whether a question is required — adding/removing/
- * reordering sections and fields is a larger form-builder feature, not
- * covered here. */
+ * mode (a workspace-owned, non-system template) staff can add, edit,
+ * remove, and reorder questions while preserving locked system templates. */
 export function OrganizerStructureViewer({
   templateVersionId,
   editable = false,
@@ -35,6 +33,9 @@ export function OrganizerStructureViewer({
   const [sections, setSections] = useState<FormSectionRow[]>([]);
   const [fieldsBySection, setFieldsBySection] = useState<Map<string | null, FormFieldRow[]>>(new Map());
   const [edits, setEdits] = useState<Map<string, { label: string; help_text: string; is_required: boolean }>>(new Map());
+  const [newFieldLabel, setNewFieldLabel] = useState("");
+  const [newFieldType, setNewFieldType] = useState<FormFieldRow["component_type"]>("text");
+  const [newFieldSectionId, setNewFieldSectionId] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -89,6 +90,75 @@ export function OrganizerStructureViewer({
     setEdits(new Map());
   }
 
+  async function addField() {
+    if (!newFieldSectionId || !newFieldLabel.trim()) return;
+    setSaving(true);
+    const supabase = createClient();
+    const current = fieldsBySection.get(newFieldSectionId) ?? [];
+    const fieldKey = `${newFieldLabel.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, "") || "question"}_${Date.now().toString(36)}`;
+    const { data, error } = await supabase.from("form_fields").insert({
+      template_version_id: templateVersionId,
+      section_id: newFieldSectionId,
+      field_key: fieldKey,
+      component_type: newFieldType,
+      label: newFieldLabel.trim(),
+      sort_order: Math.max(...current.map((field) => field.sort_order), 0) + 10,
+      is_required: false,
+    }).select("*").single();
+    setSaving(false);
+    if (error || !data) {
+      toast.error(friendlyDbError(error?.message));
+      return;
+    }
+    setFieldsBySection((previous) => {
+      const next = new Map(previous);
+      next.set(newFieldSectionId, [...(next.get(newFieldSectionId) ?? []), data]);
+      return next;
+    });
+    setNewFieldLabel("");
+    toast.success("Question added");
+  }
+
+  async function removeField(sectionId: string, field: FormFieldRow) {
+    if (!window.confirm(`Remove “${field.label}” from this draft?`)) return;
+    setSaving(true);
+    const supabase = createClient();
+    const { error } = await supabase.from("form_fields").delete().eq("id", field.id);
+    setSaving(false);
+    if (error) {
+      toast.error(friendlyDbError(error.message));
+      return;
+    }
+    setFieldsBySection((previous) => {
+      const next = new Map(previous);
+      next.set(sectionId, (next.get(sectionId) ?? []).filter((item) => item.id !== field.id));
+      return next;
+    });
+    toast.success("Question removed");
+  }
+
+  async function moveField(sectionId: string, fieldIndex: number, direction: -1 | 1) {
+    const current = [...(fieldsBySection.get(sectionId) ?? [])];
+    const swapIndex = fieldIndex + direction;
+    if (!current[fieldIndex] || !current[swapIndex]) return;
+    const first = current[fieldIndex];
+    const second = current[swapIndex];
+    setSaving(true);
+    const supabase = createClient();
+    const [a, b] = await Promise.all([
+      supabase.from("form_fields").update({ sort_order: second.sort_order }).eq("id", first.id),
+      supabase.from("form_fields").update({ sort_order: first.sort_order }).eq("id", second.id),
+    ]);
+    setSaving(false);
+    if (a.error || b.error) {
+      toast.error(friendlyDbError(a.error?.message ?? b.error?.message));
+      return;
+    }
+    current[fieldIndex] = { ...second, sort_order: first.sort_order };
+    current[swapIndex] = { ...first, sort_order: second.sort_order };
+    setFieldsBySection((previous) => new Map(previous).set(sectionId, current));
+  }
+
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-sm text-muted-foreground py-6 justify-center">
@@ -117,7 +187,7 @@ export function OrganizerStructureViewer({
             </div>
             {section.description && <p className="text-xs text-muted-foreground -mt-2">{section.description}</p>}
             <div className="space-y-4 pl-3 border-l border-border">
-              {(fieldsBySection.get(section.id) ?? []).map((field) => {
+              {(fieldsBySection.get(section.id) ?? []).map((field, fieldIndex, sectionFields) => {
                 const isInput = !NON_INPUT_TYPES.has(field.component_type);
                 const v = fieldValue(field);
                 return (
@@ -139,10 +209,15 @@ export function OrganizerStructureViewer({
                             className="text-xs"
                           />
                         </div>
-                        <label className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1.5 whitespace-nowrap">
-                          <Checkbox checked={v.is_required} onCheckedChange={(c) => updateField(field, { is_required: c === true })} />
-                          Required
-                        </label>
+                        <div className="flex items-center gap-1">
+                          <label className="mr-2 flex items-center gap-1.5 text-xs text-muted-foreground whitespace-nowrap">
+                            <Checkbox checked={v.is_required} onCheckedChange={(c) => updateField(field, { is_required: c === true })} />
+                            Required
+                          </label>
+                          <Button type="button" size="icon" variant="ghost" disabled={saving || fieldIndex === 0} onClick={() => moveField(section.id, fieldIndex, -1)} aria-label="Move question up"><ArrowUp className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" disabled={saving || fieldIndex === sectionFields.length - 1} onClick={() => moveField(section.id, fieldIndex, 1)} aria-label="Move question down"><ArrowDown className="size-3.5" /></Button>
+                          <Button type="button" size="icon" variant="ghost" disabled={saving || field.is_locked} onClick={() => removeField(section.id, field)} aria-label="Remove question"><Trash2 className="size-3.5 text-destructive" /></Button>
+                        </div>
                       </div>
                     ) : (
                       isInput && (
@@ -164,12 +239,20 @@ export function OrganizerStructureViewer({
           </div>
         ))}
       {editable && (
-        <div className="sticky bottom-0 bg-background pt-2 border-t border-border flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">{edits.size > 0 ? `${edits.size} question(s) changed` : "No changes yet"}</p>
-          <Button size="sm" variant="brand" disabled={edits.size === 0 || saving} onClick={saveChanges}>
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            Save changes
-          </Button>
+        <div className="sticky bottom-0 space-y-3 border-t border-border bg-background pt-3">
+          <div className="grid gap-2 sm:grid-cols-[1fr_180px_180px_auto]">
+            <Input value={newFieldLabel} onChange={(event) => setNewFieldLabel(event.target.value)} placeholder="New question label" />
+            <Select value={newFieldSectionId} onValueChange={setNewFieldSectionId}><SelectTrigger><SelectValue placeholder="Choose section" /></SelectTrigger><SelectContent>{sections.filter((section) => !section.parent_section_id).map((section) => <SelectItem key={section.id} value={section.id}>{section.title}</SelectItem>)}</SelectContent></Select>
+            <Select value={newFieldType} onValueChange={(value) => setNewFieldType(value as FormFieldRow["component_type"])}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent>{["text","textarea","number","currency","date","email","phone","yes_no","single_choice","multiple_choice","dropdown","file_upload","percentage","acknowledgment","year"].map((type) => <SelectItem key={type} value={type}>{type.replaceAll("_", " ")}</SelectItem>)}</SelectContent></Select>
+            <Button type="button" variant="outline" disabled={saving || !newFieldLabel.trim() || !newFieldSectionId} onClick={addField}><Plus className="size-4" /> Add</Button>
+          </div>
+          <div className="flex items-center justify-between">
+            <p className="text-xs text-muted-foreground">{edits.size > 0 ? `${edits.size} question(s) changed` : "Add, edit, reorder, or remove questions in this draft."}</p>
+            <Button size="sm" variant="brand" disabled={edits.size === 0 || saving} onClick={saveChanges}>
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Save changes
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -30,7 +30,7 @@ export default async function ClientDetailPage({
 }) {
   const { workspace } = await requireWorkspace();
   if (!workspace) return <NoWorkspaceState />;
-  const [viewAccess,editAccess,engagementAccess]=await Promise.all([requirePermission(workspace.workspace.id,"clients.view"),requirePermission(workspace.workspace.id,"clients.edit"),requirePermission(workspace.workspace.id,"engagements.create")]);
+  const [viewAccess,editAccess,engagementAccess,previewAccess]=await Promise.all([requirePermission(workspace.workspace.id,"clients.view"),requirePermission(workspace.workspace.id,"clients.edit"),requirePermission(workspace.workspace.id,"engagements.create"),requirePermission(workspace.workspace.id,"portal.preview")]);
   if(!viewAccess.allowed)return <ForbiddenState description={viewAccess.reason}/>;
 
   const { clientId } = await params;
@@ -97,7 +97,7 @@ export default async function ClientDetailPage({
       <PageHeader
         title={clientDisplayName(detail.client)}
         description={detail.client.email ?? undefined}
-        actions={<div className="flex items-center gap-2"><StatusBadge label={status.label} tone={status.tone} />{editAccess.allowed&&<EditClientDialog client={detail.client}/>} {engagementAccess.allowed&&<Link href={`/engagements/new?clientId=${clientId}`}><Button size="sm">New engagement</Button></Link>}</div>}
+        actions={<div className="flex items-center gap-2"><StatusBadge label={status.label} tone={status.tone} />{previewAccess.allowed&&<Link href={`/clients/${clientId}/portal-preview`}><Button size="sm" variant="secondary">Preview as Client</Button></Link>}{editAccess.allowed&&<EditClientDialog client={detail.client}/>} {engagementAccess.allowed&&<Link href={`/engagements/new?clientId=${clientId}`}><Button size="sm">New engagement</Button></Link>}</div>}
       />
       <Tabs tabs={tabs} />
     </div>

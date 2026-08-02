@@ -227,6 +227,7 @@ export function AppointmentFormDialog({
           </div>
 
           <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
             <Button type="submit" variant="brand" disabled={submitting}>
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
               Schedule appointment

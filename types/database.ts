@@ -12133,6 +12133,18 @@ export type Database = {
         }
         Returns: string
       }
+      retry_communication: {
+        Args: { p_outbox_id: string }
+        Returns: string
+      }
+      retry_automation_job: {
+        Args: { p_job_id: string }
+        Returns: string
+      }
+      retry_workflow_action: {
+        Args: { p_action_id: string }
+        Returns: string
+      }
       recalculate_intake_progress: {
         Args: { p_submission_id: string }
         Returns: number

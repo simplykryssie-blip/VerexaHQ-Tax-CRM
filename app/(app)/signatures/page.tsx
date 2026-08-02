@@ -38,6 +38,9 @@ export default async function SignaturesPage() {
           </Link>
         </Button>
       </div>
+      <div className="rounded-lg border border-warning/30 bg-warning/5 p-3 text-xs text-muted-foreground">
+        Ordinary engagement-letter e-signatures are available here. IRS Form 8879/KBA signing stays unavailable until an approved identity-verification provider is connected.
+      </div>
 
       {requests.length === 0 ? (
         <EmptyState icon={PenTool} title="No signature requests yet" description="Send a document for signature to get started." />

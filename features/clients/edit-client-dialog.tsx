@@ -50,7 +50,7 @@ export function EditClientDialog({ client }: { client: Tables<"clients"> }) {
   const [source, setSource] = useState(client.source ?? "");
   const [status, setStatus] = useState(client.status as (typeof CLIENT_STATUSES)[number]);
 
-  const isBusiness = clientType === "business" || clientType === "organization";
+  const isBusiness = clientType === "business";
 
   async function onSave() {
     setError(null);
@@ -228,6 +228,9 @@ export function EditClientDialog({ client }: { client: Tables<"clients"> }) {
           </div>
         </div>
         <DialogFooter>
+          <Button type="button" variant="outline" disabled={submitting} onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
           <Button type="button" variant="brand" disabled={submitting} onClick={onSave}>
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             Save changes

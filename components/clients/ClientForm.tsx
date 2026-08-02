@@ -13,6 +13,7 @@ import { FormField, inputClassName } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/LegacyButton";
 import { titleCase } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ClientDuplicateWarningDrawer } from "@/features/clients/client-duplicate-warning-drawer";
 
 export function ClientForm() {
@@ -30,7 +31,7 @@ export function ClientForm() {
     resolver: zodResolver(createClientSchema),
     defaultValues: { clientType: "individual", setupMode: "active" },
   });
-  const [email,phone,overrideReason]=useWatch({control,name:["email","phone","duplicateOverrideReason"]});
+  const [email,phone,overrideReason,clientType]=useWatch({control,name:["email","phone","duplicateOverrideReason","clientType"]});
 
   useEffect(()=>{
     if(overrideReason)return;
@@ -77,15 +78,6 @@ export function ClientForm() {
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FormField label="First name" htmlFor="firstName" error={errors.firstName?.message} required>
-          <input id="firstName" className={inputClassName} {...register("firstName")} />
-        </FormField>
-        <FormField label="Last name" htmlFor="lastName" error={errors.lastName?.message} required>
-          <input id="lastName" className={inputClassName} {...register("lastName")} />
-        </FormField>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label="Client type" htmlFor="clientType" error={errors.clientType?.message} required>
           <select id="clientType" className={inputClassName} {...register("clientType")}>
             {clientTypeOptions.map((option) => (
@@ -98,6 +90,31 @@ export function ClientForm() {
         <div />
       </div>
 
+      {clientType === "business" ? (
+        <>
+          <FormField label="Business name" htmlFor="company" error={errors.company?.message} required>
+            <input id="company" className={inputClassName} {...register("company")} />
+          </FormField>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <FormField label="Primary contact first name" htmlFor="firstName" error={errors.firstName?.message}>
+              <input id="firstName" className={inputClassName} {...register("firstName")} />
+            </FormField>
+            <FormField label="Primary contact last name" htmlFor="lastName" error={errors.lastName?.message}>
+              <input id="lastName" className={inputClassName} {...register("lastName")} />
+            </FormField>
+          </div>
+        </>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <FormField label="First name" htmlFor="firstName" error={errors.firstName?.message} required>
+            <input id="firstName" className={inputClassName} {...register("firstName")} />
+          </FormField>
+          <FormField label="Last name" htmlFor="lastName" error={errors.lastName?.message} required>
+            <input id="lastName" className={inputClassName} {...register("lastName")} />
+          </FormField>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label="Email" htmlFor="email" error={errors.email?.message}>
           <input id="email" type="email" className={inputClassName} {...register("email")} />
@@ -106,10 +123,6 @@ export function ClientForm() {
           <input id="phone" type="tel" className={inputClassName} {...register("phone")} />
         </FormField>
       </div>
-
-      <FormField label="Company" htmlFor="company" error={errors.company?.message} hint="Optional — for business or organization clients.">
-        <input id="company" className={inputClassName} {...register("company")} />
-      </FormField>
 
       <FormField label="Notes" htmlFor="notes" error={errors.notes?.message}>
         <textarea id="notes" rows={4} className={inputClassName} {...register("notes")} />
@@ -134,6 +147,9 @@ export function ClientForm() {
       </fieldset>
 
       <div className="flex justify-end gap-2">
+        <Link href="/clients">
+          <Button type="button" variant="secondary">Cancel</Button>
+        </Link>
         <Button type="submit" loading={isSubmitting}>
           Save client
         </Button>

@@ -2,6 +2,18 @@
 
 Backend applied to Supabase project `VerexaHQ Tax Office` on 2026-08-01.
 
+## Frontend Sections 4–8 completed (2026-08-02)
+
+- **Section 4 — Intake and Documents:** `/templates` is a full preview/edit library; workspace organizer questions can be added, edited, reordered, required, and removed. Intake review, client organizers, document requests, missing-document tracking, vault categorization, approval/rejection, replacement/versioning, archive/restore, and soft deletion are connected. All creation flows include Back or Cancel controls.
+- **Section 5 — Communications and Scheduling:** `/communications` unifies secure inbox links, scheduled email/SMS, reminders, delivery history, failure detail, and retry. `queue_communication` now enforces `communications.send`, workspace ownership, and the client's email/SMS consent, suppression, and invalid-address flags. Client replies cancel only reminders explicitly carrying `stop_on_client_response=true`. Calendar and appointment scheduling remain available at `/calendar`.
+- **Section 6 — Review, Signatures, Billing, and Release:** `/review-release` unifies ERO review, ordinary e-signature, billing, and return-release queues. `/billing` links staff invoices, payments, balances, refunds/voids, and pricing. Return delivery continues to use `evaluate_return_release` and `release_completed_return`. Form 8879/KBA remains explicitly unavailable until an approved provider is connected.
+- **Section 7 — Client Portal and Administration:** the portal now includes appointments, signatures, invoices/payment history, completed returns, and notifications in addition to organizers, documents, requests, messages, quotes, and engagement progress. `/clients/[clientId]/portal-preview` is an audited, read-only staff preview and cannot perform client actions. Staff navigation exposes Team, Reports, Integrations, Services, Templates, Automations, Billing, and Settings according to granular permissions.
+- **Section 8 — Automation and Integrations:** the existing visual workflow builder, triggers, conditions, waits, actions, approvals, and run history are exposed as Automations. Failed workflow actions and backend automation jobs have permission-checked retry RPCs. Integration cards continue to show truthful Connected/Not Connected status for email, SMS, Zoom, and payments instead of simulating providers.
+- Client type remains only **Individual** or **Business**. A household is a relationship group linking separate client records; it is not a third client record type.
+- `verexahq@gmail.com` now has an active `ero` membership in the MKB ETechnologies ERO workspace. The existing owner membership was not replaced.
+- New live migrations: `sections_4_8_permissions`, `communications_scheduling_lifecycle`, and `automation_operator_retry`.
+- Sections 4–8 passed TypeScript, the production build, lint with zero errors, and live rollback lifecycle tests. The 48 lint warnings predate this section and remain non-blocking.
+
 ## Sales/client carryover section completed
 
 - `/leads` now has permission-aware table and pipeline views, controlled stage movement, required lost/do-not-contact reasons, and server audit events.

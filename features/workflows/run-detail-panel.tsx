@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Check, X } from "lucide-react";
+import { Loader2, Check, X, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +54,15 @@ export function WorkflowRunDetailPanel({
       return;
     }
     toast.success("Run cancelled");
+    router.refresh();
+  }
+
+  async function retryAction(id: string) {
+    setBusy(true);
+    const { error } = await supabase.rpc("retry_workflow_action", { p_action_id: id });
+    setBusy(false);
+    if (error) { toast.error(friendlyDbError(error.message)); return; }
+    toast.success("Workflow action queued for retry");
     router.refresh();
   }
 
@@ -154,7 +163,7 @@ export function WorkflowRunDetailPanel({
                   <p>{j.action_type.replace(/_/g, " ")}</p>
                   {j.error_message && <p className="text-xs text-destructive">{j.error_message}</p>}
                 </div>
-                <Badge variant={j.status === "completed" ? "success" : j.status === "failed" ? "destructive" : "secondary"}>{j.status.replace(/_/g, " ")}</Badge>
+                <div className="flex items-center gap-2"><Badge variant={j.status === "completed" ? "success" : j.status === "failed" ? "destructive" : "secondary"}>{j.status.replace(/_/g, " ")}</Badge>{(j.status === "failed" || j.status === "cancelled") && <Button size="sm" variant="outline" disabled={busy} onClick={() => retryAction(j.id)}><RotateCcw className="h-3.5 w-3.5" />Retry</Button>}</div>
               </div>
             ))}
           </CardContent>
