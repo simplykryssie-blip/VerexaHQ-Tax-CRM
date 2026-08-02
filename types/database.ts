@@ -12020,6 +12020,15 @@ export type Database = {
         }
         Returns: Json
       }
+      decline_signature: {
+        Args: {
+          p_decline_reason: string
+          p_ip_address?: unknown
+          p_signer_id: string
+          p_user_agent?: string
+        }
+        Returns: Json
+      }
       convert_lead_to_client: { Args: { p_lead_id: string }; Returns: string }
       convert_lead_to_client_v2: {
         Args: {

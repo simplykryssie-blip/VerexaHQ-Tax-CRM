@@ -38,11 +38,32 @@ export async function POST(request: Request) {
   }
 
   const forwardedFor = request.headers.get("x-forwarded-for");
+  const ipAddress = forwardedFor ? forwardedFor.split(",")[0].trim() : undefined;
+  const userAgent = request.headers.get("user-agent") ?? undefined;
+
+  if (signatureData.type === "declined") {
+    const declineReason = typeof signatureData.decline_reason === "string" ? signatureData.decline_reason.trim() : "";
+    if (!declineReason) {
+      return NextResponse.json({ error: "A reason is required to decline." }, { status: 400 });
+    }
+    const { data, error } = await admin.rpc("decline_signature", {
+      p_signer_id: signerId,
+      p_decline_reason: declineReason,
+      p_ip_address: ipAddress,
+      p_user_agent: userAgent,
+    });
+    if (error) {
+      logServerError("portal sign decline", error);
+      return NextResponse.json({ error: "Couldn't record your response. Please try again." }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, result: data });
+  }
+
   const { data, error } = await admin.rpc("complete_signature", {
     p_signer_id: signerId,
     p_signature_data: signatureData,
-    p_ip_address: forwardedFor ? forwardedFor.split(",")[0].trim() : undefined,
-    p_user_agent: request.headers.get("user-agent") ?? undefined,
+    p_ip_address: ipAddress,
+    p_user_agent: userAgent,
   });
 
   if (error) {

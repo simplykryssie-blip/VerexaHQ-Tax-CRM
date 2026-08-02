@@ -26,7 +26,7 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
     : { data: null };
 
   const client = appointment.client as { id: string; first_name?: string; last_name?: string; company?: string } | null;
-  const lead = appointment.lead as { first_name?: string; last_name?: string } | null;
+  const lead = appointment.lead as { id: string; first_name?: string; last_name?: string } | null;
   const engagement = appointment.engagement as { id: string; engagement_number?: string; title?: string } | null;
   const appointmentType = appointment.appointment_type as { name?: string } | null;
   const zoomMeeting = appointment.zoom_meeting as { join_url?: string | null } | null;
@@ -52,13 +52,15 @@ export default async function AppointmentDetailPage({ params }: { params: Promis
           <CardTitle className="text-base">Details</CardTitle>
         </CardHeader>
         <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-          <Field label="Client">
+          <Field label="Attendee / Contact">
             {client ? (
               <Link href={`/clients/${client.id}`} className="hover:underline">
                 {client.company || `${client.first_name ?? ""} ${client.last_name ?? ""}`.trim()}
               </Link>
             ) : lead ? (
-              `${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim()
+              <Link href={`/leads/${lead.id}`} className="hover:underline">
+                {`${lead.first_name ?? ""} ${lead.last_name ?? ""}`.trim()}
+              </Link>
             ) : (
               "—"
             )}
