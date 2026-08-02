@@ -11,6 +11,9 @@ import {
   WalletCards,
   BadgeDollarSign,
   Users,
+  UsersRound,
+  FileInput,
+  Home,
 } from "lucide-react";
 import type { MembershipRole, Workspace } from "@/lib/types";
 import { roleHasCapability } from "@/lib/permissions/capabilities";
@@ -24,7 +27,10 @@ export type NavItem = {
 
 const CORE_NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, permissionKey: "dashboard.view" },
+  { href: "/leads", label: "Leads", icon: UsersRound, permissionKey: "leads.view" },
+  { href: "/lead-forms", label: "Lead Forms", icon: FileInput, permissionKey: "lead_forms.manage" },
   { href: "/clients", label: "Clients", icon: Users, permissionKey: "clients.view" },
+  { href: "/households", label: "Households", icon: Home, permissionKey: "clients.view" },
   { href: "/engagements", label: "Engagements", icon: ClipboardList, permissionKey: "engagements.view" },
   { href: "/pricing", label: "Pricing & Quotes", icon: BadgeDollarSign, permissionKey: "pricing.view" },
   { href: "/intakes", label: "Intakes", icon: FileText, permissionKey: "intakes.view" },

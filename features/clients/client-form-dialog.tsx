@@ -50,7 +50,7 @@ export function ClientFormDialog({ workspaceId }: { workspaceId: string }) {
   });
 
   const clientType = watch("clientType");
-  const isBusiness = clientType === "business" || clientType === "organization";
+  const isBusiness = clientType === "business";
 
   async function onSubmit(values: ClientInput) {
     setSubmitting(true);

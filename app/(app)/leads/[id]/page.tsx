@@ -9,11 +9,23 @@ import { LeadFormDialog } from "@/features/leads/lead-form-dialog";
 import { ConvertLeadButton } from "@/features/leads/convert-lead-button";
 import { LEAD_STATUS_LABELS } from "@/lib/validation/leads";
 import { formatCurrency, formatDateTime } from "@/lib/formatters";
+import { requireWorkspace } from "@/lib/auth/workspace";
+import { requirePermission } from "@/lib/permissions/granular";
+import { ForbiddenState } from "@/components/ui/ForbiddenState";
+import { LeadStageSelect } from "@/features/leads/lead-stage-select";
 
 export default async function LeadDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  const { workspace } = await requireWorkspace();
+  if (!workspace) return <ForbiddenState />;
+  const [viewAccess, editAccess, convertAccess] = await Promise.all([
+    requirePermission(workspace.workspace.id, "leads.view"),
+    requirePermission(workspace.workspace.id, "leads.edit"),
+    requirePermission(workspace.workspace.id, "leads.convert"),
+  ]);
+  if (!viewAccess.allowed) return <ForbiddenState description={viewAccess.reason} />;
   const supabase = await createClient();
-  const { data: lead } = await supabase.from("leads").select("*").eq("id", id).maybeSingle();
+  const { data: lead } = await supabase.from("leads").select("*").eq("id", id).eq("workspace_id", workspace.workspace.id).maybeSingle();
   if (!lead) notFound();
 
   return (
@@ -28,13 +40,13 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
             {lead.first_name} {lead.last_name}
           </h1>
           <div className="flex items-center gap-2 mt-1">
-            <Badge variant="secondary">{LEAD_STATUS_LABELS[lead.status]}</Badge>
+            {editAccess.allowed ? <LeadStageSelect leadId={lead.id} value={lead.status} /> : <Badge variant="secondary">{LEAD_STATUS_LABELS[lead.status]}</Badge>}
             {lead.company && <span className="text-sm text-muted-foreground">{lead.company}</span>}
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <LeadFormDialog workspaceId={lead.workspace_id} lead={lead} trigger={<Button variant="outline">Edit</Button>} />
-          <ConvertLeadButton leadId={lead.id} alreadyConverted={!!lead.converted_client_id} />
+          {editAccess.allowed && <LeadFormDialog workspaceId={lead.workspace_id} lead={lead} trigger={<Button variant="outline">Edit</Button>} />}
+          {convertAccess.allowed && <ConvertLeadButton leadId={lead.id} alreadyConverted={!!lead.converted_client_id} />}
         </div>
       </div>
 

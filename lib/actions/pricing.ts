@@ -118,6 +118,14 @@ export async function expireQuoteAction(id: string): Promise<Result> {
   if (error) return { error: error.message }; revalidatePath("/pricing"); revalidatePath("/portal/quotes"); return { success: "Quote expired." };
 }
 
+export async function createChangeOrderAction(input:{quoteId:string;description:string;amount:number;validUntil?:string}):Promise<Result>{
+  const auth=await authorize("quotes.change_order"); if("error" in auth)return{error:auth.error};
+  const parsed=z.object({quoteId:uuid,description:z.string().trim().min(3).max(500),amount:z.number().min(0),validUntil:z.string().optional()}).safeParse(input); if(!parsed.success)return{error:parsed.error.issues[0]?.message??"Check the change order."};
+  const supabase=await createClient(); const {data,error}=await supabase.rpc("create_quote_change_order",{p_quote_id:parsed.data.quoteId,p_description:parsed.data.description,p_amount:parsed.data.amount,p_valid_until:parsed.data.validUntil||undefined});
+  if(error||!data)return{error:error?.message??"The change order could not be created."};
+  revalidatePath("/pricing"); revalidatePath(`/quotes/${parsed.data.quoteId}`); return{success:"Draft change order created.",id:data};
+}
+
 export async function respondToQuoteAction(id: string, response: "accept" | "decline", name: string): Promise<Result> {
   const { client } = await (await import("@/lib/auth/portal")).requirePortalAccess();
   if (!client) return { error: "Client portal access is required." };

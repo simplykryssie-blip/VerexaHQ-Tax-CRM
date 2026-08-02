@@ -14,6 +14,8 @@ import { ClientsFilterBar } from "@/components/clients/ClientsFilterBar";
 import { clientStatusMeta, intakeSubmissionStatusMeta } from "@/lib/status";
 import { clientDisplayName, formatRelativeTime, titleCase } from "@/lib/utils";
 import { NoWorkspaceState } from "@/components/ui/NoWorkspaceState";
+import { requirePermission } from "@/lib/permissions/granular";
+import { ForbiddenState } from "@/components/ui/ForbiddenState";
 
 export default async function ClientsPage({
   searchParams,
@@ -22,6 +24,8 @@ export default async function ClientsPage({
 }) {
   const { workspace } = await requireWorkspace();
   if (!workspace) return <NoWorkspaceState />;
+  const [viewAccess,createAccess]=await Promise.all([requirePermission(workspace.workspace.id,"clients.view"),requirePermission(workspace.workspace.id,"clients.create")]);
+  if(!viewAccess.allowed)return <ForbiddenState description={viewAccess.reason}/>;
 
   const params = await searchParams;
   const page = Number(params.page) > 0 ? Number(params.page) : 1;
@@ -100,13 +104,13 @@ export default async function ClientsPage({
       <PageHeader
         title="Clients"
         description="Manage every client engaged with your firm."
-        actions={
+        actions={createAccess.allowed?
           <Link href="/clients/new">
             <Button size="sm">
               <UserPlus className="size-4" />
               Add client
             </Button>
-          </Link>
+          </Link>:undefined
         }
       />
 
@@ -119,10 +123,10 @@ export default async function ClientsPage({
               icon={Users}
               title="No clients found"
               description="Try adjusting your search or filters, or add a new client."
-              action={
+              action={createAccess.allowed?
                 <Link href="/clients/new">
                   <Button size="sm">Add client</Button>
-                </Link>
+                </Link>:undefined
               }
             />
           </div>

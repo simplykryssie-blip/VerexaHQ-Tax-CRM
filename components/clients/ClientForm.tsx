@@ -1,34 +1,56 @@
 "use client";
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createClientSchema,
   clientTypeOptions,
   type CreateClientInput,
 } from "@/lib/validation/clients";
-import { createClientAction } from "@/lib/actions/clients";
+import { checkClientDuplicatesAction, createClientAction, type DuplicateMatch } from "@/lib/actions/clients";
 import { FormField, inputClassName } from "@/components/ui/FormField";
 import { Button } from "@/components/ui/LegacyButton";
 import { titleCase } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { ClientDuplicateWarningDrawer } from "@/features/clients/client-duplicate-warning-drawer";
 
 export function ClientForm() {
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
+  const [duplicates, setDuplicates] = useState<DuplicateMatch[]>([]);
+  const [pendingValues, setPendingValues] = useState<CreateClientInput | null>(null);
   const {
     register,
     handleSubmit,
+    control,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<CreateClientInput>({
     resolver: zodResolver(createClientSchema),
-    defaultValues: { clientType: "individual", setupMode: "lead" },
+    defaultValues: { clientType: "individual", setupMode: "active" },
   });
+  const [email,phone,overrideReason]=useWatch({control,name:["email","phone","duplicateOverrideReason"]});
 
-  const onSubmit = async (data: CreateClientInput) => {
+  useEffect(()=>{
+    if(overrideReason)return;
+    const timer=window.setTimeout(async()=>{
+      if(!email && (phone??"").replace(/\D/g,"").length<7)return;
+      const result=await checkClientDuplicatesAction({email,phone});
+      if(result.duplicates?.length){setPendingValues(null);setDuplicates(result.duplicates);}
+    },550);
+    return()=>window.clearTimeout(timer);
+  },[email,phone,overrideReason]);
+
+  const save = async (data: CreateClientInput) => {
     setFormError(null);
     const result = await createClientAction(data);
+    if (result.duplicates?.length) {
+      setDuplicates(result.duplicates);
+      setPendingValues(data);
+      if (result.error) setFormError(result.error);
+      return;
+    }
     if (result?.error) {
       setFormError(result.error);
     } else if (result?.clientId) {
@@ -38,6 +60,14 @@ export function ClientForm() {
           : `/clients/${result.clientId}`,
       );
     }
+  };
+
+  const onSubmit = async (data: CreateClientInput) => save(data);
+
+  const continueAfterWarning = async (reason: string) => {
+    setValue("duplicateOverrideReason",reason,{shouldDirty:true});
+    setDuplicates([]);
+    if (pendingValues) await save({ ...pendingValues, duplicateOverrideReason: reason });
   };
 
   return (
@@ -88,10 +118,10 @@ export function ClientForm() {
       <fieldset className="space-y-3 rounded-xl border border-border bg-slate-50/60 p-4">
         <legend className="px-1 text-sm font-semibold text-foreground">What happens next?</legend>
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-white p-3">
-          <input className="mt-1 accent-[var(--accent-600)]" type="radio" value="lead" {...register("setupMode")} />
+          <input className="mt-1 accent-[var(--accent-600)]" type="radio" value="active" {...register("setupMode")} />
           <span>
-            <span className="block text-sm font-medium text-foreground">Save as lead</span>
-            <span className="block text-xs text-muted">No portal invitation or tax organizer is sent.</span>
+            <span className="block text-sm font-medium text-foreground">Create client only</span>
+            <span className="block text-xs text-muted">Create the client workspace without starting a tax engagement.</span>
           </span>
         </label>
         <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-white p-3">
@@ -108,6 +138,12 @@ export function ClientForm() {
           Save client
         </Button>
       </div>
+      <ClientDuplicateWarningDrawer
+        open={duplicates.length > 0}
+        matches={duplicates}
+        onOpenChange={(open) => !open && setDuplicates([])}
+        onContinue={continueAfterWarning}
+      />
     </form>
   );
 }

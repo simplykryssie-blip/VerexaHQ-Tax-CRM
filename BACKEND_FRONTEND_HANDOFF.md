@@ -2,6 +2,19 @@
 
 Backend applied to Supabase project `VerexaHQ Tax Office` on 2026-08-01.
 
+## Sales/client carryover section completed
+
+- `/leads` now has permission-aware table and pipeline views, controlled stage movement, required lost/do-not-contact reasons, and server audit events.
+- Lead conversion runs through `convert_lead_to_client_v2`. It is idempotent, checks normalized email/phone duplicates, can link an existing client, requires permission plus an audit reason to create separately, and transfers lead quotes, assessments, and form submissions to the client.
+- `/lead-forms` and `/lead-forms/[id]` provide the public form builder, preview, copyable link, and draft/publish/pause/archive lifecycle. `/forms/[slug]` is the anonymous published form route. It never exposes sensitive identifier, banking, upload, or tax-document fields.
+- Public form presentation uses a security-invoker reader with an anon column grant and published-row RLS. Anonymous submission remains the validated `submit_public_lead_form` write contract.
+- The new-client flow checks duplicates while staff types and repeats the check transactionally at save. The warning drawer shows masked matches and existing-file links; overrides require a reason and are audited.
+- `/clients/[clientId]` is now the complete client workspace: overview, contact information, intakes, editable tax profile, income/deductions, engagements, document requests, quotes, and household/family groups.
+- Households remain relationship groups. Staff can link an existing Individual client as taxpayer/spouse/member without merging or deleting either client record; dependents may remain non-client members.
+- `/dashboard` is a live operational dashboard and `/work-queue` combines engagement pressure with open staff tasks and mine/all-office scope.
+- Accepted quotes expose **Create change order**. `create_quote_change_order` preserves the locked accepted quote and creates a separately numbered, linked draft that follows the ordinary send/accept lifecycle.
+- New permission keys: `leads.*`, `lead_forms.*`, `clients.duplicate_override`, `households.manage`, and `quotes.change_order`.
+
 ## Frontend Section 1 completed
 
 - Granular permission definitions, system/custom roles, scoped grants, member assignments, sensitive-action approvals, and retention/legal-hold controls are live.

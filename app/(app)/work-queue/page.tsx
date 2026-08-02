@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ListChecks } from "lucide-react";
+import { CheckSquare, ListChecks } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { EmptyState } from "@/components/empty-state";
 import { Badge } from "@/components/ui/badge";
@@ -37,7 +37,9 @@ export default async function WorkQueuePage({
     query = query.or(`primary_preparer_user_id.eq.${user!.id},reviewer_user_id.eq.${user!.id}`);
   }
 
-  const { data: items, error } = await query;
+  let taskQuery=supabase.from("tasks").select("id,title,status,priority,due_at,assigned_to_user_id,client:clients(first_name,last_name,company),engagement:tax_engagements(id,engagement_number)").eq("workspace_id",workspaceId).not("status","in",'("completed","cancelled")').order("due_at",{ascending:true,nullsFirst:false}).limit(25);
+  if(mine==="1")taskQuery=taskQuery.eq("assigned_to_user_id",user!.id);
+  const [{ data: items, error },{data:tasks,error:tasksError}] = await Promise.all([query,taskQuery]);
 
   return (
     <div className="space-y-4">
@@ -106,6 +108,12 @@ export default async function WorkQueuePage({
           </Table>
         </div>
       )}
+
+      <div className="pt-3">
+        <div className="mb-3 flex items-center gap-2"><CheckSquare className="size-5 text-primary"/><div><h2 className="font-semibold">Staff tasks</h2><p className="text-xs text-muted-foreground">Open assignments ordered by due date.</p></div></div>
+        {tasksError&&<p className="text-sm text-destructive">Couldn&apos;t load staff tasks.</p>}
+        {!tasks?.length?<EmptyState icon={CheckSquare} title="No open staff tasks" description="Assigned tasks will appear here alongside engagement work."/>:<div className="rounded-lg border border-border bg-card"><Table><TableHeader><TableRow><TableHead>Task</TableHead><TableHead>Client</TableHead><TableHead>Priority</TableHead><TableHead>Status</TableHead><TableHead>Due</TableHead></TableRow></TableHeader><TableBody>{tasks.map(task=>{const client=task.client as {first_name:string;last_name:string;company:string|null}|null;const engagement=task.engagement as {id:string;engagement_number:string|null}|null;return <TableRow key={task.id}><TableCell><Link href={`/tasks/${task.id}`} className="font-medium hover:underline">{task.title}</Link>{engagement&&<div className="text-xs text-muted-foreground"><Link href={`/engagements/${engagement.id}`}>{engagement.engagement_number}</Link></div>}</TableCell><TableCell>{client?.company||`${client?.first_name??""} ${client?.last_name??""}`.trim()||"—"}</TableCell><TableCell><Badge variant={task.priority==="urgent"?"destructive":task.priority==="high"?"warning":"secondary"}>{task.priority}</Badge></TableCell><TableCell>{String(task.status).replaceAll("_"," ")}</TableCell><TableCell>{formatDate(task.due_at)}</TableCell></TableRow>})}</TableBody></Table></div>}
+      </div>
     </div>
   );
 }

@@ -19,8 +19,10 @@ import { createClient } from "@/lib/supabase/client";
 import { friendlyDbError } from "@/lib/errors";
 import { toast } from "@/components/ui/toaster";
 import { Loader2, Plus } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export function MemberFormDialog({ householdId, workspaceId }: { householdId: string; workspaceId: string }) {
+type ClientOption={id:string;first_name:string;last_name:string;company:string|null;email:string|null};
+export function MemberFormDialog({ householdId, workspaceId, clients=[] }: { householdId: string; workspaceId: string; clients?:ClientOption[] }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -34,6 +36,7 @@ export function MemberFormDialog({ householdId, workspaceId }: { householdId: st
     isSpouse: false,
     isDependent: false,
     monthsInHome: "",
+    clientId: "",
   });
 
   async function handleSubmit(e: React.FormEvent) {
@@ -56,6 +59,7 @@ export function MemberFormDialog({ householdId, workspaceId }: { householdId: st
       is_spouse: form.isSpouse,
       is_dependent: form.isDependent,
       months_in_home: form.monthsInHome ? Number(form.monthsInHome) : null,
+      client_id: form.clientId || null,
     });
     setSubmitting(false);
     if (dbError) {
@@ -73,6 +77,7 @@ export function MemberFormDialog({ householdId, workspaceId }: { householdId: st
       isSpouse: false,
       isDependent: false,
       monthsInHome: "",
+      clientId: "",
     });
     router.refresh();
   }
@@ -94,6 +99,14 @@ export function MemberFormDialog({ householdId, workspaceId }: { householdId: st
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
+          <div className="space-y-1">
+            <Label>Link an existing client (optional)</Label>
+            <Select value={form.clientId||"none"} onValueChange={(value)=>{const selected=clients.find(client=>client.id===value);setForm({...form,clientId:value==="none"?"":value,firstName:selected?.first_name??form.firstName,lastName:selected?.last_name??form.lastName});}}>
+              <SelectTrigger><SelectValue placeholder="Choose an individual client"/></SelectTrigger>
+              <SelectContent><SelectItem value="none">No client record — household member only</SelectItem>{clients.map(client=><SelectItem key={client.id} value={client.id}>{client.first_name} {client.last_name}{client.email?` · ${client.email}`:""}</SelectItem>)}</SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">Linking keeps each taxpayer&apos;s client workspace separate while showing the family relationship.</p>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>First name</Label>
