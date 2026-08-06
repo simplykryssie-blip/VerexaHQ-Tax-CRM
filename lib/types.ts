@@ -13,7 +13,7 @@ export type Enums<T extends keyof Database["public"]["Enums"]> =
   Database["public"]["Enums"][T];
 
 export type Workspace = Tables<"workspaces">;
-export type WorkspaceMember = Tables<"workspace_members">;
+export type WorkspaceMember = Tables<"workspace_users">;
 export type Client = Tables<"clients">;
 export type ClientContact = Tables<"client_contacts">;
 export type ClientAddress = Tables<"client_addresses">;
@@ -49,8 +49,24 @@ export type Template = Tables<"templates">;
 export type HouseholdMember = Tables<"household_members">;
 export type Notification = Tables<"notifications">;
 
-export type MembershipRole = Enums<"membership_role">;
-export type MembershipStatus = Enums<"membership_status">;
+// membership_role is no longer a DB enum — role is normalized into the
+// `roles` table (workspace_users.role_id -> roles.id) and read via
+// `roles.slug`. These are the 10 live system role slugs.
+export type MembershipRole =
+  | "owner"
+  | "admin"
+  | "ero"
+  | "manager"
+  | "staff"
+  | "reviewer"
+  | "compliance_officer"
+  | "administrative_staff"
+  | "receptionist"
+  | "ptin_preparer";
+
+// membership_status is no longer a DB enum either — workspace_users.status
+// is a checked text column with these four values.
+export type MembershipStatus = "invited" | "active" | "suspended" | "removed";
 export type ClientTypeEnum = Enums<"client_type">;
 export type IntakeSubmissionStatus = Enums<"intake_submission_status">;
 export type IntakeAnswerStatus = Enums<"intake_answer_status">;
@@ -73,25 +89,20 @@ export type TemplateStatus = Enums<"template_status">;
 export type TemplateVisibility = Enums<"template_visibility">;
 export type TemplateKind = Enums<"template_kind">;
 
+// Production roles only — excludes receptionist and administrative_staff,
+// which are clerical/front-desk roles rather than engagement-production ones.
 export const STAFF_ROLES: MembershipRole[] = [
   "owner",
   "admin",
   "ero",
-  "preparer",
+  "manager",
+  "staff",
   "reviewer",
-  "intake_specialist",
-  "document_specialist",
-  "billing",
-  "seasonal_staff",
-  "auditor",
+  "compliance_officer",
+  "ptin_preparer",
 ];
 
-export const REVIEW_ROLES: MembershipRole[] = [
-  "owner",
-  "admin",
-  "ero",
-  "preparer",
-  "reviewer",
-];
+// Same set as STAFF_ROLES for now — no separate review gate.
+export const REVIEW_ROLES: MembershipRole[] = STAFF_ROLES;
 
 export const MANAGE_ROLES: MembershipRole[] = ["owner", "admin", "ero"];

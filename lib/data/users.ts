@@ -17,8 +17,8 @@ export async function getUserSummaryMap(
 
   const { data, error } = await supabase
     .from("user_profiles")
-    .select("user_id, display_name, first_name, last_name")
-    .in("user_id", ids);
+    .select("id, display_name, first_name, last_name")
+    .in("id", ids);
 
   const map = new Map<string, UserSummary>();
   if (error || !data) return map;
@@ -28,7 +28,7 @@ export async function getUserSummaryMap(
       profile.display_name ||
       [profile.first_name, profile.last_name].filter(Boolean).join(" ") ||
       "Staff member";
-    map.set(profile.user_id, { userId: profile.user_id, name });
+    map.set(profile.id, { userId: profile.id, name });
   }
   return map;
 }
@@ -39,7 +39,7 @@ export async function listWorkspaceStaff(
   workspaceId: string,
 ): Promise<UserSummary[]> {
   const { data, error } = await supabase
-    .from("workspace_members")
+    .from("workspace_users")
     .select("user_id")
     .eq("workspace_id", workspaceId)
     .eq("status", "active");

@@ -1,8 +1,7 @@
 import { requireWorkspaceRole } from "@/lib/auth/workspace";
 import { createClient } from "@/lib/supabase/server";
 import { STAFF_ROLES } from "@/lib/types";
-import { listClientsForPicker } from "@/lib/data/engagements";
-import { listWorkspaceStaff } from "@/lib/data/users";
+import { listClientsForPicker, listServicesForPicker } from "@/lib/data/engagements";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Card, CardBody } from "@/components/ui/LegacyCard";
 import { ForbiddenState } from "@/components/ui/ForbiddenState";
@@ -15,9 +14,9 @@ export default async function NewEngagementPage() {
   }
 
   const supabase = await createClient();
-  const [clients, staff] = await Promise.all([
+  const [clients, services] = await Promise.all([
     listClientsForPicker(supabase, workspace.workspace.id),
-    listWorkspaceStaff(supabase, workspace.workspace.id),
+    listServicesForPicker(supabase, workspace.workspace.id),
   ]);
 
   return (
@@ -25,7 +24,7 @@ export default async function NewEngagementPage() {
       <PageHeader title="New engagement" description="Create a tax engagement for a client." />
       <Card>
         <CardBody>
-          <EngagementForm clients={clients} staff={staff} />
+          <EngagementForm clients={clients} services={services} />
         </CardBody>
       </Card>
     </div>

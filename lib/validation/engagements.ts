@@ -119,6 +119,19 @@ const moneyField = z
   })
   .refine((value) => value === null || value >= 0, "Must be zero or greater");
 
+// Live `engagements.priority` enum values (engagement_priority in the DB).
+export const engagementPriorityValues = ["Low", "Medium", "High", "Urgent"] as const;
+
+// The live "engagements" table shape (client_id, service_id, workflow_id
+// derived from the service's process, current_stage derived from the
+// process's first stage, priority as Low/Medium/High/Urgent) has nothing in
+// common with the fields below (taxYear, returnType, jurisdiction, etc.),
+// which target the dead "tax_engagements" table. createEngagementSchema is
+// defined separately, further down, against the live table. The schema
+// below remains only for updateEngagementSchema/changeStatusSchema/etc.,
+// which still target "tax_engagements" via lib/actions/engagements.ts and
+// are out of scope for this pass.
+//
 // A plain object schema (no refinements) so it can still be reshaped with
 // .omit()/.partial()/.extend() below — Zod 4 only allows those on a bare
 // ZodObject, not on a schema already wrapped by .refine().
@@ -161,8 +174,27 @@ function withValidDueDates<T extends z.ZodType<{ dueDate?: string; internalDueDa
     });
 }
 
-export const createEngagementSchema = withValidDueDates(engagementBaseObjectSchema);
+// The live "engagements" table's actual create shape: pick a client and a
+// service, everything else (workflow_id, current_stage, engagement_number,
+// status) is derived server-side in createEngagementAction.
+export const createEngagementSchema = z
+  .object({
+    clientId: z.string().uuid("Select a client"),
+    serviceId: z.string().uuid("Select a service"),
+    priority: z.enum(engagementPriorityValues).default("Medium"),
+    dueDate: z.string().optional().or(z.literal("")),
+    internalReference: z.string().trim().max(200).optional(),
+  })
+  .refine((data) => !data.dueDate || !Number.isNaN(Date.parse(data.dueDate)), {
+    message: "Enter a valid due date",
+    path: ["dueDate"],
+  });
 export type CreateEngagementInput = z.infer<typeof createEngagementSchema>;
+
+// Retained for updateEngagementSchema/etc. below, which still target the
+// dead "tax_engagements" table shape — out of scope for this pass.
+export const legacyCreateEngagementSchema = withValidDueDates(engagementBaseObjectSchema);
+export type LegacyCreateEngagementInput = z.infer<typeof legacyCreateEngagementSchema>;
 
 export const updateEngagementSchema = withValidDueDates(
   engagementBaseObjectSchema.omit({ clientId: true }).partial().extend({

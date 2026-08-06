@@ -27,8 +27,8 @@ export const listMyWorkspaces = cache(async (): Promise<WorkspaceContext[]> => {
 
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("workspace_members")
-    .select("id, role, workspace:workspaces(*)")
+    .from("workspace_users")
+    .select("id, role:roles(slug), workspace:workspaces(*)")
     .eq("user_id", user.id)
     .eq("status", "active");
 
@@ -38,12 +38,12 @@ export const listMyWorkspaces = cache(async (): Promise<WorkspaceContext[]> => {
 
   return data
     .filter(
-      (member): member is typeof member & { workspace: Workspace } =>
-        Boolean(member.workspace),
+      (member): member is typeof member & { workspace: Workspace; role: { slug: string } } =>
+        Boolean(member.workspace) && Boolean(member.role),
     )
     .map((member) => ({
       workspace: member.workspace,
-      role: member.role,
+      role: member.role.slug as MembershipRole,
       membershipId: member.id,
     }));
 });

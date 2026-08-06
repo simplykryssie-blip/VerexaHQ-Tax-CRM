@@ -75,49 +75,47 @@ export async function createEngagementAction(input: CreateEngagementInput): Prom
   const data = parsed.data;
 
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+
+  const { data: service, error: serviceError } = await supabase
+    .from("services")
+    .select("id, process_id")
+    .eq("id", data.serviceId)
+    .eq("workspace_id", workspace.workspace.id)
+    .maybeSingle();
+
+  if (serviceError || !service) {
+    return { error: "Selected service could not be found." };
+  }
+
+  let currentStage: string | null = null;
+  if (service.process_id) {
+    const { data: firstStage } = await supabase
+      .from("process_stages")
+      .select("name")
+      .eq("process_id", service.process_id)
+      .order("display_order", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    currentStage = firstStage?.name ?? null;
+  }
 
   const { data: row, error } = await supabase
-    .from("tax_engagements")
+    .from("engagements")
     .insert({
       workspace_id: workspace.workspace.id,
       client_id: data.clientId,
-      service_id: data.serviceId || null,
-      title: data.title,
-      tax_year: data.taxYear,
-      engagement_type: data.engagementType,
-      return_type: data.returnType || null,
-      status: data.status,
+      service_id: data.serviceId,
+      workflow_id: service.process_id,
+      current_stage: currentStage,
       priority: data.priority,
-      primary_preparer_user_id: data.preparerUserId || null,
-      reviewer_user_id: data.reviewerUserId || null,
-      responsible_staff_user_id: data.responsibleStaffUserId || null,
-      assigned_at: data.preparerUserId || data.reviewerUserId ? new Date().toISOString() : null,
       due_date: data.dueDate || null,
-      internal_due_date: data.internalDueDate || null,
-      jurisdiction: data.jurisdiction || null,
-      federal_return_required: data.federalReturnRequired,
-      state_return_required: data.stateReturnRequired,
-      local_return_required: data.localReturnRequired,
-      description: data.description || null,
-      document_request_id: data.documentRequestId || null,
-      created_by: user?.id ?? null,
+      internal_reference: data.internalReference || null,
     })
     .select("id")
     .single();
 
   if (error || !row) {
     return { error: "We couldn't create this engagement. Please try again." };
-  }
-
-  if (data.intakeSubmissionId) {
-    await supabase
-      .from("intake_submissions")
-      .update({ engagement_id: row.id })
-      .eq("id", data.intakeSubmissionId)
-      .eq("workspace_id", workspace.workspace.id);
   }
 
   revalidateEngagement(row.id);

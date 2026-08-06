@@ -1,3 +1,9 @@
+// NOTE: listEngagements() and getEngagementDetail() below still target the
+// dead "tax_engagements" table (and other now-renamed tables/columns). Only
+// the creation path (listClientsForPicker, listServicesForPicker, and
+// createEngagementAction in lib/actions/engagements.ts) has been rewired to
+// the live "engagements" schema. The list/detail pages are a separate,
+// still-broken feature — fix in a follow-up pass.
 import type { SupabaseServerClient } from "@/lib/supabase/server";
 import { getUserSummaryMap, type UserSummary } from "@/lib/data/users";
 import type {
@@ -240,11 +246,31 @@ async function getOpenClarificationsCount(
 export async function listClientsForPicker(
   supabase: SupabaseServerClient,
   workspaceId: string,
-): Promise<Pick<Client, "id" | "first_name" | "last_name" | "display_name" | "preferred_name" | "company">[]> {
+): Promise<Pick<Client, "id" | "first_name" | "last_name" | "business_name">[]> {
   const { data } = await supabase
     .from("clients")
-    .select("id, first_name, last_name, display_name, preferred_name, company")
+    .select("id, first_name, last_name, business_name")
     .eq("workspace_id", workspaceId)
     .order("last_name", { ascending: true });
   return data ?? [];
+}
+
+export type ServiceOption = { id: string; name: string; processId: string | null };
+
+/** Published services for a workspace, for the "create engagement" service picker. */
+export async function listServicesForPicker(
+  supabase: SupabaseServerClient,
+  workspaceId: string,
+): Promise<ServiceOption[]> {
+  const { data } = await supabase
+    .from("services")
+    .select("id, name, process_id")
+    .eq("workspace_id", workspaceId)
+    .eq("status", "published")
+    .order("display_order", { ascending: true });
+  return (data ?? []).map((service) => ({
+    id: service.id,
+    name: service.name,
+    processId: service.process_id,
+  }));
 }
